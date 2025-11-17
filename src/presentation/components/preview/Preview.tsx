@@ -2,25 +2,30 @@ import { Box, Paper } from '@mui/material';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState, useCallback } from 'react';
 import { marked } from 'marked';
 import markedKatex from 'marked-katex-extension';
+import { markedHighlight } from 'marked-highlight';
+import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
 import mermaid from 'mermaid';
 import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore';
 import 'katex/dist/katex.min.css';
+import 'highlight.js/styles/github-dark.css';
 
-// Initialize mermaid
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'default',
-  securityLevel: 'loose',
-});
-
-// Configure marked with KaTeX extension once
+// Configure marked with KaTeX extension and syntax highlighting
 const katexOptions = {
   throwOnError: false,
   output: 'html',
 };
 
 marked.use(markedKatex(katexOptions));
+marked.use(
+  markedHighlight({
+    langPrefix: 'hljs language-',
+    highlight(code, lang) {
+      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+      return hljs.highlight(code, { language }).value;
+    },
+  })
+);
 
 marked.setOptions({
   gfm: true,
@@ -48,6 +53,17 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
   useEffect(() => {
     onScrollHandlerRef.current = onScrollRatioChange;
   }, [onScrollRatioChange]);
+
+  // Initialize mermaid with theme based on dark mode
+  useEffect(() => {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: darkMode ? 'dark' : 'default',
+      securityLevel: 'loose',
+    });
+    // Clear SVG cache when theme changes to force re-render
+    latestSvgCache.current.clear();
+  }, [darkMode]);
 
   // Process markdown to HTML
   useEffect(() => {
@@ -80,21 +96,24 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
       // Parse markdown to HTML
       const rawHtml = await marked.parse(processedContent);
 
-      // Sanitize HTML - allow KaTeX classes and attributes
+      // Use DOMPurify hook to modify links during sanitization
+      DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+        if (node.tagName === 'A') {
+          node.setAttribute('target', '_blank');
+          node.setAttribute('rel', 'noopener noreferrer');
+        }
+      });
+
+      // Sanitize HTML with KaTeX tags allowed
       const sanitized = DOMPurify.sanitize(rawHtml, {
-        ADD_TAGS: ['div', 'span', 'annotation', 'semantics', 'mrow', 'mi', 'mn', 'mo', 'mtext', 'mspace', 'mfrac', 'msup', 'msub', 'msqrt', 'mroot', 'math'],
-        ADD_ATTR: ['class', 'id', 'style', 'xmlns', 'target', 'rel'],
+        ADD_TAGS: ['annotation', 'semantics', 'mrow', 'mi', 'mn', 'mo', 'mtext', 'mspace', 'mfrac', 'msup', 'msub', 'msqrt', 'mroot', 'math'],
+        ADD_ATTR: ['data-loading'],
       });
 
-      // Ensure links open in new tab
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(sanitized, 'text/html');
-      doc.querySelectorAll('a').forEach((a) => {
-        a.setAttribute('target', '_blank');
-        a.setAttribute('rel', 'noopener noreferrer');
-      });
+      // Remove hook after use
+      DOMPurify.removeAllHooks();
 
-      setHtml(doc.body.innerHTML);
+      setHtml(sanitized);
     };
 
     processMarkdown();
@@ -106,8 +125,12 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
       const el = document.getElementById(id);
       if (!el) return;
 
-      // Check if already rendered
-      if (el.querySelector('svg')) return;
+      // Check if already rendered and not loading placeholder
+      const hasLoading = el.getAttribute('data-loading') === 'true';
+      if (el.querySelector('svg') && !hasLoading) return;
+
+      // Remove loading indicator
+      el.removeAttribute('data-loading');
 
       const cached = latestSvgCache.current.get(cacheKey);
       if (cached) {
@@ -144,7 +167,7 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
       if (!html || mermaidBlocks.length === 0 || !showPreview) return;
 
       // Wait for DOM to be ready
-      await new Promise(resolve => setTimeout(resolve, 75));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       // Render only visible diagrams using Intersection Observer
       const observer = new IntersectionObserver(
@@ -162,15 +185,15 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
         },
         {
           root: previewRef.current,
-          rootMargin: '200px', // Pre-render diagrams 200px before they come into view
+          rootMargin: '100px', // Reduced margin for better performance
           threshold: 0,
         }
       );
 
-      // Observe all mermaid containers
+      // Observe only containers that need rendering (have loading attribute)
       mermaidBlocks.forEach(({ id }) => {
         const el = document.getElementById(id);
-        if (el) {
+        if (el && el.getAttribute('data-loading') === 'true') {
           observer.observe(el);
         }
       });
@@ -189,7 +212,7 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
     let cleanup: (() => void) | undefined;
     renderTimeoutRef.current = window.setTimeout(async () => {
       cleanup = await renderMermaid();
-    }, 150);
+    }, 500);
     return () => {
       if (renderTimeoutRef.current) {
         clearTimeout(renderTimeoutRef.current);
@@ -199,17 +222,6 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
       }
     };
   }, [renderMermaid, showEditor, mermaidModal, darkMode, html, mermaidBlocks]);
-
-  // Re-render after any React render if the SVGs are missing (e.g., other UI state updates)
-  useEffect(() => {
-    const needsRender = mermaidBlocks.some(({ id }) => {
-      const el = document.getElementById(id);
-      return el && !el.querySelector('svg');
-    });
-    if (needsRender) {
-      renderMermaid('recovery');
-    }
-  });
 
   useImperativeHandle(
     ref,

@@ -32,7 +32,8 @@ src/
 │   ├── pages/
 │   │   ├── EditorPage.tsx      # Main editor page (split view)
 │   │   ├── ViewPage.tsx        # View-only page (shared links)
-│   │   └── PrintPage.tsx       # Print-optimized page with auto-print
+│   │   ├── PrintPage.tsx       # Print-optimized page with auto-print
+│   │   └── PrivacyPage.tsx     # Privacy policy page
 │   ├── components/
 │   │   ├── editor/
 │   │   │   └── Editor.tsx      # Monaco-based markdown editor
@@ -83,8 +84,9 @@ src/
 - **React Router v7**: Client-side routing
 - Routes:
   - `/` - Editor page (split view with editor + preview)
-  - `/view?c=...` - View-only page (compressed shared content)
+  - `/view` - View-only page (shared links with compressed content)
   - `/print#paxo:...` - Print-optimized page with auto-print trigger
+  - `/privacy` - Privacy policy page
 
 ### Export & Sharing
 
@@ -303,7 +305,27 @@ GitHub Actions workflow (`.github/workflows/deploy.yml`):
 5. Build for production
 6. Deploy to GitHub Pages
 
-## Recent Fixes
+## Recent Fixes & Enhancements
+
+### SEO Improvements
+
+**Enhancement**: Comprehensive SEO optimization
+
+- Added extensive meta tags for search engines (title, description, keywords)
+- Open Graph tags for social media sharing (Facebook, Twitter)
+- Canonical URL and robots meta tags
+- Enhanced default markdown content with 400+ lines of comprehensive examples
+- SEO-focused descriptions highlighting key features and use cases
+- Added structured content for better search engine indexing
+
+### Privacy Policy & Bug Reporting
+
+**Addition**: Privacy policy page and bug reporting
+
+- Created dedicated `/privacy` route with comprehensive privacy policy
+- Added bug reporting button in header linking to GitHub issues
+- Privacy policy explains data handling, local storage, and user rights
+- Clear communication about no server-side data storage
 
 ### MermaidModal Display Issue
 

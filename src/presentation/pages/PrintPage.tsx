@@ -2,10 +2,13 @@ import { Box, Paper } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { marked } from 'marked';
 import markedKatex from 'marked-katex-extension';
+import { markedHighlight } from 'marked-highlight';
+import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
 import mermaid from 'mermaid';
 import { decompressFromBase64 } from '../../utils/compression';
 import 'katex/dist/katex.min.css';
+import 'highlight.js/styles/github.css';
 
 // Initialize mermaid with light theme for printing
 mermaid.initialize({
@@ -22,8 +25,17 @@ mermaid.initialize({
   },
 });
 
-// Configure marked with KaTeX extension
+// Configure marked with KaTeX extension and syntax highlighting
 marked.use(markedKatex({ throwOnError: false, output: 'html' as const }));
+marked.use(
+  markedHighlight({
+    langPrefix: 'hljs language-',
+    highlight(code, lang) {
+      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+      return hljs.highlight(code, { language }).value;
+    },
+  })
+);
 marked.setOptions({ gfm: true, breaks: true });
 
 export default function PrintPage() {
@@ -73,21 +85,23 @@ export default function PrintPage() {
     // Parse markdown to HTML
     const rawHtml = await marked.parse(processedContent);
 
-    // Sanitize HTML
+    // Use DOMPurify hook to modify links during sanitization
+    DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+      if (node.tagName === 'A') {
+        node.setAttribute('target', '_blank');
+        node.setAttribute('rel', 'noopener noreferrer');
+      }
+    });
+
+    // Sanitize HTML with KaTeX tags allowed
     const sanitized = DOMPurify.sanitize(rawHtml, {
-      ADD_TAGS: ['div', 'span', 'annotation', 'semantics', 'mrow', 'mi', 'mn', 'mo', 'mtext', 'mspace', 'mfrac', 'msup', 'msub', 'msqrt', 'mroot', 'math'],
-      ADD_ATTR: ['class', 'id', 'style', 'xmlns', 'target', 'rel'],
+      ADD_TAGS: ['annotation', 'semantics', 'mrow', 'mi', 'mn', 'mo', 'mtext', 'mspace', 'mfrac', 'msup', 'msub', 'msqrt', 'mroot', 'math'],
     });
 
-    // Ensure links open in new tab
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(sanitized, 'text/html');
-    doc.querySelectorAll('a').forEach((a) => {
-      a.setAttribute('target', '_blank');
-      a.setAttribute('rel', 'noopener noreferrer');
-    });
+    // Remove hook after use
+    DOMPurify.removeAllHooks();
 
-    setHtml(doc.body.innerHTML);
+    setHtml(sanitized);
   };
 
   // Render all mermaid diagrams, then trigger print

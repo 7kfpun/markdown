@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { Brightness4, Brightness7, GetApp, PictureAsPdf, Share, Upload, RestartAlt, Description } from '@mui/icons-material';
+import { Brightness4, Brightness7, GetApp, PictureAsPdf, Share, Upload, RestartAlt, Description, BugReport, Policy } from '@mui/icons-material';
 import styled from 'styled-components';
 import { useMarkdownStore } from '../../infrastructure/store/useMarkdownStore';
 import { DEFAULT_MARKDOWN } from '../../utils/constants';
@@ -306,22 +306,36 @@ export default function EditorPage() {
         </HeaderCenter>
 
         <HeaderRight>
-          <ToolbarIconButton onClick={handleReset} title="Reset to default" $dark={darkMode}>
+          <ToolbarIconButton
+            onClick={() => window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank')}
+            title="Report a bug or request a feature"
+            $dark={darkMode}
+          >
+            <BugReport fontSize="small" />
+          </ToolbarIconButton>
+          <ToolbarIconButton
+            onClick={() => window.open('/privacy', '_blank')}
+            title="Privacy Policy"
+            $dark={darkMode}
+          >
+            <Policy fontSize="small" />
+          </ToolbarIconButton>
+          <ToolbarIconButton onClick={handleReset} title="Reset to default content" $dark={darkMode}>
             <RestartAlt fontSize="small" />
           </ToolbarIconButton>
-          <ToolbarIconButton onClick={handleImport} title="Import Markdown / Text" $dark={darkMode}>
+          <ToolbarIconButton onClick={handleImport} title="Import Markdown or Text file" $dark={darkMode}>
             <Upload fontSize="small" />
           </ToolbarIconButton>
-          <ToolbarIconButton onClick={handleShare} title="Share link" $dark={darkMode}>
+          <ToolbarIconButton onClick={handleShare} title="Share via compressed link" $dark={darkMode}>
             <Share fontSize="small" />
           </ToolbarIconButton>
-          <ToolbarIconButton onClick={handleExport} title="Download Markdown" $dark={darkMode}>
+          <ToolbarIconButton onClick={handleExport} title="Download as Markdown (.md)" $dark={darkMode}>
             <GetApp fontSize="small" />
           </ToolbarIconButton>
-          <ToolbarIconButton onClick={handleExportHTML} title="Download HTML" $dark={darkMode}>
+          <ToolbarIconButton onClick={handleExportHTML} title="Download as HTML file" $dark={darkMode}>
             <Description fontSize="small" />
           </ToolbarIconButton>
-          <ToolbarIconButton onClick={handleExportPDF} title="Download PDF" $dark={darkMode}>
+          <ToolbarIconButton onClick={handleExportPDF} title="Export to PDF (print dialog)" $dark={darkMode}>
             <PictureAsPdf fontSize="small" />
           </ToolbarIconButton>
           <ToolbarIconButton onClick={toggleDarkMode} title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'} $dark={darkMode}>
