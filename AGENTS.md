@@ -306,7 +306,7 @@ GitHub Actions workflows:
 3. Install dependencies
 4. Run ESLint
 5. Build for production
-6. Copy `dist/index.html` to `dist/404.html` for SPA routing on GitHub Pages
+6. Copy `public/404.html` to `dist/404.html` (hash redirect for SPA routing on GitHub Pages)
 7. Deploy to GitHub Pages
 
 **ci.yml** (CI on push/PR):
