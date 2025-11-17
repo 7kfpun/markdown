@@ -49,8 +49,7 @@ yarn format          # Format with Prettier
 - `/view` – View-only rendered content (from compressed link)
 - `/print#paxo:...` – Print-optimized view (opened automatically for PDF export)
 - `/privacy` – Privacy policy
-- GitHub Pages: 404 fallback copies `index.html` so `/print` and other routes resolve in the SPA
-  - Static `public/404.html` redirects to `/#...` so print/share links don’t 404 on GitHub Pages
+- GitHub Pages: 404 fallback copies `index.html` so `/print` and other routes resolve in the SPA without changing the URL
 
 ## Project Structure
 
