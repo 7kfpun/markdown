@@ -81,7 +81,7 @@ src/
 
 ### Routing
 
-- **React Router v7**: Client-side routing
+- **React Router v7**: BrowserRouter with SPA fallback (404.html) for static hosting
 - Routes:
   - `/` - Editor page (split view with editor + preview)
   - `/view` - View-only page (shared links with compressed content)
@@ -306,7 +306,8 @@ GitHub Actions workflows:
 3. Install dependencies
 4. Run ESLint
 5. Build for production
-6. Deploy to GitHub Pages
+6. Copy `dist/index.html` to `dist/404.html` for SPA routing on GitHub Pages
+7. Deploy to GitHub Pages
 
 **ci.yml** (CI on push/PR):
 

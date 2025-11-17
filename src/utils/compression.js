@@ -67,3 +67,31 @@ export const extractContentFromHash = () => {
   }
   return null;
 };
+
+// Support paths like /paxo:<compressed> (fallback when the fragment is stripped, e.g., some redirects)
+export const extractContentFromUrl = () => {
+  const hash = window.location.hash;
+  if (hash.startsWith('#paxo:')) {
+    try {
+      const compressed = hash.substring(6);
+      const content = decompressFromBase64(compressed);
+      window.history.replaceState(null, '', window.location.pathname);
+      return content;
+    } catch (error) {
+      console.error('Failed to extract content from URL:', error);
+      return null;
+    }
+  }
+  const pathMatch = window.location.pathname.match(/\/paxo:([^/]+)/);
+  if (pathMatch?.[1]) {
+    try {
+      const content = decompressFromBase64(pathMatch[1]);
+      window.history.replaceState(null, '', '/');
+      return content;
+    } catch (error) {
+      console.error('Failed to extract content from path:', error);
+      return null;
+    }
+  }
+  return null;
+};
