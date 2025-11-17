@@ -3,7 +3,7 @@ import { Brightness4, Brightness7, GetApp, PictureAsPdf, Share, Upload, RestartA
 import styled from 'styled-components';
 import { useMarkdownStore } from '../../infrastructure/store/useMarkdownStore';
 import { DEFAULT_MARKDOWN } from '../../utils/constants';
-import { downloadMarkdownAsPDF, downloadRenderedHTML, downloadPDF } from '../../utils/export';
+import { openPrintPage, downloadRenderedHTML } from '../../utils/export';
 import Editor, { EditorHandle } from '../components/editor/Editor';
 import Preview, { PreviewHandle } from '../components/preview/Preview';
 import MermaidModal from '../components/mermaid/MermaidModal';
@@ -170,12 +170,7 @@ export default function EditorPage() {
   };
 
   const handleExportPDF = () => {
-    const previewEl = document.getElementById('preview-container');
-    if (previewEl) {
-      downloadPDF(previewEl, { quality: 2 }, `preview-${Date.now()}.pdf`);
-    } else {
-      downloadMarkdownAsPDF(content);
-    }
+    openPrintPage(content);
   };
 
   const handleExportHTML = () => {

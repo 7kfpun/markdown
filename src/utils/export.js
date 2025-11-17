@@ -1,24 +1,15 @@
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { compressToBase64 } from './compression';
 
-export const downloadMarkdownAsPDF = async (content, filename = null) => {
+export const openPrintPage = (content) => {
   try {
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-    const margin = 40;
-    const pageWidth = doc.internal.pageSize.getWidth() - margin * 2;
-    const lines = doc.splitTextToSize(content, pageWidth);
-    doc.text(lines, margin, margin);
-    doc.save(filename || `markdown-${Date.now()}.pdf`);
+    const compressed = compressToBase64(content);
+    const printUrl = `${window.location.origin}/print#paxo:${compressed}`;
+    window.open(printUrl, '_blank');
   } catch (error) {
-    console.error('Failed to export PDF:', error);
-    // Fallback: download as markdown to avoid silent failure
-    const blob = new Blob([content], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename || `markdown-${Date.now()}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
+    console.error('Failed to open print page:', error);
+    alert(
+      'Content too long for print preview. Please use markdown export instead.'
+    );
   }
 };
 
@@ -56,7 +47,7 @@ export const downloadMarkdown = (content, filename = null) => {
   URL.revokeObjectURL(url);
 };
 
-export const downloadHTML = (content, theme, filename = null) => {
+export const downloadHTML = (content, filename = null) => {
   const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -124,75 +115,6 @@ export const downloadHTML = (content, theme, filename = null) => {
   URL.revokeObjectURL(url);
 };
 
-export const downloadPDF = async (element, options = {}, filename = null) => {
-  const {
-    pageSize = 'A4',
-    orientation = 'portrait',
-    margin = 20,
-    quality = 1,
-  } = options;
-
-  const pageSizes = {
-    A4: { width: 210, height: 297 },
-    Letter: { width: 216, height: 279 },
-    Legal: { width: 216, height: 356 },
-  };
-
-  const size = pageSizes[pageSize] || pageSizes.A4;
-
-  const canvas = await html2canvas(element, {
-    scale: quality,
-    useCORS: true,
-    logging: false,
-  });
-
-  const imgWidth = size.width - margin * 2;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-  const pdf = new jsPDF({
-    orientation,
-    unit: 'mm',
-    format: pageSize.toLowerCase(),
-  });
-
-  const imgData = canvas.toDataURL('image/png');
-  let heightLeft = imgHeight;
-  let position = margin;
-
-  pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-  heightLeft -= size.height - margin * 2;
-
-  while (heightLeft > 0) {
-    pdf.addPage();
-    position = margin - (imgHeight - heightLeft);
-    pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-    heightLeft -= size.height - margin * 2;
-  }
-
-  pdf.save(filename || `markdown-${Date.now()}.pdf`);
-};
-
-export const downloadPNG = async (element, options = {}, filename = null) => {
-  const { width = 1200, scale = 2, backgroundColor = 'white' } = options;
-
-  const canvas = await html2canvas(element, {
-    scale,
-    useCORS: true,
-    logging: false,
-    backgroundColor,
-    width,
-  });
-
-  canvas.toBlob((blob) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename || `markdown-${Date.now()}.png`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-};
-
 export const copyHTMLToClipboard = async (htmlContent) => {
   try {
     const blob = new Blob([htmlContent], { type: 'text/html' });
@@ -204,35 +126,6 @@ export const copyHTMLToClipboard = async (htmlContent) => {
     return true;
   } catch (error) {
     console.error('Failed to copy HTML:', error);
-    return false;
-  }
-};
-
-export const copyPNGToClipboard = async (element) => {
-  try {
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    });
-
-    return new Promise((resolve) => {
-      canvas.toBlob(async (blob) => {
-        try {
-          await navigator.clipboard.write([
-            new ClipboardItem({
-              'image/png': blob,
-            }),
-          ]);
-          resolve(true);
-        } catch (error) {
-          console.error('Failed to copy PNG:', error);
-          resolve(false);
-        }
-      });
-    });
-  } catch (error) {
-    console.error('Failed to copy PNG:', error);
     return false;
   }
 };

@@ -1,18 +1,34 @@
 import pako from 'pako';
 
+// Convert base64 to URL-safe base64
+const toUrlSafeBase64 = (base64) => {
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+};
+
+// Convert URL-safe base64 back to regular base64
+const fromUrlSafeBase64 = (urlSafeBase64) => {
+  let base64 = urlSafeBase64.replace(/-/g, '+').replace(/_/g, '/');
+  // Add padding if needed
+  while (base64.length % 4) {
+    base64 += '=';
+  }
+  return base64;
+};
+
 export const compressToBase64 = (str) => {
   try {
-    const compressed = pako.deflate(str);
+    const compressed = pako.deflate(str, { level: 9 }); // Maximum compression
     const base64 = btoa(String.fromCharCode.apply(null, compressed));
-    return base64;
+    return toUrlSafeBase64(base64);
   } catch (error) {
     console.error('Compression error:', error);
     throw new Error('Failed to compress content');
   }
 };
 
-export const decompressFromBase64 = (base64) => {
+export const decompressFromBase64 = (urlSafeBase64) => {
   try {
+    const base64 = fromUrlSafeBase64(urlSafeBase64);
     const compressed = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
     const decompressed = pako.inflate(compressed, { to: 'string' });
     return decompressed;
@@ -24,10 +40,13 @@ export const decompressFromBase64 = (base64) => {
 
 export const generateShareLink = (content) => {
   const compressed = compressToBase64(content);
-  // Keep under the shortest modern browser URL limit (~2000 chars)
-  if (compressed.length > 2000) {
+  // Modern browsers support much longer URLs:
+  // Chrome: ~32KB, Firefox: ~65KB, Safari: ~80KB, Edge: ~32KB
+  // Set limit to 10KB to be safe across all browsers
+  const MAX_URL_LENGTH = 10000;
+  if (compressed.length > MAX_URL_LENGTH) {
     throw new Error(
-      'Content too long for sharing via link (max ~2000 chars). Please use download instead.'
+      `Content too long for sharing via link (${compressed.length} chars, max ${MAX_URL_LENGTH}). Please use download instead.`
     );
   }
   return `${window.location.origin}/#paxo:${compressed}`;

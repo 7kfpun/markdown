@@ -1,30 +1,22 @@
 # 1Markdown - AI Agent Documentation
 
+## Project Overview
+
+1Markdown is a modern, browser-based markdown editor with live preview, Mermaid diagram support, and collaborative sharing features. Built with React, Material-UI, and Zustand for state management.
+
 ## Architecture Overview
 
-This project follows **CLEAN Architecture** principles with clear separation of concerns across layers.
-
-### Architecture Layers
+This project uses a simplified architecture focused on presentation and infrastructure layers:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Presentation Layer                        │
-│  (React Components, Pages, Router, MUI, Styled-Components)  │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-┌───────────────────────────┴─────────────────────────────────┐
-│                   Application Layer                          │
-│         (Use Cases, Business Logic, Zustand Store)          │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-┌───────────────────────────┴─────────────────────────────────┐
-│                    Domain Layer                              │
-│          (Entities, Value Objects, Interfaces)               │
+│  (React Components, Pages, Router, MUI)                      │
 └───────────────────────────┬─────────────────────────────────┘
                             │
 ┌───────────────────────────┴─────────────────────────────────┐
 │                 Infrastructure Layer                         │
-│    (External Services, Repositories, API Clients, Storage)   │
+│    (Zustand Store, Utilities, External Services)            │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -32,220 +24,107 @@ This project follows **CLEAN Architecture** principles with clear separation of 
 
 ```
 src/
-├── domain/                      # Domain Layer (Entities & Interfaces)
-│   ├── entities/
-│   │   ├── Markdown.ts         # Markdown entity
-│   │   └── MermaidDiagram.ts   # Mermaid diagram entity
-│   ├── repositories/           # Repository interfaces
-│   │   └── IMarkdownRepository.ts
-│   └── types/                  # Domain types & value objects
-│       └── index.ts
-│
-├── application/                 # Application Layer (Use Cases & Logic)
-│   ├── useCases/
-│   │   ├── markdown/
-│   │   │   ├── UpdateMarkdownUseCase.ts
-│   │   │   ├── ExportMarkdownUseCase.ts
-│   │   │   └── ShareMarkdownUseCase.ts
-│   │   └── mermaid/
-│   │       ├── RenderMermaidUseCase.ts
-│   │       └── CopyMermaidUseCase.ts
-│   └── store/                  # Zustand store
-│       └── useMarkdownStore.ts
-│
-├── infrastructure/              # Infrastructure Layer (External Services)
-│   ├── repositories/
-│   │   └── LocalStorageMarkdownRepository.ts
-│   ├── services/
-│   │   ├── CompressionService.ts
-│   │   ├── ExportService.ts
-│   │   ├── MermaidService.ts
-│   │   └── ClipboardService.ts
+├── infrastructure/              # Infrastructure Layer (State & Storage)
 │   └── store/
-│       └── zustand/            # Zustand configuration
+│       └── useMarkdownStore.ts # Zustand store with localStorage persistence
 │
 ├── presentation/                # Presentation Layer (UI)
 │   ├── pages/
-│   │   ├── EditorPage.tsx      # Main editor page
-│   │   └── ViewPage.tsx        # View-only page
+│   │   ├── EditorPage.tsx      # Main editor page (split view)
+│   │   ├── ViewPage.tsx        # View-only page (shared links)
+│   │   └── PrintPage.tsx       # Print-optimized page with auto-print
 │   ├── components/
 │   │   ├── editor/
-│   │   │   └── Editor.tsx
+│   │   │   └── Editor.tsx      # Monaco-based markdown editor
 │   │   ├── preview/
-│   │   │   └── Preview.tsx
-│   │   ├── toolbar/
-│   │   │   ├── Toolbar.tsx
-│   │   │   ├── ExportMenu.tsx
-│   │   │   └── ShareButton.tsx
-│   │   ├── mermaid/
-│   │   │   ├── MermaidDiagram.tsx
-│   │   │   └── MermaidModal.tsx
-│   │   └── common/
-│   │       ├── FileDropZone.tsx
-│   │       └── PanelResizer.tsx
+│   │   │   └── Preview.tsx     # Markdown preview with live rendering
+│   │   └── mermaid/
+│   │       ├── MermaidDiagram.tsx  # Inline mermaid rendering component
+│   │       └── MermaidModal.tsx    # Full-screen mermaid diagram viewer
 │   ├── router/
 │   │   └── AppRouter.tsx       # React Router configuration
-│   ├── theme/
-│   │   └── muiTheme.ts         # MUI theme configuration
-│   └── styles/
-│       └── GlobalStyles.tsx    # Global styled-components
+│   └── theme/
+│       └── muiTheme.ts         # Material-UI theme configuration
+│
+├── utils/                       # Utility functions
+│   ├── analytics.ts            # Google Analytics integration
+│   ├── compression.js          # Pako-based content compression for sharing
+│   ├── constants.js            # Default markdown content & constants
+│   ├── export.js               # PDF/HTML/PNG/Markdown export utilities
+│   └── mermaidToClipboard.js   # Clipboard operations for diagrams
 │
 ├── App.tsx                      # Main application component
-└── main.tsx                     # Entry point
+└── main.tsx                     # Entry point with React strict mode
 ```
 
 ## Key Technologies
 
+### Core Framework
+
+- **React 18**: UI framework with hooks and concurrent features
+- **TypeScript/JavaScript**: Mixed TS/JS codebase
+- **Vite**: Fast build tool and dev server
+
 ### State Management
 
-- **Zustand**: Lightweight state management with minimal boilerplate
-- Store located at: `src/infrastructure/store/zustand/useMarkdownStore.ts`
-- Replaces React Context for better performance and simpler API
+- **Zustand**: Lightweight state management
+- **Store**: `src/infrastructure/store/useMarkdownStore.ts`
+- **Persistence**: localStorage middleware for auto-save
 
-### Styling
+### UI Components
 
-- **Material-UI (MUI)**: Component library for consistent UI
-- **Styled-Components**: CSS-in-JS for custom styling
-- **Emotion**: MUI's underlying styling engine
+- **Material-UI (MUI) v6**: Component library
+- **Monaco Editor**: VS Code-powered markdown editor
+- **Marked**: Markdown parsing and rendering
+- **Mermaid**: Diagram and flowchart rendering
 
 ### Routing
 
 - **React Router v7**: Client-side routing
 - Routes:
-  - `/` - Editor page (split view)
-  - `/view` - View-only page (preview only)
+  - `/` - Editor page (split view with editor + preview)
+  - `/view?c=...` - View-only page (compressed shared content)
+  - `/print#paxo:...` - Print-optimized page with auto-print trigger
 
-### Sharing
+### Export & Sharing
 
-- **Compressed Links**: Paxo compression; links kept under ~2k characters to fit the shortest modern browser URL limits
-
-## CLEAN Architecture Principles
-
-### 1. Domain Layer
-
-**Purpose**: Core business logic and entities
-**Dependencies**: None (pure TypeScript)
-**Key Concepts**:
-
-- **Entities**: Core business objects (Markdown, MermaidDiagram)
-- **Value Objects**: Immutable objects (Theme, ExportOptions)
-- **Repository Interfaces**: Contracts for data access
-
-**Example**:
-
-```typescript
-// src/domain/entities/Markdown.ts
-export class Markdown {
-  constructor(
-    public readonly content: string,
-    public readonly lastModified: Date
-  ) {}
-
-  update(newContent: string): Markdown {
-    return new Markdown(newContent, new Date());
-  }
-}
-```
-
-### 2. Application Layer
-
-**Purpose**: Use cases and application-specific business rules
-**Dependencies**: Domain layer only
-**Key Concepts**:
-
-- **Use Cases**: Single-purpose application actions
-- **DTOs**: Data transfer objects
-- **Application Services**: Orchestrate domain logic
-
-**Example**:
-
-```typescript
-// src/application/useCases/markdown/UpdateMarkdownUseCase.ts
-export class UpdateMarkdownUseCase {
-  execute(content: string) {
-    const markdown = new Markdown(content, new Date());
-    return this.repository.save(markdown);
-  }
-}
-```
-
-### 3. Infrastructure Layer
-
-**Purpose**: External dependencies and implementations
-**Dependencies**: Domain and Application layers
-**Key Concepts**:
-
-- **Repository Implementations**: LocalStorage, IndexedDB, API
-- **External Services**: Compression, Export, Clipboard
-- **Third-party integrations**: Mermaid, jsPDF, pako
-
-**Example**:
-
-```typescript
-// src/infrastructure/repositories/LocalStorageMarkdownRepository.ts
-export class LocalStorageMarkdownRepository implements IMarkdownRepository {
-  save(markdown: Markdown): void {
-    localStorage.setItem('markdown', JSON.stringify(markdown));
-  }
-
-  load(): Markdown | null {
-    const data = localStorage.getItem('markdown');
-    return data ? JSON.parse(data) : null;
-  }
-}
-```
-
-### 4. Presentation Layer
-
-**Purpose**: User interface and user interactions
-**Dependencies**: All layers (via dependency injection)
-**Key Concepts**:
-
-- **Pages**: Route-level components
-- **Components**: Reusable UI elements (MUI + styled-components)
-- **Hooks**: Custom React hooks for component logic
-- **Router**: React Router configuration
-
-**Example**:
-
-```typescript
-// src/presentation/components/editor/Editor.tsx
-import { TextField } from '@mui/material';
-import styled from 'styled-components';
-
-const StyledEditor = styled(TextField)`
-  .MuiInputBase-root {
-    font-family: 'Monaco', monospace;
-  }
-`;
-
-export const Editor = () => {
-  const { content, updateContent } = useMarkdownStore();
-  return <StyledEditor value={content} onChange={e => updateContent(e.target.value)} />;
-};
-```
+- **Browser Print API**: Native PDF generation via print dialog
+- **Pako**: DEFLATE compression (level 9) for URL sharing
+- URL-safe base64 encoding for share links
+- Links compressed to fit browser URL limits (up to 10KB compressed)
 
 ## Zustand Store Structure
 
 ```typescript
-// src/infrastructure/store/zustand/useMarkdownStore.ts
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-
+// src/infrastructure/store/useMarkdownStore.ts
 interface MarkdownState {
-  // State
+  // Content state
   content: string;
-  editorTheme: string;
-  previewTheme: string;
-  darkMode: boolean;
-
-  // Actions
   updateContent: (content: string) => void;
-  setEditorTheme: (theme: string) => void;
-  setPreviewTheme: (theme: string) => void;
-  toggleDarkMode: () => void;
+  resetContent: () => void;
 
-  // Mermaid modal
+  // Editor settings
+  editorTheme: string;
+  editorFontSize: number;
+  editorWrap: boolean;
+  setEditorTheme: (theme: string) => void;
+  setEditorFontSize: (size: number) => void;
+  setEditorWrap: (wrap: boolean) => void;
+
+  // Preview settings
+  previewTheme: string;
+  setPreviewTheme: (theme: string) => void;
+
+  // UI state
+  darkMode: boolean;
+  showEditor: boolean;
+  showPreview: boolean;
+  toggleDarkMode: () => void;
+  setShowEditor: (show: boolean) => void;
+  setShowPreview: (show: boolean) => void;
+  togglePanels: (mode: 'editor-only' | 'preview-only' | 'split') => void;
+
+  // Mermaid modal state
   mermaidModal: {
     isOpen: boolean;
     svg: string;
@@ -254,149 +133,262 @@ interface MarkdownState {
   openMermaidModal: (svg: string, code: string) => void;
   closeMermaidModal: () => void;
 }
-
-export const useMarkdownStore = create<MarkdownState>()(
-  persist(
-    (set) => ({
-      content: DEFAULT_MARKDOWN,
-      editorTheme: 'vs-dark',
-      previewTheme: 'github',
-      darkMode: false,
-
-      updateContent: (content) => set({ content }),
-      setEditorTheme: (theme) => set({ editorTheme: theme }),
-      setPreviewTheme: (theme) => set({ previewTheme: theme }),
-      toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
-
-      mermaidModal: { isOpen: false, svg: '', code: '' },
-      openMermaidModal: (svg, code) =>
-        set({ mermaidModal: { isOpen: true, svg, code } }),
-      closeMermaidModal: () =>
-        set({ mermaidModal: { isOpen: false, svg: '', code: '' } }),
-    }),
-    { name: 'markdown-storage' }
-  )
-);
 ```
 
-## Dependency Flow
+## Key Features
 
-```
-Presentation → Application → Domain
-     ↓              ↓
-Infrastructure ─────┘
-```
+### 1. Live Markdown Editor
 
-**Rules**:
+- Monaco editor with syntax highlighting
+- Configurable themes (vs-dark, vs-light, etc.)
+- Adjustable font size and word wrap
+- Auto-save to localStorage
 
-1. Domain has NO dependencies (pure business logic)
-2. Application depends ONLY on Domain
-3. Infrastructure can depend on Domain and Application
-4. Presentation can depend on ALL layers but should primarily use Application
-5. Dependencies always point INWARD (toward Domain)
+### 2. Real-time Preview
 
-## Benefits of This Architecture
+- Live markdown rendering using Marked
+- Syntax highlighting for code blocks
+- Mermaid diagram support
+- Click-to-zoom diagrams in full-screen modal
 
-1. **Testability**: Each layer can be tested in isolation
-2. **Maintainability**: Clear boundaries and responsibilities
-3. **Scalability**: Easy to add new features without affecting existing code
-4. **Flexibility**: Easy to swap implementations (e.g., switch from localStorage to IndexedDB)
-5. **Type Safety**: Full TypeScript support across all layers
+### 3. Mermaid Diagrams
 
-## Adding New Features
+- Inline rendering in preview
+- Click to open full-screen modal
+- Copy as PNG or SVG to clipboard
+- Download as PNG or SVG
+- Supports all Mermaid diagram types:
+  - Flowcharts
+  - Sequence diagrams
+  - Class diagrams
+  - State diagrams
+  - ER diagrams
+  - And more
 
-### Example: Adding PDF Export with Options
+### 4. Export Options
 
-1. **Domain**: Define PDF export options interface
+- **Markdown (.md)**: Export raw markdown
+- **HTML**: Standalone HTML file with styles
+- **PDF**: Opens print-optimized page in new tab, triggers browser print dialog
+  - Renders all Mermaid diagrams before printing
+  - Print-friendly layout with proper page breaks
+  - Uses browser's native print-to-PDF feature
 
-```typescript
-// src/domain/types/ExportOptions.ts
-export interface PDFExportOptions {
-  pageSize: 'A4' | 'Letter' | 'Legal';
-  orientation: 'portrait' | 'landscape';
-  margin: number;
-}
-```
+### 5. Sharing
 
-2. **Application**: Create use case
+- Generate compressed shareable links (up to 10KB)
+- Maximum compression with Pako DEFLATE level 9
+- URL-safe base64 encoding (no +, /, or = characters)
+- View-only mode for shared links
+- Hash-based routing for instant content loading
 
-```typescript
-// src/application/useCases/markdown/ExportPDFUseCase.ts
-export class ExportPDFUseCase {
-  constructor(private exportService: IExportService) {}
+### 6. Layout Modes
 
-  execute(content: string, options: PDFExportOptions): Promise<void> {
-    return this.exportService.exportAsPDF(content, options);
-  }
-}
-```
+- **Split View**: Editor + Preview side-by-side (default)
+- **Editor Only**: Focus on writing
+- **Preview Only**: Focus on rendered output
+- Adjustable panel sizes with draggable divider
 
-3. **Infrastructure**: Implement service
+## Component Details
 
-```typescript
-// src/infrastructure/services/ExportService.ts
-export class ExportService implements IExportService {
-  async exportAsPDF(content: string, options: PDFExportOptions): Promise<void> {
-    // Use jsPDF + html2canvas
-  }
-}
-```
+### EditorPage.tsx
 
-4. **Presentation**: Use in component
+Main page component that orchestrates:
 
-```typescript
-// src/presentation/components/toolbar/ExportMenu.tsx
-const handleExportPDF = () => {
-  const useCase = new ExportPDFUseCase(exportService);
-  useCase.execute(content, pdfOptions);
-};
-```
+- Editor and Preview components
+- Toolbar with export/share actions
+- Layout management (split/single panel)
+- Scroll synchronization between editor and preview
 
-## Environment Setup
+### Editor.tsx
 
-### Development
+Monaco-based editor with:
+
+- Markdown syntax highlighting
+- Theme customization
+- Font size adjustment
+- Word wrap toggle
+- Exposed methods via ref (scrollToLine, getScrollInfo)
+
+### Preview.tsx
+
+Markdown preview with:
+
+- Live rendering using Marked
+- Mermaid diagram detection and rendering
+- Syntax highlighting for code blocks
+- Click handlers for interactive diagrams
+- Exposed methods via ref (scrollToRatio, getElement)
+
+### MermaidModal.tsx
+
+Full-screen diagram viewer:
+
+- Renders SVG from Mermaid code or pre-rendered SVG
+- Copy to clipboard (PNG/SVG)
+- Download (PNG/SVG)
+- Proper sizing and centering
+- Fixed: Container always rendered to avoid ref timing issues
+
+## Utility Functions
+
+### export.js
+
+Export utilities:
+
+- `downloadMarkdown()`: Save as .md file
+- `downloadHTML()`: Save as standalone HTML
+- `openPrintPage()`: Open print-optimized page in new tab
+- `downloadRenderedHTML()`: Save rendered preview as HTML
+- `copyHTMLToClipboard()`: Copy rendered HTML
+
+### compression.js
+
+Sharing utilities:
+
+- `compressToBase64()`: Compress markdown to URL-safe base64
+- `decompressFromBase64()`: Decompress from URL-safe base64
+- `generateShareLink()`: Create shareable link (max 10KB)
+- `extractContentFromHash()`: Extract content from URL hash
+- Uses Pako DEFLATE level 9 for maximum compression
+- URL-safe encoding replaces +/= with -\_
+
+### mermaidToClipboard.js
+
+Mermaid-specific utilities:
+
+- `copySVGToClipboard()`: Copy diagram as SVG
+- `copyMermaidAsPNG()`: Copy/download diagram as PNG
+- Supports both clipboard and download operations
+
+## Development
+
+### Setup
 
 ```bash
-yarn dev          # Start dev server
-yarn lint         # Run linter
-yarn format       # Format code
+yarn install          # Install dependencies
+yarn dev             # Start dev server (http://localhost:5173)
 ```
 
-### Production
+### Build
 
 ```bash
-yarn build        # Build for production
-yarn preview      # Preview build
+yarn build           # Production build
+yarn preview         # Preview production build
 ```
 
-### Testing (to be added)
+### Code Quality
 
 ```bash
-yarn test         # Run tests
-yarn test:cov     # Test coverage
+yarn lint            # Run ESLint
+yarn format          # Format code with Prettier
 ```
+
+### Pre-commit Hook
+
+Husky hook automatically runs:
+
+1. ESLint on staged files
+2. Prettier formatting
+3. Prevents commit if errors found
 
 ## CI/CD
 
-GitHub Actions workflow automatically:
+GitHub Actions workflow (`.github/workflows/deploy.yml`):
 
-1. Runs ESLint
-2. Builds the application
-3. Deploys to GitHub Pages
+1. Checkout code
+2. Setup Node.js
+3. Install dependencies
+4. Run ESLint
+5. Build for production
+6. Deploy to GitHub Pages
 
-## Contributing Guidelines
+## Recent Fixes
 
-1. Follow CLEAN architecture principles
-2. Keep dependencies pointing inward
-3. Write pure functions in Domain layer
-4. Use dependency injection
-5. Add tests for new features
-6. Update this documentation when adding new patterns
+### MermaidModal Display Issue
+
+**Problem**: Charts not showing in modal
+**Root Cause**: Container div only rendered when `hasContent` was true, but `hasContent` was only set after rendering into container (circular dependency)
+**Solution**:
+
+- Container now always rendered (with `width: 100%` and `height: 100%`)
+- Fallback message positioned absolutely
+- Proper flexbox centering for SVG content
+
+### PDF Export Redesign
+
+**Change**: Replaced jsPDF/html2canvas with browser print API
+
+- Removed dependencies on jsPDF and html2canvas
+- Created new `/print` route for print-optimized view
+- Opens content in new tab and triggers browser's native print dialog
+- Renders all Mermaid diagrams before printing
+- Print-friendly CSS with proper page breaks
+- Better quality and smaller bundle size
+- Users can choose PDF settings in browser print dialog
+
+### Share Link Length Improvement
+
+**Enhancement**: Increased shareable link capacity
+
+- Increased limit from 2KB to 10KB (5x improvement)
+- Implemented URL-safe base64 encoding
+- Added maximum compression (Pako DEFLATE level 9)
+- Better error messages showing actual vs max length
+
+### Mermaid Diagram Performance Optimization
+
+**Problem**: Documents with many Mermaid diagrams caused slow rendering
+**Solution**: Implemented lazy loading with Intersection Observer
+
+- Only renders diagrams when they're about to become visible
+- Pre-renders 200px before viewport entry for smooth experience
+- Maintains SVG cache for instant re-renders
+- Shows "Loading diagram..." placeholder during render
+- Dramatically improves performance for large documents
+
+## Browser Support
+
+- Chrome/Edge: Full support
+- Firefox: Full support
+- Safari: Full support
+- Clipboard API requires HTTPS (or localhost)
+
+## Environment Variables
+
+- `VITE_GA_MEASUREMENT_ID`: Google Analytics tracking ID (optional)
+
+## Performance Considerations
+
+1. **Debounced Rendering**: Markdown re-render debounced to avoid lag during typing
+2. **Mermaid Caching**: SVG cache to prevent re-rendering unchanged diagrams
+3. **Lazy Loading Diagrams**: Intersection Observer renders Mermaid diagrams only when visible
+   - Pre-renders diagrams 200px before they enter viewport
+   - Dramatically improves performance for documents with many diagrams
+   - Loading placeholder shown until diagram renders
+4. **Code Splitting**: React Router handles route-based code splitting
+
+## Known Limitations
+
+1. URL sharing limited by browser URL length (up to 10KB compressed content, ~40-50KB raw markdown depending on content)
+2. PDF export via print dialog requires all diagrams to render first (may take time for many diagrams)
+3. Very long documents should use download/upload instead of share links
+4. Print page uses same URL compression limit as sharing (10KB)
+
+## Future Enhancements
+
+- [ ] Add tests (Vitest + React Testing Library)
+- [ ] Collaborative editing (WebSocket/CRDT)
+- [ ] Cloud storage integration
+- [ ] Custom themes
+- [ ] Plugin system for custom markdown extensions
+- [ ] Mobile responsive improvements
 
 ## Resources
 
-- [CLEAN Architecture by Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Zustand Documentation](https://docs.pmnd.rs/zustand/getting-started/introduction)
 - [Material-UI](https://mui.com/)
-- [Styled-Components](https://styled-components.com/)
+- [Marked Documentation](https://marked.js.org/)
+- [Mermaid Documentation](https://mermaid.js.org/)
+- [Monaco Editor](https://microsoft.github.io/monaco-editor/)
 - [React Router](https://reactrouter.com/)

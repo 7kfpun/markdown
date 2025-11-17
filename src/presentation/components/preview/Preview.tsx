@@ -72,7 +72,7 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
         const id = `mermaid-${baseKey}-${idx}`;
         const cacheKey = `${baseKey}`;
         blocks.push({ code: cleanCode, id, cacheKey });
-        return `<div class="mermaid-container" id="${id}"></div>`;
+        return `<div class="mermaid-container" id="${id}" data-loading="true"><div style="padding: 2rem; color: #666; text-align: center;">Loading diagram...</div></div>`;
       });
 
       setMermaidBlocks(blocks);
@@ -100,6 +100,45 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
     processMarkdown();
   }, [content]);
 
+  const renderSingleMermaid = useCallback(
+    async (block: { code: string; id: string; cacheKey: string }, renderIdSeed: string = 'render') => {
+      const { code, id, cacheKey } = block;
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      // Check if already rendered
+      if (el.querySelector('svg')) return;
+
+      const cached = latestSvgCache.current.get(cacheKey);
+      if (cached) {
+        el.innerHTML = cached;
+        el.style.cursor = 'zoom-in';
+        el.onclick = () => openMermaidModal(el.innerHTML || cached, code);
+        return;
+      }
+
+      try {
+        const renderId = `${renderIdSeed}-${id}-${Date.now()}`;
+        const { svg } = await mermaid.render(renderId, code);
+        const svgMarkup = svg || el.innerHTML;
+        latestSvgCache.current.set(cacheKey, svgMarkup);
+        el.innerHTML = svgMarkup;
+        el.style.cursor = 'zoom-in';
+        el.onclick = () => openMermaidModal(el.innerHTML || svgMarkup, code);
+      } catch (error) {
+        console.error('Mermaid render error:', error);
+        const cachedSvg = latestSvgCache.current.get(cacheKey);
+        if (cachedSvg) {
+          el.innerHTML = cachedSvg;
+          el.onclick = () => openMermaidModal(el.innerHTML || cachedSvg, code);
+        } else {
+          el.innerHTML = `<div style="color: red; padding: 1rem; border: 1px solid red; border-radius: 4px;">Failed to render Mermaid diagram</div>`;
+        }
+      }
+    },
+    [openMermaidModal]
+  );
+
   const renderMermaid = useCallback(
     async (renderIdSeed: string = 'render') => {
       if (!html || mermaidBlocks.length === 0 || !showPreview) return;
@@ -107,37 +146,39 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
       // Wait for DOM to be ready
       await new Promise(resolve => setTimeout(resolve, 75));
 
-      for (const { code, id, cacheKey } of mermaidBlocks) {
+      // Render only visible diagrams using Intersection Observer
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const id = entry.target.id;
+              const block = mermaidBlocks.find((b) => b.id === id);
+              if (block) {
+                renderSingleMermaid(block, renderIdSeed);
+                observer.unobserve(entry.target);
+              }
+            }
+          });
+        },
+        {
+          root: previewRef.current,
+          rootMargin: '200px', // Pre-render diagrams 200px before they come into view
+          threshold: 0,
+        }
+      );
+
+      // Observe all mermaid containers
+      mermaidBlocks.forEach(({ id }) => {
         const el = document.getElementById(id);
         if (el) {
-          const cached = latestSvgCache.current.get(cacheKey);
-          if (cached) {
-            el.innerHTML = cached;
-            el.style.cursor = 'zoom-in';
-            el.onclick = () => openMermaidModal(el.innerHTML || cached, code);
-          }
-          try {
-            const renderId = `${renderIdSeed}-${id}-${Date.now()}`;
-            const { svg } = await mermaid.render(renderId, code);
-            const svgMarkup = svg || el.innerHTML;
-            latestSvgCache.current.set(cacheKey, svgMarkup);
-            el.innerHTML = svgMarkup;
-            el.style.cursor = 'zoom-in';
-            el.onclick = () => openMermaidModal(el.innerHTML || svgMarkup, code);
-          } catch (error) {
-            console.error('Mermaid render error:', error);
-            const cachedSvg = latestSvgCache.current.get(cacheKey);
-            if (cachedSvg) {
-              el.innerHTML = cachedSvg;
-              el.onclick = () => openMermaidModal(el.innerHTML || cachedSvg, code);
-            } else {
-              el.innerHTML = `<div style="color: red; padding: 1rem; border: 1px solid red; border-radius: 4px;">Failed to render Mermaid diagram</div>`;
-            }
-          }
+          observer.observe(el);
         }
-      }
+      });
+
+      // Cleanup
+      return () => observer.disconnect();
     },
-    [html, mermaidBlocks, openMermaidModal, showPreview]
+    [html, mermaidBlocks, showPreview, renderSingleMermaid]
   );
 
   // Render when inputs change (debounced to avoid transient errors during edits)
@@ -145,12 +186,16 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
     if (renderTimeoutRef.current) {
       clearTimeout(renderTimeoutRef.current);
     }
-    renderTimeoutRef.current = window.setTimeout(() => {
-      renderMermaid();
+    let cleanup: (() => void) | undefined;
+    renderTimeoutRef.current = window.setTimeout(async () => {
+      cleanup = await renderMermaid();
     }, 150);
     return () => {
       if (renderTimeoutRef.current) {
         clearTimeout(renderTimeoutRef.current);
+      }
+      if (cleanup) {
+        cleanup();
       }
     };
   }, [renderMermaid, showEditor, mermaidModal, darkMode, html, mermaidBlocks]);
