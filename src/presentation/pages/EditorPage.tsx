@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Tooltip } from '@mui/material';
 import { Brightness4, Brightness7, GetApp, PictureAsPdf, Share, Upload, RestartAlt, Description, BugReport, Policy } from '@mui/icons-material';
 import styled from 'styled-components';
 import { useMarkdownStore } from '../../infrastructure/store/useMarkdownStore';
@@ -285,62 +285,97 @@ export default function EditorPage() {
 
         <HeaderCenter>
           <Segmented $dark={darkMode}>
-            <SegmentedButton
-              $active={layoutMode === 'editor-only'}
-              $dark={darkMode}
-              onClick={() => togglePanels('editor-only')}
-            >
-              Editor
-            </SegmentedButton>
-            <SegmentedButton $active={layoutMode === 'split'} $dark={darkMode} onClick={() => togglePanels('split')}>
-              Split
-            </SegmentedButton>
-            <SegmentedButton
-              $active={layoutMode === 'preview-only'}
-              $dark={darkMode}
-              onClick={() => togglePanels('preview-only')}
-            >
-              Preview
-            </SegmentedButton>
+            <Tooltip title="Editor only" arrow>
+              <SegmentedButton
+                aria-label="Show editor only"
+                $active={layoutMode === 'editor-only'}
+                $dark={darkMode}
+                onClick={() => togglePanels('editor-only')}
+              >
+                Editor
+              </SegmentedButton>
+            </Tooltip>
+            <Tooltip title="Split view" arrow>
+              <SegmentedButton
+                aria-label="Split view"
+                $active={layoutMode === 'split'}
+                $dark={darkMode}
+                onClick={() => togglePanels('split')}
+              >
+                Split
+              </SegmentedButton>
+            </Tooltip>
+            <Tooltip title="Preview only" arrow>
+              <SegmentedButton
+                aria-label="Show preview only"
+                $active={layoutMode === 'preview-only'}
+                $dark={darkMode}
+                onClick={() => togglePanels('preview-only')}
+              >
+                Preview
+              </SegmentedButton>
+            </Tooltip>
           </Segmented>
         </HeaderCenter>
 
         <HeaderRight>
-          <ToolbarIconButton
-            onClick={() => window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank')}
-            title="Report a bug or request a feature"
-            $dark={darkMode}
-          >
-            <BugReport fontSize="small" />
-          </ToolbarIconButton>
-          <ToolbarIconButton
-            onClick={() => window.open('/privacy', '_blank')}
-            title="Privacy Policy"
-            $dark={darkMode}
-          >
-            <Policy fontSize="small" />
-          </ToolbarIconButton>
-          <ToolbarIconButton onClick={handleReset} title="Reset to default content" $dark={darkMode}>
-            <RestartAlt fontSize="small" />
-          </ToolbarIconButton>
-          <ToolbarIconButton onClick={handleImport} title="Import Markdown or Text file" $dark={darkMode}>
-            <Upload fontSize="small" />
-          </ToolbarIconButton>
-          <ToolbarIconButton onClick={handleShare} title="Share via compressed link" $dark={darkMode}>
-            <Share fontSize="small" />
-          </ToolbarIconButton>
-          <ToolbarIconButton onClick={handleExport} title="Download as Markdown (.md)" $dark={darkMode}>
-            <GetApp fontSize="small" />
-          </ToolbarIconButton>
-          <ToolbarIconButton onClick={handleExportHTML} title="Download as HTML file" $dark={darkMode}>
-            <Description fontSize="small" />
-          </ToolbarIconButton>
-          <ToolbarIconButton onClick={handleExportPDF} title="Export to PDF (print dialog)" $dark={darkMode}>
-            <PictureAsPdf fontSize="small" />
-          </ToolbarIconButton>
-          <ToolbarIconButton onClick={toggleDarkMode} title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'} $dark={darkMode}>
-            {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
-          </ToolbarIconButton>
+          <Tooltip title="Feedback" arrow>
+            <ToolbarIconButton
+              aria-label="Report a bug or request a feature"
+              onClick={() => window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank')}
+              $dark={darkMode}
+            >
+              <BugReport fontSize="small" />
+            </ToolbarIconButton>
+          </Tooltip>
+          <Tooltip title="Privacy" arrow>
+            <ToolbarIconButton
+              aria-label="Privacy policy"
+              onClick={() => window.open('/privacy', '_blank')}
+              $dark={darkMode}
+            >
+              <Policy fontSize="small" />
+            </ToolbarIconButton>
+          </Tooltip>
+          <Tooltip title="Reset content" arrow>
+            <ToolbarIconButton aria-label="Reset to default content" onClick={handleReset} $dark={darkMode}>
+              <RestartAlt fontSize="small" />
+            </ToolbarIconButton>
+          </Tooltip>
+          <Tooltip title="Import file" arrow>
+            <ToolbarIconButton aria-label="Import Markdown or text file" onClick={handleImport} $dark={darkMode}>
+              <Upload fontSize="small" />
+            </ToolbarIconButton>
+          </Tooltip>
+          <Tooltip title="Share link" arrow>
+            <ToolbarIconButton aria-label="Share via compressed link" onClick={handleShare} $dark={darkMode}>
+              <Share fontSize="small" />
+            </ToolbarIconButton>
+          </Tooltip>
+          <Tooltip title="Download .md" arrow>
+            <ToolbarIconButton aria-label="Download as Markdown (.md)" onClick={handleExport} $dark={darkMode}>
+              <GetApp fontSize="small" />
+            </ToolbarIconButton>
+          </Tooltip>
+          <Tooltip title="Download HTML" arrow>
+            <ToolbarIconButton aria-label="Download rendered HTML" onClick={handleExportHTML} $dark={darkMode}>
+              <Description fontSize="small" />
+            </ToolbarIconButton>
+          </Tooltip>
+          <Tooltip title="Export PDF" arrow>
+            <ToolbarIconButton aria-label="Export to PDF (print dialog)" onClick={handleExportPDF} $dark={darkMode}>
+              <PictureAsPdf fontSize="small" />
+            </ToolbarIconButton>
+          </Tooltip>
+          <Tooltip title={darkMode ? 'Light mode' : 'Dark mode'} arrow>
+            <ToolbarIconButton
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              onClick={toggleDarkMode}
+              $dark={darkMode}
+            >
+              {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
+            </ToolbarIconButton>
+          </Tooltip>
         </HeaderRight>
       </Header>
 

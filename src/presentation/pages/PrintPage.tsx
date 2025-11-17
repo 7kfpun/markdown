@@ -1,12 +1,9 @@
 import { Box, Paper } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { marked } from 'marked';
-import markedKatex from 'marked-katex-extension';
-import { markedHighlight } from 'marked-highlight';
-import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
 import mermaid from 'mermaid';
 import { decompressFromBase64 } from '../../utils/compression';
+import { getMarkedInstance } from '../../utils/markedInstance';
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/github.css';
 
@@ -25,18 +22,7 @@ mermaid.initialize({
   },
 });
 
-// Configure marked with KaTeX extension and syntax highlighting
-marked.use(markedKatex({ throwOnError: false, output: 'html' as const }));
-marked.use(
-  markedHighlight({
-    langPrefix: 'hljs language-',
-    highlight(code, lang) {
-      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-      return hljs.highlight(code, { language }).value;
-    },
-  })
-);
-marked.setOptions({ gfm: true, breaks: true });
+const marked = getMarkedInstance();
 
 export default function PrintPage() {
   const [html, setHtml] = useState('');

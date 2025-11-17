@@ -1,36 +1,13 @@
 import { Box, Paper } from '@mui/material';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState, useCallback } from 'react';
-import { marked } from 'marked';
-import markedKatex from 'marked-katex-extension';
-import { markedHighlight } from 'marked-highlight';
-import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
 import mermaid from 'mermaid';
 import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore';
+import { getMarkedInstance } from '../../../utils/markedInstance';
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/github-dark.css';
 
-// Configure marked with KaTeX extension and syntax highlighting
-const katexOptions = {
-  throwOnError: false,
-  output: 'html',
-};
-
-marked.use(markedKatex(katexOptions));
-marked.use(
-  markedHighlight({
-    langPrefix: 'hljs language-',
-    highlight(code, lang) {
-      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-      return hljs.highlight(code, { language }).value;
-    },
-  })
-);
-
-marked.setOptions({
-  gfm: true,
-  breaks: true,
-});
+const marked = getMarkedInstance();
 
 export interface PreviewHandle {
   scrollToRatio: (ratio: number) => void;
