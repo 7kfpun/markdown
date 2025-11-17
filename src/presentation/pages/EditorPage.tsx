@@ -1,5 +1,5 @@
-import { Box, Tooltip } from '@mui/material';
-import { Brightness4, Brightness7, GetApp, PictureAsPdf, Share, Upload, RestartAlt, Description, BugReport, Policy } from '@mui/icons-material';
+import { Box, Tooltip, Drawer, Typography } from '@mui/material';
+import { Brightness4, Brightness7, GetApp, PictureAsPdf, Share, Upload, RestartAlt, Description, BugReport, Policy, Menu, Close } from '@mui/icons-material';
 import styled from 'styled-components';
 import { useMarkdownStore } from '../../infrastructure/store/useMarkdownStore';
 import { DEFAULT_MARKDOWN } from '../../utils/constants';
@@ -7,9 +7,11 @@ import { openPrintPage, downloadRenderedHTML } from '../../utils/export';
 import Editor, { EditorHandle } from '../components/editor/Editor';
 import Preview, { PreviewHandle } from '../components/preview/Preview';
 import MermaidModal from '../components/mermaid/MermaidModal';
+import { OfflineIndicator } from '../components/offline/OfflineIndicator';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { generateShareLink } from '../../utils/compression';
 import { downloadMarkdown } from '../../utils/export';
+import { useOnlineStatus } from '../../utils/useOnlineStatus';
 
 const PageContainer = styled(Box)`
   display: flex;
@@ -23,7 +25,7 @@ const ContentContainer = styled(Box)`
   overflow: hidden;
 `;
 
-const PanelContainer = styled(Box)<{ $show: boolean }>`
+const PanelContainer = styled(Box) <{ $show: boolean }>`
   flex: 1;
   overflow: hidden;
   display: ${(props) => (props.$show ? 'flex' : 'none')};
@@ -41,6 +43,7 @@ const Header = styled.header<{ $dark: boolean }>`
       : 'linear-gradient(135deg, #1f7aec, #5ec5ff)'};
   color: ${(p) => (p.$dark ? '#e5e7eb' : '#f8fbff')};
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  position: relative;
 `;
 
 const HeaderSection = styled.div`
@@ -53,10 +56,15 @@ const HeaderSection = styled.div`
 
 const HeaderCenter = styled(HeaderSection)`
   justify-content: center;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  flex: unset;
 `;
 
 const HeaderRight = styled(HeaderSection)`
   justify-content: flex-end;
+  margin-left: auto;
 `;
 
 const Logo = styled.div`
@@ -64,6 +72,7 @@ const Logo = styled.div`
   letter-spacing: 0.2px;
   font-size: 18px;
   white-space: nowrap;
+  flex-shrink: 0;
 `;
 
 const Segmented = styled.div<{ $dark: boolean }>`
@@ -127,6 +136,63 @@ const Resizer = styled.div`
   }
 `;
 
+const HeaderRightDesktop = styled(HeaderRight)`
+  @media (max-width: 640px) {
+    display: none;
+  }
+`;
+
+const MenuButton = styled.button<{ $dark: boolean }>`
+  display: none;
+  appearance: none;
+  border: none;
+  background: ${(p) => (p.$dark ? 'rgba(255,255,255,0.08)' : 'rgba(255, 255, 255, 0.15)')};
+  color: ${(p) => (p.$dark ? '#e5e7eb' : '#f8fbff')};
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 9px;
+  transition: all 0.15s ease;
+  
+  @media (max-width: 640px) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    
+    &:hover {
+      background: ${(p) => (p.$dark ? 'rgba(255,255,255,0.12)' : 'rgba(255, 255, 255, 0.25)')};
+      transform: translateY(-1px);
+    }
+  }
+`;
+
+const MobileMenuContainer = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+`;
+
+const MobileMenuButton = styled.button<{ $dark: boolean }>`
+  appearance: none;
+  border: none;
+  padding: 12px 16px;
+  background: ${(p) => (p.$dark ? 'rgba(255,255,255,0.08)' : 'rgba(255, 255, 255, 0.1)')};
+  color: ${(p) => (p.$dark ? '#e5e7eb' : '#1f1f1f')};
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.15s ease;
+  
+  &:hover {
+    background: ${(p) => (p.$dark ? 'rgba(255,255,255,0.12)' : 'rgba(255, 255, 255, 0.2)')};
+  }
+`;
+
 export default function EditorPage() {
   const {
     darkMode,
@@ -141,7 +207,10 @@ export default function EditorPage() {
   } = useMarkdownStore();
 
   const [toast, setToast] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [splitSizes, setSplitSizes] = useState({ editor: 50, preview: 50 });
+  const [wasOffline, setWasOffline] = useState(false);
+  const isOnline = useOnlineStatus();
   const contentRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<EditorHandle>(null);
   const previewRef = useRef<PreviewHandle>(null);
@@ -151,6 +220,16 @@ export default function EditorPage() {
     startX: 0,
     startSizes: { editor: 50, preview: 50 },
   });
+
+  // Track when we transition from offline to online
+  useEffect(() => {
+    if (!isOnline) {
+      setWasOffline(true);
+    } else if (wasOffline && isOnline) {
+      // Show reconnection message for 3 seconds
+      setTimeout(() => setWasOffline(false), 3000);
+    }
+  }, [isOnline, wasOffline]);
 
   const handleShare = async () => {
     try {
@@ -278,6 +357,7 @@ export default function EditorPage() {
 
   return (
     <PageContainer>
+      <OfflineIndicator isOnline={isOnline} wasOffline={wasOffline} />
       <Header $dark={darkMode}>
         <HeaderSection>
           <Logo>1Markdown</Logo>
@@ -318,7 +398,7 @@ export default function EditorPage() {
           </Segmented>
         </HeaderCenter>
 
-        <HeaderRight>
+        <HeaderRightDesktop>
           <Tooltip title="Feedback" arrow>
             <ToolbarIconButton
               aria-label="Report a bug or request a feature"
@@ -376,7 +456,69 @@ export default function EditorPage() {
               {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
             </ToolbarIconButton>
           </Tooltip>
-        </HeaderRight>
+        </HeaderRightDesktop>
+
+        <MenuButton $dark={darkMode} onClick={() => setMobileMenuOpen(true)}>
+          <Menu />
+        </MenuButton>
+
+        <Drawer anchor="right" open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)}>
+          <MobileMenuContainer sx={{ width: 280, bgcolor: darkMode ? '#1f2937' : '#f8fbff' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                Menu
+              </Typography>
+              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: darkMode ? '#e5e7eb' : '#1f1f1f' }}>
+                <Close />
+              </button>
+            </Box>
+
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleShare(); }} title="Share link">
+              <Share fontSize="small" />
+              Share Link
+            </MobileMenuButton>
+
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleImport(); }} title="Import file">
+              <Upload fontSize="small" />
+              Import File
+            </MobileMenuButton>
+
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExport(); }} title="Download .md">
+              <GetApp fontSize="small" />
+              Download .md
+            </MobileMenuButton>
+
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExportHTML(); }} title="Download HTML">
+              <Description fontSize="small" />
+              Download HTML
+            </MobileMenuButton>
+
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExportPDF(); }} title="Export PDF">
+              <PictureAsPdf fontSize="small" />
+              Export PDF
+            </MobileMenuButton>
+
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleReset(); }} title="Reset content">
+              <RestartAlt fontSize="small" />
+              Reset Content
+            </MobileMenuButton>
+
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank'); }} title="Feedback">
+              <BugReport fontSize="small" />
+              Report Bug
+            </MobileMenuButton>
+
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); window.open('/privacy', '_blank'); }} title="Privacy">
+              <Policy fontSize="small" />
+              Privacy Policy
+            </MobileMenuButton>
+
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); toggleDarkMode(); }} title="Toggle theme">
+              {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
+              {darkMode ? 'Light Mode' : 'Dark Mode'}
+            </MobileMenuButton>
+          </MobileMenuContainer>
+        </Drawer>
       </Header>
 
       <ContentContainer ref={contentRef}>

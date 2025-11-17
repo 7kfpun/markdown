@@ -93,8 +93,8 @@ You can combine formatting: **Bold _and italic_** or ***everything together***!
 [Link with title](https://example.com "Hover to see title")
 
 **Images:**
-![Alt text description](https://via.placeholder.com/400x200)
-![Image with title](https://via.placeholder.com/300x150 "Image Title")
+![Alt text description](/og-image.png)
+![Image with title](/og-image-light.png "Image with title")
 
 **Reference-style links:**
 [1Markdown][1markdown]

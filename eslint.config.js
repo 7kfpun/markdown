@@ -8,6 +8,19 @@ export default [
   },
   js.configs.recommended,
   {
+    files: ['public/sw.js'],
+    languageOptions: {
+      globals: {
+        self: 'readonly',
+        caches: 'readonly',
+        fetch: 'readonly',
+        Response: 'readonly',
+        location: 'readonly',
+        clients: 'readonly',
+      },
+    },
+  },
+  {
     files: ['**/*.{js,jsx}'],
     plugins: {
       react: reactPlugin,

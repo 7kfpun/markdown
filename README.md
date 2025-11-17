@@ -28,6 +28,7 @@ Prerequisites: Node.js 20+, Yarn 1.22+
 ```bash
 yarn install         # Install dependencies
 yarn dev             # Start dev server (http://localhost:5173)
+yarn test            # Run tests (Vitest, jsdom)
 yarn build           # Production build
 yarn preview         # Preview production build
 yarn lint            # Lint
@@ -72,6 +73,7 @@ src/
 - Syntax highlighting uses a shared marked instance to avoid double-highlighting.
 - PDF export relies on the browser print dialog (no html2canvas/jsPDF in use).
 - Share links are limited by URL length (≈10 KB compressed content).
+- Editor/preview scroll positions stay in sync and are restored when switching layout modes.
 
 ## Browser Support
 

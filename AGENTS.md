@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-1Markdown is a modern, browser-based markdown editor with live preview, Mermaid diagram support, and collaborative sharing features. Built with React, Material-UI, and Zustand for state management.
+1Markdown is a modern, browser-based markdown editor with live preview, Mermaid diagram support, and collaborative sharing features. Built with React 19, Material-UI 7, and Zustand for state management.
 
 ## Architecture Overview
 
@@ -36,7 +36,7 @@ src/
 │   │   └── PrivacyPage.tsx     # Privacy policy page
 │   ├── components/
 │   │   ├── editor/
-│   │   │   └── Editor.tsx      # Monaco-based markdown editor
+│   │   │   └── Editor.tsx      # CodeMirror-based markdown editor
 │   │   ├── preview/
 │   │   │   └── Preview.tsx     # Markdown preview with live rendering
 │   │   └── mermaid/
@@ -62,9 +62,9 @@ src/
 
 ### Core Framework
 
-- **React 18**: UI framework with hooks and concurrent features
+- **React 19**: UI framework with hooks and concurrent features
 - **TypeScript/JavaScript**: Mixed TS/JS codebase
-- **Vite**: Fast build tool and dev server
+- **Vite 5**: Fast build tool and dev server
 
 ### State Management
 
@@ -74,9 +74,9 @@ src/
 
 ### UI Components
 
-- **Material-UI (MUI) v6**: Component library
-- **Monaco Editor**: VS Code-powered markdown editor
-- **Marked**: Markdown parsing and rendering
+- **Material-UI (MUI) v7**: Component library
+- **CodeMirror 6**: Markdown editor
+- **Marked + marked-highlight + highlight.js**: Markdown parsing and syntax highlighting
 - **Mermaid**: Diagram and flowchart rendering
 
 ### Routing
@@ -279,10 +279,11 @@ yarn build           # Production build
 yarn preview         # Preview production build
 ```
 
-### Code Quality
+### Code Quality & Tests
 
 ```bash
 yarn lint            # Run ESLint
+yarn test            # Run Vitest (jsdom)
 yarn format          # Format code with Prettier
 ```
 
@@ -296,7 +297,9 @@ Husky hook automatically runs:
 
 ## CI/CD
 
-GitHub Actions workflow (`.github/workflows/deploy.yml`):
+GitHub Actions workflows:
+
+**deploy.yml** (GitHub Pages):
 
 1. Checkout code
 2. Setup Node.js
@@ -304,6 +307,15 @@ GitHub Actions workflow (`.github/workflows/deploy.yml`):
 4. Run ESLint
 5. Build for production
 6. Deploy to GitHub Pages
+
+**ci.yml** (CI on push/PR):
+
+1. Checkout code
+2. Setup Node.js
+3. Install dependencies
+4. Lint
+5. Test (Vitest)
+6. Build
 
 ## Recent Fixes & Enhancements
 
@@ -348,6 +360,14 @@ GitHub Actions workflow (`.github/workflows/deploy.yml`):
 - Print-friendly CSS with proper page breaks
 - Better quality and smaller bundle size
 - Users can choose PDF settings in browser print dialog
+
+### Scroll Sync Reliability
+
+- Editor/preview scroll positions now remain aligned and restore the last ratio when toggling layout modes.
+
+### Testing & Lint Coverage
+
+- Added Vitest (jsdom) with compression utilities test coverage and CI workflow running lint, test, and build.
 
 ### Share Link Length Improvement
 

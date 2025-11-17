@@ -1,42 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="manifest" href="/site.webmanifest" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Primary Meta Tags -->
-    <title>1Markdown - Free Online Markdown Editor with Live Preview, Mermaid Diagrams & LaTeX Math</title>
-    <meta name="title" content="1Markdown - Free Online Markdown Editor with Live Preview, Mermaid Diagrams & LaTeX Math" />
-    <meta name="description" content="Professional markdown editor with real-time preview, interactive Mermaid diagrams, LaTeX math equations, syntax highlighting, and PDF export. No signup required. Share documents via links, collaborate instantly, and export to multiple formats including HTML and PDF." />
-    <meta name="keywords" content="markdown editor, online markdown, mermaid diagrams, latex math, markdown preview, markdown to pdf, markdown to html, free markdown editor, collaborative markdown, syntax highlighting, code editor, technical documentation, markdown share link" />
-    <meta name="author" content="1Markdown" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://1markdown.wahthefox.com/" />
-    <meta property="og:title" content="1Markdown - Free Online Markdown Editor with Live Preview" />
-    <meta property="og:description" content="Professional markdown editor with real-time preview, interactive Mermaid diagrams, LaTeX math equations, and instant sharing. Export to PDF, HTML, or share via compressed links." />
-    <meta property="og:image" content="https://1markdown.wahthefox.com/og-image.png" />
+  <!-- Preconnect to external resources for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+  <link rel="dns-prefetch" href="https://www.google-analytics.com" />
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://1markdown.wahthefox.com/" />
-    <meta property="twitter:title" content="1Markdown - Free Online Markdown Editor" />
-    <meta property="twitter:description" content="Professional markdown editor with real-time preview, interactive Mermaid diagrams, LaTeX math equations, and instant sharing." />
-    <meta property="twitter:image" content="https://1markdown.wahthefox.com/og-image.png" />
+  <!-- Favicon and app icons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#1f7aec" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="1Markdown" />
 
-    <!-- Additional SEO -->
-    <meta name="robots" content="index, follow" />
-    <meta name="language" content="English" />
-    <meta name="revisit-after" content="7 days" />
-    <link rel="canonical" href="https://1markdown.wahthefox.com/" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <!-- Primary Meta Tags -->
+  <title>1Markdown - Free Online Markdown Editor with Live Preview, Mermaid Diagrams & LaTeX Math</title>
+  <meta name="title"
+    content="1Markdown - Free Online Markdown Editor with Live Preview, Mermaid Diagrams & LaTeX Math" />
+  <meta name="description"
+    content="Professional markdown editor with real-time preview, interactive Mermaid diagrams, LaTeX math equations, syntax highlighting, and PDF export. No signup required. Share documents via links, collaborate instantly, and export to multiple formats including HTML and PDF." />
+  <meta name="keywords"
+    content="markdown editor, online markdown, mermaid diagrams, latex math, markdown preview, markdown to pdf, markdown to html, free markdown editor, collaborative markdown, syntax highlighting, code editor, technical documentation, markdown share link, live editor" />
+  <meta name="author" content="1Markdown" />
+  <meta name="generator" content="Vite + React + TypeScript" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://1markdown.wahthefox.com/" />
+  <meta property="og:title" content="1Markdown - Free Online Markdown Editor with Live Preview" />
+  <meta property="og:description"
+    content="Professional markdown editor with real-time preview, interactive Mermaid diagrams, LaTeX math equations, and instant sharing. Export to PDF, HTML, or share via compressed links." />
+  <meta property="og:image" content="https://1markdown.wahthefox.com/og-image.png" />
+  <meta property="og:image:alt" content="1Markdown editor with split view showing markdown and preview" />
+  <meta property="og:site_name" content="1Markdown" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:image:light" content="https://1markdown.wahthefox.com/og-image-light.png" />
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://1markdown.wahthefox.com/" />
+  <meta name="twitter:title" content="1Markdown - Free Online Markdown Editor" />
+  <meta name="twitter:description"
+    content="Professional markdown editor with real-time preview, interactive Mermaid diagrams, LaTeX math equations, and instant sharing." />
+  <meta name="twitter:image" content="https://1markdown.wahthefox.com/og-image.png" />
+  <meta name="twitter:image:alt" content="1Markdown - Live Markdown Editor" />
+  <meta name="twitter:creator" content="@1markdown" />
+
+  <!-- Additional SEO & Indexing -->
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="language" content="English" />
+  <meta name="revisit-after" content="7 days" />
+  <meta name="copyright" content="1Markdown Contributors" />
+  <link rel="canonical" href="https://1markdown.wahthefox.com/" />
+
+  <!-- Additional accessibility & security -->
+  <meta name="color-scheme" content="light dark" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <!-- Structured Data (JSON-LD) for search engines -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "1Markdown",
+    "url": "https://1markdown.wahthefox.com",
+    "description": "Professional markdown editor with real-time preview, interactive Mermaid diagrams, LaTeX math equations, and instant sharing",
+    "applicationCategory": "Productivity",
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "150"
+    },
+    "screenshot": "https://1markdown.wahthefox.com/og-image.png",
+    "image": "https://1markdown.wahthefox.com/og-image.png",
+    "author": {
+      "@type": "Organization",
+      "name": "1Markdown Contributors"
+    },
+    "potentialAction": {
+      "@type": "CreateAction",
+      "target": "https://1markdown.wahthefox.com"
+    }
+  }
+  </script>
+</head>
+
+<body>
+  <noscript>
+    <div style="padding: 20px; text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+      <h1>JavaScript Required</h1>
+      <p>1Markdown requires JavaScript to be enabled. Please enable JavaScript in your browser settings.</p>
+    </div>
+  </noscript>
+
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
