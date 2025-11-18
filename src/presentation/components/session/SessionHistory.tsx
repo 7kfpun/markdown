@@ -23,6 +23,7 @@ import {
   deleteAllSessions,
   renameSession,
   formatLastModified,
+  createSnapshot,
   SessionMetadata,
 } from '../../../utils/sessionHistory';
 import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore';
@@ -96,9 +97,17 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
     if (sessionData) {
       try {
         const parsed = JSON.parse(sessionData);
-        // Load the content into the current session
-        useMarkdownStore.getState().updateContent(parsed.content || '');
+        const restoredContent = parsed.state?.content || parsed.content || '';
+
+        // Create a NEW snapshot with restored content (adds to top of history)
+        const newKey = createSnapshot(restoredContent);
+
+        // Update current content and switch to new key
+        useMarkdownStore.getState().updateContent(restoredContent);
+        useMarkdownStore.getState().switchStorageKey(newKey);
+
         onClose();
+        loadSessions(); // Refresh to show new snapshot at top
       } catch (error) {
         console.error('Failed to load session:', error);
       }

@@ -145,6 +145,47 @@ export const createSessionMetadata = (
   };
 };
 
+// Create a new snapshot (generates new storage key and saves content)
+export const createSnapshot = (content: string, fullState?: any): string => {
+  // Generate unique storage key for snapshot
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 9);
+  const newKey = `markdown-storage-${timestamp}-${random}`;
+
+  // Create metadata for snapshot
+  const metadata = createSessionMetadata(newKey, content);
+  saveSessionMetadata(metadata);
+
+  // Save full state to new storage key (or just content if no state provided)
+  let storeData;
+  if (fullState) {
+    // Copy full state but update storageKey
+    storeData = JSON.stringify({
+      ...fullState,
+      state: {
+        ...fullState.state,
+        content,
+        storageKey: newKey,
+      },
+    });
+  } else {
+    // Just content (minimal state)
+    storeData = JSON.stringify({
+      state: {
+        content,
+        storageKey: newKey,
+      },
+      version: 0,
+    });
+  }
+  localStorage.setItem(newKey, storeData);
+
+  // Update sessionStorage to use new key
+  sessionStorage.setItem('markdown-current-storage-key', newKey);
+
+  return newKey;
+};
+
 // Auto-save manager
 let autoSaveTimer: number | null = null;
 
