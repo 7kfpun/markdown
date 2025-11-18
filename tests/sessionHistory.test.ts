@@ -4,8 +4,11 @@ import {
   saveSessionMetadata,
   updateSessionMetadata,
   deleteSession,
+  deleteAllSessions,
+  renameSession,
   getCurrentSessionMetadata,
   createSessionMetadata,
+  createSnapshot,
   formatLastModified,
   startAutoSave,
   stopAutoSave,
@@ -15,6 +18,7 @@ import {
 describe('sessionHistory utilities', () => {
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -183,6 +187,203 @@ describe('sessionHistory utilities', () => {
 
     it('handles deletion of non-existent session gracefully', () => {
       expect(() => deleteSession('nonexistent')).not.toThrow();
+    });
+  });
+
+  describe('deleteAllSessions', () => {
+    it('deletes all session metadata and content', () => {
+      const metadata1: SessionMetadata = {
+        storageKey: 'key1',
+        title: 'Session 1',
+        lastModified: Date.now(),
+        contentPreview: 'Preview 1',
+        createdAt: Date.now(),
+      };
+      const metadata2: SessionMetadata = {
+        storageKey: 'key2',
+        title: 'Session 2',
+        lastModified: Date.now(),
+        contentPreview: 'Preview 2',
+        createdAt: Date.now(),
+      };
+
+      saveSessionMetadata(metadata1);
+      saveSessionMetadata(metadata2);
+      localStorage.setItem('key1', 'content 1');
+      localStorage.setItem('key2', 'content 2');
+
+      deleteAllSessions();
+
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(0);
+      expect(localStorage.getItem('key1')).toBeNull();
+      expect(localStorage.getItem('key2')).toBeNull();
+    });
+
+    it('handles empty session list gracefully', () => {
+      expect(() => deleteAllSessions()).not.toThrow();
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(0);
+    });
+
+    it('preserves other localStorage items', () => {
+      const metadata: SessionMetadata = {
+        storageKey: 'session-key',
+        title: 'Session',
+        lastModified: Date.now(),
+        contentPreview: 'Preview',
+        createdAt: Date.now(),
+      };
+      saveSessionMetadata(metadata);
+      localStorage.setItem('session-key', 'session content');
+      localStorage.setItem('other-key', 'other content');
+
+      deleteAllSessions();
+
+      expect(localStorage.getItem('session-key')).toBeNull();
+      expect(localStorage.getItem('other-key')).toBe('other content');
+    });
+  });
+
+  describe('renameSession', () => {
+    it('renames session and updates lastModified', () => {
+      const originalTime = 1000;
+      const metadata: SessionMetadata = {
+        storageKey: 'key1',
+        title: 'Original Title',
+        lastModified: originalTime,
+        contentPreview: 'Preview',
+        createdAt: originalTime,
+      };
+      saveSessionMetadata(metadata);
+
+      const beforeRename = Date.now();
+      renameSession('key1', 'New Title');
+      const afterRename = Date.now();
+
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(1);
+      expect(sessions[0].title).toBe('New Title');
+      expect(sessions[0].lastModified).toBeGreaterThanOrEqual(beforeRename);
+      expect(sessions[0].lastModified).toBeLessThanOrEqual(afterRename);
+      expect(sessions[0].createdAt).toBe(originalTime);
+    });
+
+    it('handles renaming non-existent session gracefully', () => {
+      expect(() => renameSession('nonexistent', 'New Title')).not.toThrow();
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(0);
+    });
+
+    it('preserves other session properties', () => {
+      const metadata: SessionMetadata = {
+        storageKey: 'key1',
+        title: 'Original',
+        lastModified: 1000,
+        contentPreview: 'Original preview',
+        createdAt: 500,
+      };
+      saveSessionMetadata(metadata);
+
+      renameSession('key1', 'Renamed');
+
+      const sessions = getAllSessions();
+      expect(sessions[0].storageKey).toBe('key1');
+      expect(sessions[0].contentPreview).toBe('Original preview');
+      expect(sessions[0].createdAt).toBe(500);
+    });
+  });
+
+  describe('createSnapshot', () => {
+    it('creates new snapshot with unique storage key', () => {
+      const content = '# Test Content\nSome text here';
+      const newKey = createSnapshot(content);
+
+      expect(newKey).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
+      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe(newKey);
+    });
+
+    it('saves snapshot content to localStorage', () => {
+      const content = '# Snapshot Test';
+      const newKey = createSnapshot(content);
+
+      const stored = localStorage.getItem(newKey);
+      expect(stored).not.toBeNull();
+
+      const parsed = JSON.parse(stored!);
+      expect(parsed.state.content).toBe(content);
+      expect(parsed.state.storageKey).toBe(newKey);
+    });
+
+    it('creates metadata for snapshot', () => {
+      const content = '# My Snapshot\nWith some content';
+      const newKey = createSnapshot(content);
+
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(1);
+      expect(sessions[0].storageKey).toBe(newKey);
+      expect(sessions[0].title).toBe('My Snapshot');
+    });
+
+    it('generates different keys for sequential snapshots', () => {
+      const key1 = createSnapshot('Content 1');
+      sessionStorage.clear();
+      const key2 = createSnapshot('Content 2');
+      sessionStorage.clear();
+      const key3 = createSnapshot('Content 3');
+
+      expect(key1).not.toBe(key2);
+      expect(key2).not.toBe(key3);
+      expect(key1).not.toBe(key3);
+
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(3);
+    });
+
+    it('preserves full state when provided', () => {
+      const content = '# Test';
+      const fullState = {
+        state: {
+          content: 'old content',
+          storageKey: 'old-key',
+          darkMode: true,
+          showEditor: false,
+        },
+        version: 5,
+      };
+
+      const newKey = createSnapshot(content, fullState);
+
+      const stored = localStorage.getItem(newKey);
+      const parsed = JSON.parse(stored!);
+
+      expect(parsed.state.content).toBe(content);
+      expect(parsed.state.storageKey).toBe(newKey);
+      expect(parsed.state.darkMode).toBe(true);
+      expect(parsed.state.showEditor).toBe(false);
+      expect(parsed.version).toBe(5);
+    });
+
+    it('creates minimal state when fullState not provided', () => {
+      const content = '# Minimal';
+      const newKey = createSnapshot(content);
+
+      const stored = localStorage.getItem(newKey);
+      const parsed = JSON.parse(stored!);
+
+      expect(parsed.state.content).toBe(content);
+      expect(parsed.state.storageKey).toBe(newKey);
+      expect(parsed.version).toBe(0);
+      expect(Object.keys(parsed.state)).toHaveLength(2); // only content and storageKey
+    });
+
+    it('updates sessionStorage current key', () => {
+      sessionStorage.setItem('markdown-current-storage-key', 'old-key');
+
+      const newKey = createSnapshot('# New snapshot');
+
+      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe(newKey);
+      expect(sessionStorage.getItem('markdown-current-storage-key')).not.toBe('old-key');
     });
   });
 
