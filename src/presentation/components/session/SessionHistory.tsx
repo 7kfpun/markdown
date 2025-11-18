@@ -10,12 +10,20 @@ import {
   Button,
   Divider,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
-import { Close, Delete, History as HistoryIcon } from '@mui/icons-material';
+import { Close, Delete, History as HistoryIcon, Restore, Edit, DeleteSweep } from '@mui/icons-material';
 import {
   getAllSessions,
   deleteSession,
+  deleteAllSessions,
+  renameSession,
   formatLastModified,
+  createSnapshot,
   SessionMetadata,
 } from '../../../utils/sessionHistory';
 import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore';
@@ -29,6 +37,9 @@ interface Props {
 
 export default function SessionHistory({ open, onClose, currentStorageKey, onLoadSession }: Props) {
   const [sessions, setSessions] = useState<SessionMetadata[]>([]);
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [renameStorageKey, setRenameStorageKey] = useState('');
+  const [renameValue, setRenameValue] = useState('');
 
   const loadSessions = () => {
     const allSessions = getAllSessions();
@@ -49,7 +60,33 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
     }
   };
 
-  const handleLoadSession = (storageKey: string) => {
+  const handleDeleteAll = () => {
+    if (confirm('Delete ALL sessions? This cannot be undone.')) {
+      deleteAllSessions();
+      loadSessions();
+    }
+  };
+
+  const handleRename = (storageKey: string, currentTitle: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setRenameStorageKey(storageKey);
+    setRenameValue(currentTitle);
+    setRenameDialogOpen(true);
+  };
+
+  const handleRenameSubmit = () => {
+    if (renameValue.trim()) {
+      renameSession(renameStorageKey, renameValue.trim());
+      loadSessions();
+    }
+    setRenameDialogOpen(false);
+  };
+
+  const handleLoadSession = (storageKey: string, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+
     if (storageKey === currentStorageKey) {
       onClose();
       return;
@@ -60,9 +97,17 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
     if (sessionData) {
       try {
         const parsed = JSON.parse(sessionData);
-        // Load the content into the current session
-        useMarkdownStore.getState().updateContent(parsed.content || '');
+        const restoredContent = parsed.state?.content || parsed.content || '';
+
+        // Create a NEW snapshot with restored content (adds to top of history)
+        const newKey = createSnapshot(restoredContent);
+
+        // Update current content and switch to new key
+        useMarkdownStore.getState().updateContent(restoredContent);
+        useMarkdownStore.getState().switchStorageKey(newKey);
+
         onClose();
+        loadSessions(); // Refresh to show new snapshot at top
       } catch (error) {
         console.error('Failed to load session:', error);
       }
@@ -86,6 +131,20 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
           All your editing sessions are saved automatically
         </Typography>
 
+        {sessions.length > 0 && (
+          <Button
+            variant="outlined"
+            color="error"
+            size="small"
+            startIcon={<DeleteSweep />}
+            onClick={handleDeleteAll}
+            sx={{ mb: 2 }}
+            fullWidth
+          >
+            Delete All Sessions
+          </Button>
+        )}
+
         <Divider sx={{ mb: 2 }} />
 
         {sessions.length === 0 ? (
@@ -102,24 +161,41 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
                     borderColor: isCurrent ? 'primary.main' : 'divider',
                     borderRadius: 1,
                     mb: 1,
-                    cursor: 'pointer',
                     bgcolor: isCurrent ? 'action.selected' : 'background.paper',
                     '&:hover': {
                       bgcolor: isCurrent ? 'action.selected' : 'action.hover',
                     },
                   }}
-                  onClick={() => handleLoadSession(session.storageKey)}
                   secondaryAction={
-                    !isCurrent && (
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      {!isCurrent && (
+                        <IconButton
+                          aria-label="restore"
+                          onClick={(e) => handleLoadSession(session.storageKey, e)}
+                          size="small"
+                          color="primary"
+                        >
+                          <Restore fontSize="small" />
+                        </IconButton>
+                      )}
                       <IconButton
-                        edge="end"
-                        aria-label="delete"
-                        onClick={(e) => handleDelete(session.storageKey, e)}
+                        aria-label="rename"
+                        onClick={(e) => handleRename(session.storageKey, session.title, e)}
                         size="small"
                       >
-                        <Delete fontSize="small" />
+                        <Edit fontSize="small" />
                       </IconButton>
-                    )
+                      {!isCurrent && (
+                        <IconButton
+                          aria-label="delete"
+                          onClick={(e) => handleDelete(session.storageKey, e)}
+                          size="small"
+                          color="error"
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      )}
+                    </Box>
                   }
                 >
                   <ListItemText
@@ -161,6 +237,33 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
           </List>
         )}
       </Box>
+
+      {/* Rename Dialog */}
+      <Dialog open={renameDialogOpen} onClose={() => setRenameDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Rename Session</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Session Title"
+            type="text"
+            fullWidth
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleRenameSubmit();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRenameDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleRenameSubmit} variant="contained">
+            Rename
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Drawer>
   );
 }

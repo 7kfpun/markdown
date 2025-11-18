@@ -10,6 +10,7 @@ export const DEFAULT_MARKDOWN = `# Welcome to 1Markdown - Free Online Markdown E
 - **Syntax Highlighting**: Support for 20+ programming languages with beautiful code highlighting
 - **Multiple Themes**: Choose from light, dark, colorblind-friendly, and accessibility-optimized editor themes
 - **Auto-Save**: Your work is automatically saved to local storage—never lose your progress
+- **Session History**: Click the History icon 📜 in the toolbar to view, restore, rename, or delete past versions
 
 ### 📊 Interactive Mermaid Diagrams
 Create stunning diagrams directly in markdown! Click any diagram to zoom, copy as PNG/SVG, or download for presentations:
@@ -26,6 +27,14 @@ Write complex mathematical equations with full LaTeX support:
 - Inline equations: \`$E = mc^2$\`
 - Block equations with proper formatting
 - Perfect for academic papers, research notes, and technical documentation
+
+### 📜 Session History & Auto-Save
+- **Auto-Snapshots**: Automatic snapshots every 10 minutes create a timeline of your work
+- **Git-like History**: Append-only version timeline—never lose previous versions
+- **Quick Restore**: One-click restore to any previous session from history
+- **Rename Sessions**: Organize your work with custom session names
+- **Smart Cleanup**: Keeps latest 100 sessions automatically
+- **Manual Save**: Press Cmd/Ctrl+S to save and update URL immediately
 
 ### 📤 Powerful Export Options
 - **PDF Export**: Print-optimized layout with browser's native print dialog
@@ -173,6 +182,8 @@ Create beautiful tables for data presentation:
 | Real-time Preview | ✅ Yes | ✅ Yes | ❌ No |
 | Mermaid Diagrams | ✅ Yes (13+ types) | ❌ No | ❌ No |
 | LaTeX Math | ✅ Yes | ✅ Yes | ❌ No |
+| **Session History** | **✅ Yes (100 versions)** | **❌ No** | **❌ No** |
+| **Auto-Snapshots** | **✅ Every 10 min** | **❌ No** | **❌ No** |
 | Share Links | ✅ Yes (up to 50KB) | ❌ No | ✅ Yes (limited) |
 | Syntax Highlighting | ✅ Yes (20+ languages) | ✅ Yes | ❌ No |
 | PDF Export | ✅ Yes (native print) | ✅ Yes | ❌ No |
@@ -195,6 +206,7 @@ Create beautiful tables for data presentation:
 | Italic | Ctrl + I | Cmd + I |
 | Code | Ctrl + E | Cmd + E |
 | Link | Ctrl + K | Cmd + K |
+| **Save** | **Ctrl + S** | **Cmd + S** |
 
 ### Blockquotes
 
@@ -510,6 +522,7 @@ quadrantChart
 
 Speed up your workflow with keyboard shortcuts:
 
+- **Save (Manual)**: Ctrl/Cmd + S - Save immediately and update URL
 - **Bold**: Ctrl/Cmd + B
 - **Italic**: Ctrl/Cmd + I
 - **Code**: Ctrl/Cmd + E

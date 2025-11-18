@@ -117,10 +117,10 @@ describe('compression utilities', () => {
   });
 
   describe('getStorageKey', () => {
-    it('returns default storage key when no hash or path', () => {
+    it('generates unique storage key when no hash or path', () => {
       const key = getStorageKey();
-      expect(key).toBe('markdown-storage');
-      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe('markdown-storage');
+      expect(key).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
+      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe(key);
     });
 
     it('generates unique key from hash', () => {
@@ -159,6 +159,26 @@ describe('compression utilities', () => {
       const key2 = getStorageKey();
 
       expect(key1).not.toBe(key2);
+    });
+
+    it('generates different unique keys for new sessions', () => {
+      const key1 = getStorageKey();
+
+      sessionStorage.clear();
+      const key2 = getStorageKey();
+
+      sessionStorage.clear();
+      const key3 = getStorageKey();
+
+      // All keys should be different (uniqueness)
+      expect(key1).not.toBe(key2);
+      expect(key2).not.toBe(key3);
+      expect(key1).not.toBe(key3);
+
+      // All should match the pattern
+      expect(key1).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
+      expect(key2).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
+      expect(key3).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
     });
   });
 

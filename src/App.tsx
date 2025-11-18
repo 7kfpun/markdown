@@ -10,11 +10,12 @@ import {
   startAutoSave,
   stopAutoSave,
   getCurrentSessionMetadata,
+  createSnapshot,
 } from './utils/sessionHistory';
 import { DEBOUNCE_TIMES } from './utils/constants';
 
 export default function App() {
-  const { darkMode, updateContent, content, storageKey } = useMarkdownStore();
+  const { darkMode, updateContent, content, storageKey, switchStorageKey } = useMarkdownStore();
   const saveMetadataTimeoutRef = useRef<number>();
 
   // Load URL content on mount
@@ -39,22 +40,24 @@ export default function App() {
     }
   }, []); // Only run on mount
 
-  // Auto-save: update session metadata every 10 minutes
+  // Auto-save: create snapshot every 10 minutes
   useEffect(() => {
-    const saveMetadata = () => {
-      if (content && storageKey) {
-        const existing = getCurrentSessionMetadata(storageKey);
-        const metadata = createSessionMetadata(storageKey, content, existing || undefined);
-        saveSessionMetadata(metadata);
+    const createAutoSnapshot = () => {
+      if (content) {
+        // Create a new snapshot (new storage key + metadata)
+        const newKey = createSnapshot(content);
+        console.log('Auto-snapshot created:', newKey);
+        // Update store to use new storage key
+        switchStorageKey(newKey);
       }
     };
 
-    startAutoSave(saveMetadata);
+    startAutoSave(createAutoSnapshot);
 
     return () => {
       stopAutoSave();
     };
-  }, [content, storageKey]);
+  }, [content, switchStorageKey]);
 
   // Update session metadata when content changes (debounced)
   useEffect(() => {

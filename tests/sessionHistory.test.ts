@@ -4,8 +4,11 @@ import {
   saveSessionMetadata,
   updateSessionMetadata,
   deleteSession,
+  deleteAllSessions,
+  renameSession,
   getCurrentSessionMetadata,
   createSessionMetadata,
+  createSnapshot,
   formatLastModified,
   startAutoSave,
   stopAutoSave,
@@ -15,6 +18,7 @@ import {
 describe('sessionHistory utilities', () => {
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -29,36 +33,85 @@ describe('sessionHistory utilities', () => {
       expect(sessions).toEqual([]);
     });
 
+    it('clears and returns empty array for incompatible data types (array)', () => {
+      // Store old array format
+      const oldArrayData = [
+        { storageKey: 'key1', title: 'Doc 1', lastModified: 1000, contentPreview: '', createdAt: 1000 },
+        { storageKey: 'key2', title: 'Doc 2', lastModified: 2000, contentPreview: '', createdAt: 2000 },
+      ];
+      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(oldArrayData));
+
+      const sessions = getAllSessions();
+
+      // Should return empty and clear the old data
+      expect(sessions).toEqual([]);
+      const stored = localStorage.getItem('markdown-sessions-metadata');
+      expect(JSON.parse(stored!)).toEqual({});
+    });
+
+    it('clears and returns empty array for corrupted data', () => {
+      // Store corrupted data
+      localStorage.setItem('markdown-sessions-metadata', 'invalid json {{{');
+
+      const sessions = getAllSessions();
+
+      // Should return empty and clear the corrupted data
+      expect(sessions).toEqual([]);
+      const stored = localStorage.getItem('markdown-sessions-metadata');
+      expect(JSON.parse(stored!)).toEqual({});
+    });
+
+    it('clears and returns empty array for non-object types', () => {
+      // Store primitive types
+      localStorage.setItem('markdown-sessions-metadata', JSON.stringify('string'));
+
+      const sessions1 = getAllSessions();
+      expect(sessions1).toEqual([]);
+
+      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(123));
+      const sessions2 = getAllSessions();
+      expect(sessions2).toEqual([]);
+
+      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(null));
+      const sessions3 = getAllSessions();
+      expect(sessions3).toEqual([]);
+    });
+
     it('returns all sessions from localStorage', () => {
-      const mockSessions: SessionMetadata[] = [
-        {
+      const mockSessionsObj: Record<string, SessionMetadata> = {
+        key1: {
           storageKey: 'key1',
           title: 'Document 1',
-          lastModified: Date.now(),
+          lastModified: 2000,
           contentPreview: 'Preview 1',
-          createdAt: Date.now(),
+          createdAt: 2000,
         },
-        {
+        key2: {
           storageKey: 'key2',
           title: 'Document 2',
-          lastModified: Date.now(),
+          lastModified: 1000,
           contentPreview: 'Preview 2',
-          createdAt: Date.now(),
+          createdAt: 1000,
         },
-      ];
-      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(mockSessions));
+      };
+      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(mockSessionsObj));
 
       const sessions = getAllSessions();
       expect(sessions).toHaveLength(2);
+      // Sorted by lastModified descending, so key1 (2000) should be first
       expect(sessions[0].title).toBe('Document 1');
       expect(sessions[1].title).toBe('Document 2');
     });
 
-    it('returns empty array when localStorage contains invalid JSON', () => {
+    it('clears corrupted JSON and returns empty array', () => {
       localStorage.setItem('markdown-sessions-metadata', 'invalid json');
       const sessions = getAllSessions();
       expect(sessions).toEqual([]);
       expect(console.error).toHaveBeenCalled();
+
+      // Should have cleared the corrupted data
+      const stored = localStorage.getItem('markdown-sessions-metadata');
+      expect(JSON.parse(stored!)).toEqual({});
     });
   });
 
@@ -135,6 +188,35 @@ describe('sessionHistory utilities', () => {
       expect(sessions[1].storageKey).toBe('middle');
       expect(sessions[2].storageKey).toBe('old');
     });
+
+    it('limits sessions to 100 items and removes oldest', () => {
+      // Create 102 sessions
+      for (let i = 0; i < 102; i++) {
+        const metadata: SessionMetadata = {
+          storageKey: `key-${i}`,
+          title: `Session ${i}`,
+          lastModified: 1000 + i, // Increasing timestamps
+          contentPreview: `Preview ${i}`,
+          createdAt: 1000 + i,
+        };
+        localStorage.setItem(`key-${i}`, `content-${i}`);
+        saveSessionMetadata(metadata);
+      }
+
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(100);
+
+      // Should keep the 100 most recent (key-2 through key-101)
+      expect(sessions.some((s) => s.storageKey === 'key-0')).toBe(false);
+      expect(sessions.some((s) => s.storageKey === 'key-1')).toBe(false);
+      expect(sessions.some((s) => s.storageKey === 'key-2')).toBe(true);
+      expect(sessions.some((s) => s.storageKey === 'key-101')).toBe(true);
+
+      // Oldest sessions' content should also be removed from localStorage
+      expect(localStorage.getItem('key-0')).toBeNull();
+      expect(localStorage.getItem('key-1')).toBeNull();
+      expect(localStorage.getItem('key-2')).not.toBeNull();
+    });
   });
 
   describe('updateSessionMetadata', () => {
@@ -183,6 +265,203 @@ describe('sessionHistory utilities', () => {
 
     it('handles deletion of non-existent session gracefully', () => {
       expect(() => deleteSession('nonexistent')).not.toThrow();
+    });
+  });
+
+  describe('deleteAllSessions', () => {
+    it('deletes all session metadata and content', () => {
+      const metadata1: SessionMetadata = {
+        storageKey: 'key1',
+        title: 'Session 1',
+        lastModified: Date.now(),
+        contentPreview: 'Preview 1',
+        createdAt: Date.now(),
+      };
+      const metadata2: SessionMetadata = {
+        storageKey: 'key2',
+        title: 'Session 2',
+        lastModified: Date.now(),
+        contentPreview: 'Preview 2',
+        createdAt: Date.now(),
+      };
+
+      saveSessionMetadata(metadata1);
+      saveSessionMetadata(metadata2);
+      localStorage.setItem('key1', 'content 1');
+      localStorage.setItem('key2', 'content 2');
+
+      deleteAllSessions();
+
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(0);
+      expect(localStorage.getItem('key1')).toBeNull();
+      expect(localStorage.getItem('key2')).toBeNull();
+    });
+
+    it('handles empty session list gracefully', () => {
+      expect(() => deleteAllSessions()).not.toThrow();
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(0);
+    });
+
+    it('preserves other localStorage items', () => {
+      const metadata: SessionMetadata = {
+        storageKey: 'session-key',
+        title: 'Session',
+        lastModified: Date.now(),
+        contentPreview: 'Preview',
+        createdAt: Date.now(),
+      };
+      saveSessionMetadata(metadata);
+      localStorage.setItem('session-key', 'session content');
+      localStorage.setItem('other-key', 'other content');
+
+      deleteAllSessions();
+
+      expect(localStorage.getItem('session-key')).toBeNull();
+      expect(localStorage.getItem('other-key')).toBe('other content');
+    });
+  });
+
+  describe('renameSession', () => {
+    it('renames session and updates lastModified', () => {
+      const originalTime = 1000;
+      const metadata: SessionMetadata = {
+        storageKey: 'key1',
+        title: 'Original Title',
+        lastModified: originalTime,
+        contentPreview: 'Preview',
+        createdAt: originalTime,
+      };
+      saveSessionMetadata(metadata);
+
+      const beforeRename = Date.now();
+      renameSession('key1', 'New Title');
+      const afterRename = Date.now();
+
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(1);
+      expect(sessions[0].title).toBe('New Title');
+      expect(sessions[0].lastModified).toBeGreaterThanOrEqual(beforeRename);
+      expect(sessions[0].lastModified).toBeLessThanOrEqual(afterRename);
+      expect(sessions[0].createdAt).toBe(originalTime);
+    });
+
+    it('handles renaming non-existent session gracefully', () => {
+      expect(() => renameSession('nonexistent', 'New Title')).not.toThrow();
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(0);
+    });
+
+    it('preserves other session properties', () => {
+      const metadata: SessionMetadata = {
+        storageKey: 'key1',
+        title: 'Original',
+        lastModified: 1000,
+        contentPreview: 'Original preview',
+        createdAt: 500,
+      };
+      saveSessionMetadata(metadata);
+
+      renameSession('key1', 'Renamed');
+
+      const sessions = getAllSessions();
+      expect(sessions[0].storageKey).toBe('key1');
+      expect(sessions[0].contentPreview).toBe('Original preview');
+      expect(sessions[0].createdAt).toBe(500);
+    });
+  });
+
+  describe('createSnapshot', () => {
+    it('creates new snapshot with unique storage key', () => {
+      const content = '# Test Content\nSome text here';
+      const newKey = createSnapshot(content);
+
+      expect(newKey).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
+      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe(newKey);
+    });
+
+    it('saves snapshot content to localStorage', () => {
+      const content = '# Snapshot Test';
+      const newKey = createSnapshot(content);
+
+      const stored = localStorage.getItem(newKey);
+      expect(stored).not.toBeNull();
+
+      const parsed = JSON.parse(stored!);
+      expect(parsed.state.content).toBe(content);
+      expect(parsed.state.storageKey).toBe(newKey);
+    });
+
+    it('creates metadata for snapshot', () => {
+      const content = '# My Snapshot\nWith some content';
+      const newKey = createSnapshot(content);
+
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(1);
+      expect(sessions[0].storageKey).toBe(newKey);
+      expect(sessions[0].title).toBe('My Snapshot');
+    });
+
+    it('generates different keys for sequential snapshots', () => {
+      const key1 = createSnapshot('Content 1');
+      sessionStorage.clear();
+      const key2 = createSnapshot('Content 2');
+      sessionStorage.clear();
+      const key3 = createSnapshot('Content 3');
+
+      expect(key1).not.toBe(key2);
+      expect(key2).not.toBe(key3);
+      expect(key1).not.toBe(key3);
+
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(3);
+    });
+
+    it('preserves full state when provided', () => {
+      const content = '# Test';
+      const fullState = {
+        state: {
+          content: 'old content',
+          storageKey: 'old-key',
+          darkMode: true,
+          showEditor: false,
+        },
+        version: 5,
+      };
+
+      const newKey = createSnapshot(content, fullState);
+
+      const stored = localStorage.getItem(newKey);
+      const parsed = JSON.parse(stored!);
+
+      expect(parsed.state.content).toBe(content);
+      expect(parsed.state.storageKey).toBe(newKey);
+      expect(parsed.state.darkMode).toBe(true);
+      expect(parsed.state.showEditor).toBe(false);
+      expect(parsed.version).toBe(5);
+    });
+
+    it('creates minimal state when fullState not provided', () => {
+      const content = '# Minimal';
+      const newKey = createSnapshot(content);
+
+      const stored = localStorage.getItem(newKey);
+      const parsed = JSON.parse(stored!);
+
+      expect(parsed.state.content).toBe(content);
+      expect(parsed.state.storageKey).toBe(newKey);
+      expect(parsed.version).toBe(0);
+      expect(Object.keys(parsed.state)).toHaveLength(2); // only content and storageKey
+    });
+
+    it('updates sessionStorage current key', () => {
+      sessionStorage.setItem('markdown-current-storage-key', 'old-key');
+
+      const newKey = createSnapshot('# New snapshot');
+
+      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe(newKey);
+      expect(sessionStorage.getItem('markdown-current-storage-key')).not.toBe('old-key');
     });
   });
 
