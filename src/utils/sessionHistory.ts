@@ -73,6 +73,39 @@ export const deleteSession = (storageKey: string): void => {
   }
 };
 
+// Delete all sessions (metadata and content)
+export const deleteAllSessions = (): void => {
+  try {
+    const sessions = getAllSessions();
+
+    // Remove all session content from localStorage
+    sessions.forEach((session) => {
+      localStorage.removeItem(session.storageKey);
+    });
+
+    // Clear metadata
+    localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify([]));
+  } catch (error) {
+    console.error('Failed to delete all sessions:', error);
+  }
+};
+
+// Rename session
+export const renameSession = (storageKey: string, newTitle: string): void => {
+  try {
+    const sessions = getAllSessions();
+    const session = sessions.find((s) => s.storageKey === storageKey);
+
+    if (session) {
+      session.title = newTitle;
+      session.lastModified = Date.now();
+      localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify(sessions));
+    }
+  } catch (error) {
+    console.error('Failed to rename session:', error);
+  }
+};
+
 // Get current session metadata
 export const getCurrentSessionMetadata = (storageKey: string): SessionMetadata | null => {
   const sessions = getAllSessions();
