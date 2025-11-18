@@ -17,6 +17,7 @@ import { DEBOUNCE_TIMES } from './utils/constants';
 export default function App() {
   const { darkMode, updateContent, content, storageKey, switchStorageKey } = useMarkdownStore();
   const saveMetadataTimeoutRef = useRef<number>();
+  const lastAutoSavedContentRef = useRef<string>('');
 
   // Load URL content on mount
   useEffect(() => {
@@ -40,15 +41,19 @@ export default function App() {
     }
   }, []); // Only run on mount
 
-  // Auto-save: create snapshot every 10 minutes
+  // Auto-save: create snapshot every 10 minutes (only if content changed)
   useEffect(() => {
     const createAutoSnapshot = () => {
-      if (content) {
+      if (content && content !== lastAutoSavedContentRef.current) {
         // Create a new snapshot (new storage key + metadata)
         const newKey = createSnapshot(content);
         console.log('Auto-snapshot created:', newKey);
         // Update store to use new storage key
         switchStorageKey(newKey);
+        // Track the saved content to avoid duplicate snapshots
+        lastAutoSavedContentRef.current = content;
+      } else if (content === lastAutoSavedContentRef.current) {
+        console.log('Auto-save skipped: content unchanged');
       }
     };
 
