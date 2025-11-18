@@ -19,7 +19,7 @@ export default function App() {
   const saveMetadataTimeoutRef = useRef<number>();
   const lastAutoSavedContentRef = useRef<string>('');
 
-  // Load URL content on mount
+  // Load URL content on mount and clear hash after loading
   useEffect(() => {
     const sharedContent = extractContentFromUrl();
     if (sharedContent) {
@@ -28,8 +28,15 @@ export default function App() {
       if (!content || content === '') {
         updateContent(sharedContent);
       }
+      // Clear paxo URL hash after loading shared content
+      // This transitions from shared URL to local storage
+      if (window.location.hash.startsWith('#paxo:')) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
     }
-  }, [updateContent]);
+    // Initialize auto-save tracker with current content
+    lastAutoSavedContentRef.current = content;
+  }, [updateContent]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   // Initialize session metadata on mount
@@ -52,6 +59,10 @@ export default function App() {
         switchStorageKey(newKey);
         // Track the saved content to avoid duplicate snapshots
         lastAutoSavedContentRef.current = content;
+        // Clear paxo URL hash if it exists (we're now using local storage, not shared URL)
+        if (window.location.hash.startsWith('#paxo:')) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
       } else if (content === lastAutoSavedContentRef.current) {
         console.log('Auto-save skipped: content unchanged');
       }

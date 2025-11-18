@@ -243,11 +243,17 @@ export default function EditorPage() {
   const editorRef = useRef<EditorHandle>(null);
   const previewRef = useRef<PreviewHandle>(null);
   const syncingRef = useRef(false);
+  const lastSavedContentRef = useRef<string>('');
   const dragState = useRef<{ active: boolean; startX: number; startSizes: { editor: number; preview: number } }>({
     active: false,
     startX: 0,
     startSizes: { editor: 50, preview: 50 },
   });
+
+  // Initialize lastSavedContentRef on mount
+  useEffect(() => {
+    lastSavedContentRef.current = content;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Track when we transition from offline to online
   useEffect(() => {
@@ -397,6 +403,14 @@ export default function EditorPage() {
 
   const handleManualSave = useCallback(() => {
     try {
+      // Check if content has changed since last save
+      if (content === lastSavedContentRef.current) {
+        // Content unchanged - show toast but don't create new snapshot
+        setToast('No changes to save');
+        setTimeout(() => setToast(''), 2000);
+        return;
+      }
+
       // Create a new snapshot with current state (version control)
       const fullState = {
         state: {
@@ -417,6 +431,15 @@ export default function EditorPage() {
 
       // Update sessionStorage to lock in the new key
       sessionStorage.setItem('markdown-current-storage-key', newKey);
+
+      // Track saved content to avoid duplicate saves
+      lastSavedContentRef.current = content;
+
+      // Clear paxo URL hash if it exists (we're now using local storage, not shared URL)
+      // This prevents loading old content if the page is refreshed
+      if (window.location.hash.startsWith('#paxo:')) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
 
       // Show success toast
       setToast('Saved!');

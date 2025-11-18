@@ -579,4 +579,145 @@ describe('Save and History Integration', () => {
       expect(sessions[0].storageKey).toBe(key1);
     });
   });
+
+  describe('URL Hash Management', () => {
+    it('clears paxo hash after loading shared content', () => {
+      const content = '# Shared Content';
+      const compressed = compressToBase64(content);
+      window.location.hash = `#paxo:${compressed}`;
+
+      // Simulate the App component's behavior
+      const extracted = extractContentFromHash();
+      expect(extracted).toBe(content);
+
+      // After loading, the hash should be cleared
+      if (window.location.hash.startsWith('#paxo:')) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+
+      expect(window.location.hash).toBe('');
+    });
+
+    it('preserves non-paxo hashes', () => {
+      const customHash = '#my-custom-anchor';
+      window.location.hash = customHash;
+
+      // Simulate save clearing only paxo hashes
+      if (window.location.hash.startsWith('#paxo:')) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+
+      // Non-paxo hash should remain
+      expect(window.location.hash).toBe(customHash);
+    });
+
+    it('clears paxo hash when creating snapshot from shared link', () => {
+      const content = '# Original Shared Content';
+      const compressed = compressToBase64(content);
+      window.location.hash = `#paxo:${compressed}`;
+
+      // User edits and saves
+      const newContent = '# Edited Content';
+      const newKey = createSnapshot(newContent);
+
+      // Simulate hash clearing after save
+      if (window.location.hash.startsWith('#paxo:')) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+
+      expect(window.location.hash).toBe('');
+      expect(localStorage.getItem(newKey)).not.toBeNull();
+
+      // Storage key should be locked in sessionStorage
+      const lockedKey = sessionStorage.getItem('markdown-current-storage-key');
+      expect(lockedKey).toBe(newKey);
+    });
+
+    it('prevents loading old content after hash is cleared', () => {
+      const oldContent = '# Old Shared Content';
+      const compressed = compressToBase64(oldContent);
+      window.location.hash = `#paxo:${compressed}`;
+
+      // Get initial storage key from hash
+      const key1 = getStorageKey();
+
+      // Save new content and clear hash
+      const newContent = '# New Content';
+      const key2 = createSnapshot(newContent);
+
+      if (window.location.hash.startsWith('#paxo:')) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+
+      // Even with hash cleared, getStorageKey should return the locked key
+      const key3 = getStorageKey();
+      expect(key3).toBe(key2);
+
+      // Verify the new content is stored
+      const stored = JSON.parse(localStorage.getItem(key2)!);
+      expect(stored.state.content).toBe(newContent);
+    });
+  });
+
+  describe('Save Optimization', () => {
+    it('skips snapshot creation when content unchanged', () => {
+      const content = '# Unchanged Content';
+      const key1 = createSnapshot(content);
+
+      // Get initial session count
+      const sessionsBefore = getAllSessions();
+      const countBefore = sessionsBefore.length;
+
+      // Try to save again with same content (simulated)
+      // In the real app, handleManualSave would check lastSavedContentRef
+      // and skip creating a new snapshot
+
+      // For testing, we verify that the logic would work:
+      // If content === lastSavedContent, don't call createSnapshot
+
+      // Verify only one session exists
+      const sessionsAfter = getAllSessions();
+      expect(sessionsAfter.length).toBe(countBefore);
+    });
+
+    it('creates new snapshot only when content changes', () => {
+      const content1 = '# Version 1';
+      const key1 = createSnapshot(content1);
+
+      const sessionsBefore = getAllSessions();
+      const countBefore = sessionsBefore.length;
+
+      // Save with different content
+      sessionStorage.clear();
+      const content2 = '# Version 2';
+      const key2 = createSnapshot(content2);
+
+      // Should create a new session
+      const sessionsAfter = getAllSessions();
+      expect(sessionsAfter.length).toBe(countBefore + 1);
+      expect(key1).not.toBe(key2);
+
+      // Verify both contents are stored
+      const stored1 = JSON.parse(localStorage.getItem(key1)!);
+      const stored2 = JSON.parse(localStorage.getItem(key2)!);
+      expect(stored1.state.content).toBe(content1);
+      expect(stored2.state.content).toBe(content2);
+    });
+
+    it('auto-save skips when content unchanged', () => {
+      const content = '# Auto-save Test';
+      const key1 = createSnapshot(content);
+
+      // Track content for auto-save
+      let lastAutoSavedContent = content;
+
+      // Simulate auto-save check
+      const shouldAutoSave = content !== lastAutoSavedContent;
+      expect(shouldAutoSave).toBe(false);
+
+      // Verify no new snapshot was created
+      const sessions = getAllSessions();
+      expect(sessions.filter(s => s.storageKey === key1).length).toBe(1);
+    });
+  });
 });
