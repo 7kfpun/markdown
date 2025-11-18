@@ -13,7 +13,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { generateShareLink } from '../../utils/compression';
 import { downloadMarkdown } from '../../utils/export';
 import { useOnlineStatus } from '../../utils/useOnlineStatus';
-import { createSessionMetadata, saveSessionMetadata, getCurrentSessionMetadata } from '../../utils/sessionHistory';
+import { createSessionMetadata, saveSessionMetadata, getCurrentSessionMetadata, createSnapshot } from '../../utils/sessionHistory';
 
 const PageContainer = styled(Box)`
   display: flex;
@@ -158,7 +158,7 @@ const Resizer = styled.div`
 `;
 
 const HeaderRightDesktop = styled(HeaderRight)`
-  @media (max-width: 1024px) {
+  @media (max-width: 1100px) {
     display: none;
   }
 `;
@@ -174,7 +174,7 @@ const MenuButton = styled.button<{ $dark: boolean }>`
   border-radius: 9px;
   transition: all 0.15s ease;
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1100px) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -226,6 +226,11 @@ export default function EditorPage() {
     mermaidModal,
     closeMermaidModal,
     storageKey,
+    switchStorageKey,
+    editorTheme,
+    editorFontSize,
+    editorWrap,
+    previewTheme,
   } = useMarkdownStore();
 
   const [toast, setToast] = useState('');
@@ -392,29 +397,36 @@ export default function EditorPage() {
 
   const handleManualSave = useCallback(() => {
     try {
-      // Update URL immediately (no debounce)
-      const shareLink = generateShareLink(content);
-      const hash = shareLink.split('#')[1];
-      window.history.replaceState(null, '', `#${hash}`);
+      // Create a new snapshot with current state (version control)
+      const fullState = {
+        state: {
+          content,
+          editorTheme,
+          editorFontSize,
+          editorWrap,
+          previewTheme,
+          darkMode,
+          storageKey, // Will be replaced by createSnapshot
+        },
+      };
 
-      // Force localStorage save by triggering zustand persist
-      // (This happens automatically through the store's persist middleware)
+      const newKey = createSnapshot(content, fullState);
 
-      // Update session metadata
-      const existingMetadata = getCurrentSessionMetadata(storageKey);
-      const metadata = createSessionMetadata(storageKey, content, existingMetadata || undefined);
-      saveSessionMetadata(metadata);
+      // Switch to the new storage key
+      switchStorageKey(newKey);
+
+      // Update sessionStorage to lock in the new key
+      sessionStorage.setItem('markdown-current-storage-key', newKey);
 
       // Show success toast
       setToast('Saved!');
       setTimeout(() => setToast(''), 2000);
     } catch (error) {
-      // Content too large for URL
       const reason = error instanceof Error ? error.message : 'Failed to save';
       setToast(reason);
       setTimeout(() => setToast(''), 2000);
     }
-  }, [content, storageKey]);
+  }, [content, storageKey, switchStorageKey, editorTheme, editorFontSize, editorWrap, previewTheme, darkMode]);
 
   // Add Cmd/Ctrl+S keyboard shortcut
   useEffect(() => {
