@@ -22,10 +22,40 @@ const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange
   const [html, setHtml] = useState('');
   const [mermaidBlocks, setMermaidBlocks] = useState<{ code: string; id: string; cacheKey: string }[]>([]);
   const previewRef = useRef<HTMLDivElement>(null);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
   const onScrollHandlerRef = useRef<((ratio: number) => void) | undefined>(onScrollRatioChange);
   const isSyncingRef = useRef(false);
   const latestSvgCache = useRef(new Map<string, string>());
   const renderTimeoutRef = useRef<number>();
+  const lastHtmlRef = useRef<string>('');
+
+  // Update HTML manually to preserve mermaid SVGs
+  useEffect(() => {
+    const container = previewContainerRef.current;
+    if (!container || html === lastHtmlRef.current) return;
+
+    // Save current mermaid SVGs before updating HTML
+    const savedMermaidContent = new Map<string, string>();
+    mermaidBlocks.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el && el.querySelector('svg')) {
+        savedMermaidContent.set(id, el.innerHTML);
+      }
+    });
+
+    // Update HTML
+    container.innerHTML = html;
+    lastHtmlRef.current = html;
+
+    // Restore saved mermaid SVGs
+    savedMermaidContent.forEach((content, id) => {
+      const el = document.getElementById(id);
+      if (el && el.getAttribute('data-loading') === 'true') {
+        el.innerHTML = content;
+        el.removeAttribute('data-loading');
+      }
+    });
+  }, [html, mermaidBlocks]);
 
   useEffect(() => {
     onScrollHandlerRef.current = onScrollRatioChange;
@@ -40,7 +70,16 @@ const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange
     });
     // Clear SVG cache when theme changes to force re-render
     latestSvgCache.current.clear();
-  }, [darkMode]);
+
+    // Force re-render all mermaid diagrams with new theme
+    mermaidBlocks.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el && el.querySelector('svg')) {
+        // Mark as loading to trigger re-render
+        el.setAttribute('data-loading', 'true');
+      }
+    });
+  }, [darkMode, mermaidBlocks]);
 
   // Process markdown to HTML
   useEffect(() => {
@@ -102,19 +141,21 @@ const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange
       const el = document.getElementById(id);
       if (!el) return;
 
-      // Check if already rendered and not loading placeholder
-      const hasLoading = el.getAttribute('data-loading') === 'true';
-      if (el.querySelector('svg') && !hasLoading) return;
-
+      // Use cache first to restore diagrams after DOM recreation
       const cached = latestSvgCache.current.get(cacheKey);
       if (cached) {
+        // Always restore from cache if available, even if element has SVG
+        // This fixes diagrams disappearing when modal opens/closes
         el.innerHTML = cached;
         el.style.cursor = 'zoom-in';
-        el.onclick = () => openMermaidModal(el.innerHTML || cached, code);
-        // Remove loading indicator only after successful render
+        el.onclick = () => openMermaidModal(cached, code);
         el.removeAttribute('data-loading');
         return;
       }
+
+      // Check if already rendered and not loading placeholder
+      const hasLoading = el.getAttribute('data-loading') === 'true';
+      if (el.querySelector('svg') && !hasLoading) return;
 
       try {
         const renderId = `${renderIdSeed}-${id}-${Date.now()}`;
@@ -123,22 +164,11 @@ const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange
         latestSvgCache.current.set(cacheKey, svgMarkup);
         el.innerHTML = svgMarkup;
         el.style.cursor = 'zoom-in';
-        el.onclick = () => openMermaidModal(el.innerHTML || svgMarkup, code);
-        // Remove loading indicator only after successful render
+        el.onclick = () => openMermaidModal(svgMarkup, code);
         el.removeAttribute('data-loading');
       } catch (error) {
         console.error('Mermaid render error:', error);
-        const cachedSvg = latestSvgCache.current.get(cacheKey);
-        if (cachedSvg) {
-          el.innerHTML = cachedSvg;
-          el.onclick = () => openMermaidModal(el.innerHTML || cachedSvg, code);
-          // Remove loading indicator after using cached version
-          el.removeAttribute('data-loading');
-        } else {
-          el.innerHTML = `<div style="color: red; padding: 1rem; border: 1px solid red; border-radius: 4px;">Failed to render Mermaid diagram</div>`;
-          // Keep loading indicator so it can be retried
-          // el.removeAttribute('data-loading');
-        }
+        el.innerHTML = `<div style="color: red; padding: 1rem; border: 1px solid red; border-radius: 4px;">Failed to render Mermaid diagram</div>`;
       }
     },
     [openMermaidModal]
@@ -179,10 +209,10 @@ const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange
         }
       );
 
-      // Observe only containers that need rendering (have loading attribute)
+      // Observe containers that need rendering (have loading attribute or missing SVG)
       mermaidBlocks.forEach(({ id }) => {
         const el = document.getElementById(id);
-        if (el && el.getAttribute('data-loading') === 'true') {
+        if (el && (el.getAttribute('data-loading') === 'true' || !el.querySelector('svg'))) {
           observer.observe(el);
         }
       });
@@ -354,7 +384,7 @@ const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange
         },
       }}
     >
-      <Box id="preview-container" dangerouslySetInnerHTML={{ __html: html }} />
+      <Box id="preview-container" ref={previewContainerRef} />
     </Paper>
   );
 });

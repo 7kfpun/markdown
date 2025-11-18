@@ -103,6 +103,8 @@ export default function MermaidModal({ svg, code, onClose }: Props) {
         onClose={onClose}
         maxWidth={false}
         fullWidth
+        disablePortal={false}
+        keepMounted={false}
         slotProps={{ paper: { sx: { height: '80vh', maxHeight: '100vh' } } }}
       >
         <Box sx={{ position: 'relative' }}>
