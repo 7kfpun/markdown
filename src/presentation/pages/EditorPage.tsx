@@ -1,5 +1,5 @@
 import { Box, Tooltip, Drawer, Typography } from '@mui/material';
-import { Brightness4, Brightness7, GetApp, PictureAsPdf, Share, Upload, RestartAlt, Description, BugReport, Policy, Menu, Close } from '@mui/icons-material';
+import { Brightness4, Brightness7, GetApp, PictureAsPdf, Share, Upload, RestartAlt, Description, BugReport, Policy, Menu, Close, History } from '@mui/icons-material';
 import styled from 'styled-components';
 import { useMarkdownStore } from '../../infrastructure/store/useMarkdownStore';
 import { DEFAULT_MARKDOWN } from '../../utils/constants';
@@ -7,6 +7,7 @@ import { openPrintPage, downloadRenderedHTML } from '../../utils/export';
 import Editor, { EditorHandle } from '../components/editor/Editor';
 import Preview, { PreviewHandle } from '../components/preview/Preview';
 import MermaidModal from '../components/mermaid/MermaidModal';
+import SessionHistory from '../components/session/SessionHistory';
 import { OfflineIndicator } from '../components/offline/OfflineIndicator';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { generateShareLink } from '../../utils/compression';
@@ -73,6 +74,25 @@ const Logo = styled.div`
   font-size: 18px;
   white-space: nowrap;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const LogoImage = styled.img`
+  width: 28px;
+  height: 28px;
+  display: none;
+
+  @media (max-width: 640px) {
+    display: block;
+  }
+`;
+
+const LogoText = styled.span`
+  @media (max-width: 640px) {
+    display: none;
+  }
 `;
 
 const Segmented = styled.div<{ $dark: boolean }>`
@@ -204,10 +224,12 @@ export default function EditorPage() {
     resetContent,
     mermaidModal,
     closeMermaidModal,
+    storageKey,
   } = useMarkdownStore();
 
   const [toast, setToast] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [splitSizes, setSplitSizes] = useState({ editor: 50, preview: 50 });
   const [wasOffline, setWasOffline] = useState(false);
   const isOnline = useOnlineStatus();
@@ -360,7 +382,10 @@ export default function EditorPage() {
       <OfflineIndicator isOnline={isOnline} wasOffline={wasOffline} />
       <Header $dark={darkMode}>
         <HeaderSection>
-          <Logo>1Markdown</Logo>
+          <Logo>
+            <LogoImage src="/apple-touch-icon.png" alt="1Markdown" />
+            <LogoText>1Markdown</LogoText>
+          </Logo>
         </HeaderSection>
 
         <HeaderCenter>
@@ -415,6 +440,15 @@ export default function EditorPage() {
               $dark={darkMode}
             >
               <Policy fontSize="small" />
+            </ToolbarIconButton>
+          </Tooltip>
+          <Tooltip title="Session History" arrow>
+            <ToolbarIconButton
+              aria-label="View session history"
+              onClick={() => setHistoryOpen(true)}
+              $dark={darkMode}
+            >
+              <History fontSize="small" />
             </ToolbarIconButton>
           </Tooltip>
           <Tooltip title="Reset content" arrow>
@@ -498,6 +532,11 @@ export default function EditorPage() {
               Export PDF
             </MobileMenuButton>
 
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); setHistoryOpen(true); }} title="Session History">
+              <History fontSize="small" />
+              Session History
+            </MobileMenuButton>
+
             <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleReset(); }} title="Reset content">
               <RestartAlt fontSize="small" />
               Reset Content
@@ -550,6 +589,16 @@ export default function EditorPage() {
           onClose={closeMermaidModal}
         />
       )}
+
+      <SessionHistory
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        currentStorageKey={storageKey}
+        onLoadSession={(key) => {
+          // Session loading is handled within SessionHistory component
+          setHistoryOpen(false);
+        }}
+      />
 
       {toast && (
         <Box

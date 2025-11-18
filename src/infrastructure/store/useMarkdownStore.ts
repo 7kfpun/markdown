@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { DEFAULT_MARKDOWN } from '../../utils/constants';
+import { getStorageKey } from '../../utils/compression';
 
 interface MermaidModalState {
   isOpen: boolean;
@@ -18,6 +19,7 @@ interface MarkdownState {
   showEditor: boolean;
   showPreview: boolean;
   mermaidModal: MermaidModalState;
+  storageKey: string; // Track which storage key we're using
 
   updateContent: (content: string) => void;
   setEditorTheme: (theme: string) => void;
@@ -31,11 +33,29 @@ interface MarkdownState {
   openMermaidModal: (svg: string, code: string) => void;
   closeMermaidModal: () => void;
   togglePanels: (mode: 'editor-only' | 'preview-only' | 'split') => void;
+  switchStorageKey: (newKey: string) => void;
 }
+
+// Custom storage that uses dynamic keys
+const dynamicStorage = {
+  getItem: (name: string) => {
+    const key = getStorageKey();
+    const str = localStorage.getItem(key);
+    return str;
+  },
+  setItem: (name: string, value: string) => {
+    const key = getStorageKey();
+    localStorage.setItem(key, value);
+  },
+  removeItem: (name: string) => {
+    const key = getStorageKey();
+    localStorage.removeItem(key);
+  },
+};
 
 export const useMarkdownStore = create<MarkdownState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       content: DEFAULT_MARKDOWN,
       editorTheme: 'light-default',
       editorFontSize: 13,
@@ -49,6 +69,7 @@ export const useMarkdownStore = create<MarkdownState>()(
         svg: '',
         code: '',
       },
+      storageKey: getStorageKey(),
 
       updateContent: (content) => set({ content }),
       setEditorTheme: (theme) => set({ editorTheme: theme }),
@@ -87,9 +108,14 @@ export const useMarkdownStore = create<MarkdownState>()(
           set({ showEditor: true, showPreview: true });
         }
       },
+
+      switchStorageKey: (newKey: string) => {
+        set({ storageKey: newKey });
+      },
     }),
     {
-      name: 'markdown-storage',
+      name: 'dynamic-storage', // This name is not used due to custom storage
+      storage: createJSONStorage(() => dynamicStorage),
       partialize: (state) => ({
         content: state.content,
         editorTheme: state.editorTheme,
@@ -97,6 +123,7 @@ export const useMarkdownStore = create<MarkdownState>()(
         editorWrap: state.editorWrap,
         previewTheme: state.previewTheme,
         darkMode: state.darkMode,
+        storageKey: state.storageKey,
       }),
     }
   )

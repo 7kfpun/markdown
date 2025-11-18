@@ -106,14 +106,13 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
       const hasLoading = el.getAttribute('data-loading') === 'true';
       if (el.querySelector('svg') && !hasLoading) return;
 
-      // Remove loading indicator
-      el.removeAttribute('data-loading');
-
       const cached = latestSvgCache.current.get(cacheKey);
       if (cached) {
         el.innerHTML = cached;
         el.style.cursor = 'zoom-in';
         el.onclick = () => openMermaidModal(el.innerHTML || cached, code);
+        // Remove loading indicator only after successful render
+        el.removeAttribute('data-loading');
         return;
       }
 
@@ -125,14 +124,20 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
         el.innerHTML = svgMarkup;
         el.style.cursor = 'zoom-in';
         el.onclick = () => openMermaidModal(el.innerHTML || svgMarkup, code);
+        // Remove loading indicator only after successful render
+        el.removeAttribute('data-loading');
       } catch (error) {
         console.error('Mermaid render error:', error);
         const cachedSvg = latestSvgCache.current.get(cacheKey);
         if (cachedSvg) {
           el.innerHTML = cachedSvg;
           el.onclick = () => openMermaidModal(el.innerHTML || cachedSvg, code);
+          // Remove loading indicator after using cached version
+          el.removeAttribute('data-loading');
         } else {
           el.innerHTML = `<div style="color: red; padding: 1rem; border: 1px solid red; border-radius: 4px;">Failed to render Mermaid diagram</div>`;
+          // Keep loading indicator so it can be retried
+          // el.removeAttribute('data-loading');
         }
       }
     },
@@ -143,18 +148,25 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
     async (renderIdSeed: string = 'render') => {
       if (!html || mermaidBlocks.length === 0 || !showPreview) return;
 
-      // Wait for DOM to be ready
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // Wait for DOM to be ready (increased from 50ms to 100ms for better reliability)
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Track pending renders to prevent premature cleanup
+      let pendingRenders = 0;
+      let observerDisconnected = false;
 
       // Render only visible diagrams using Intersection Observer
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting) {
+            if (entry.isIntersecting && !observerDisconnected) {
               const id = entry.target.id;
               const block = mermaidBlocks.find((b) => b.id === id);
               if (block) {
-                renderSingleMermaid(block, renderIdSeed);
+                pendingRenders++;
+                renderSingleMermaid(block, renderIdSeed).finally(() => {
+                  pendingRenders--;
+                });
                 observer.unobserve(entry.target);
               }
             }
@@ -162,7 +174,7 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
         },
         {
           root: previewRef.current,
-          rootMargin: '100px', // Reduced margin for better performance
+          rootMargin: '200px', // Increased margin to trigger loading earlier
           threshold: 0,
         }
       );
@@ -175,8 +187,14 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
         }
       });
 
-      // Cleanup
-      return () => observer.disconnect();
+      // Cleanup - wait for pending renders before disconnecting
+      return () => {
+        observerDisconnected = true;
+        // Give pending renders a chance to complete before disconnecting
+        setTimeout(() => {
+          observer.disconnect();
+        }, 100);
+      };
     },
     [html, mermaidBlocks, showPreview, renderSingleMermaid]
   );
