@@ -11,9 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Close, Download } from '@mui/icons-material';
-import mermaid from 'mermaid';
 import { copySVGToClipboard, copyMermaidAsPNG } from '../../../utils/mermaidToClipboard';
-import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore';
 
 interface Props {
   svg: string;
@@ -22,7 +20,6 @@ interface Props {
 }
 
 export default function MermaidModal({ svg, code, onClose }: Props) {
-  const { darkMode } = useMarkdownStore();
   const [toast, setToast] = useState('');
   const [hasContent, setHasContent] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -39,38 +36,34 @@ export default function MermaidModal({ svg, code, onClose }: Props) {
   useEffect(() => {
     if (!isReady) return;
 
-    const renderSvg = async () => {
+    const renderSvg = () => {
       const container = containerRef.current;
       if (!container) return;
 
       container.innerHTML = '';
       setHasContent(false);
 
+      // Only use the pre-rendered SVG passed from the preview
+      // Never call mermaid.render() here as it can interfere with preview diagrams
       if (inlineSvg) {
         container.innerHTML = inlineSvg;
         setHasContent(true);
         return;
       }
 
-      if (!code) {
+      // If no valid SVG is provided, show error instead of trying to re-render
+      if (!inlineSvg && !code) {
         setHasContent(false);
         return;
       }
 
-      try {
-        const id = `modal-${Date.now()}`;
-        // Use mermaid.render() without re-initializing to avoid affecting preview diagrams
-        const { svg: out } = await mermaid.render(id, code);
-        container.innerHTML = out;
-        setHasContent(true);
-      } catch (error) {
-        console.error('Mermaid modal render failed', error);
-        setHasContent(false);
-      }
+      // If we have code but no SVG, it means the diagram wasn't rendered yet
+      console.warn('Mermaid diagram not yet rendered in preview');
+      setHasContent(false);
     };
 
     renderSvg();
-  }, [inlineSvg, code, darkMode, isReady]);
+  }, [inlineSvg, code, isReady]);
 
   const handleCopyPNG = async () => {
     const content = containerRef.current?.innerHTML || '';
