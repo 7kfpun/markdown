@@ -44,7 +44,7 @@ yarn format          # Format with Prettier
 1. Write markdown in the left editor; see the rendered preview on the right.
 2. Hover toolbar buttons for help text; use them to import/export, share, print to PDF, or toggle themes/panels.
 3. Create Mermaid diagrams with fenced code blocks (` ```mermaid ... ``` `); click diagrams to zoom/copy.
-4. Manual save with Cmd/Ctrl+S to update URL hash and session metadata immediately.
+4. Manual save with Cmd/Ctrl+S to save to localStorage and update session metadata immediately.
 5. Access session history via the History button to view, restore, rename, or delete sessions. Automatic snapshots every 10 minutes create a timeline of your work.
 6. Editor and preview panels scroll in sync; scroll position is preserved when toggling layout modes.
 

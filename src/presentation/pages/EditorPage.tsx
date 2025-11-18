@@ -392,15 +392,8 @@ export default function EditorPage() {
 
   const handleManualSave = useCallback(() => {
     try {
-      // Update URL immediately (no debounce)
-      const shareLink = generateShareLink(content);
-      const hash = shareLink.split('#')[1];
-      window.history.replaceState(null, '', `#${hash}`);
-
-      // Force localStorage save by triggering zustand persist
-      // (This happens automatically through the store's persist middleware)
-
-      // Update session metadata
+      // Save to localStorage happens automatically through zustand persist middleware
+      // Just update session metadata to reflect the latest save
       const existingMetadata = getCurrentSessionMetadata(storageKey);
       const metadata = createSessionMetadata(storageKey, content, existingMetadata || undefined);
       saveSessionMetadata(metadata);
@@ -409,7 +402,6 @@ export default function EditorPage() {
       setToast('Saved!');
       setTimeout(() => setToast(''), 2000);
     } catch (error) {
-      // Content too large for URL
       const reason = error instanceof Error ? error.message : 'Failed to save';
       setToast(reason);
       setTimeout(() => setToast(''), 2000);

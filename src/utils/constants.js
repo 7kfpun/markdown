@@ -34,7 +34,7 @@ Write complex mathematical equations with full LaTeX support:
 - **Quick Restore**: One-click restore to any previous session from history
 - **Rename Sessions**: Organize your work with custom session names
 - **Smart Cleanup**: Keeps latest 100 sessions automatically
-- **Manual Save**: Press Cmd/Ctrl+S to save and update URL immediately
+- **Manual Save**: Press Cmd/Ctrl+S to save to localStorage and update session history
 
 ### 📤 Powerful Export Options
 - **PDF Export**: Print-optimized layout with browser's native print dialog
