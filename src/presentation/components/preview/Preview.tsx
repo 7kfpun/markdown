@@ -216,7 +216,7 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
         cleanup();
       }
     };
-  }, [renderMermaid, showEditor, mermaidModal, darkMode, html, mermaidBlocks]);
+  }, [renderMermaid, showEditor, darkMode, html, mermaidBlocks]);
 
   useImperativeHandle(
     ref,
