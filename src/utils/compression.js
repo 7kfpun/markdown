@@ -64,15 +64,19 @@ const hashString = (str) => {
     h2 = Math.imul(h2 ^ ch, 1597334677);
   }
 
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  h1 =
+    Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^
+    Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 =
+    Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^
+    Math.imul(h1 ^ (h1 >>> 13), 3266489909);
 
   // Combine and convert to base36 (shorter than hex)
   const combined = 4294967296 * (2097151 & h2) + (h1 >>> 0);
   return Math.abs(combined).toString(36).substring(0, 10);
 };
 
-// Get a unique storage key based on the URL hash
+// Get a unique storage key based on the URL hash or generate a new one
 // This allows multiple tabs with different URLs to maintain separate localStorage
 // Uses sessionStorage to "lock in" the key even after URL is cleared
 export const getStorageKey = () => {
@@ -102,10 +106,13 @@ export const getStorageKey = () => {
     return key;
   }
 
-  // Default storage key for non-shared sessions
-  const defaultKey = 'markdown-storage';
-  sessionStorage.setItem('markdown-current-storage-key', defaultKey);
-  return defaultKey;
+  // Generate a unique storage key for new sessions
+  // Use timestamp + random value for uniqueness
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 9);
+  const uniqueKey = `markdown-storage-${timestamp}-${random}`;
+  sessionStorage.setItem('markdown-current-storage-key', uniqueKey);
+  return uniqueKey;
 };
 
 export const extractContentFromHash = () => {
