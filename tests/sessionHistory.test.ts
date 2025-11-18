@@ -139,6 +139,35 @@ describe('sessionHistory utilities', () => {
       expect(sessions[1].storageKey).toBe('middle');
       expect(sessions[2].storageKey).toBe('old');
     });
+
+    it('limits sessions to 100 items and removes oldest', () => {
+      // Create 102 sessions
+      for (let i = 0; i < 102; i++) {
+        const metadata: SessionMetadata = {
+          storageKey: `key-${i}`,
+          title: `Session ${i}`,
+          lastModified: 1000 + i, // Increasing timestamps
+          contentPreview: `Preview ${i}`,
+          createdAt: 1000 + i,
+        };
+        localStorage.setItem(`key-${i}`, `content-${i}`);
+        saveSessionMetadata(metadata);
+      }
+
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(100);
+
+      // Should keep the 100 most recent (key-2 through key-101)
+      expect(sessions.some((s) => s.storageKey === 'key-0')).toBe(false);
+      expect(sessions.some((s) => s.storageKey === 'key-1')).toBe(false);
+      expect(sessions.some((s) => s.storageKey === 'key-2')).toBe(true);
+      expect(sessions.some((s) => s.storageKey === 'key-101')).toBe(true);
+
+      // Oldest sessions' content should also be removed from localStorage
+      expect(localStorage.getItem('key-0')).toBeNull();
+      expect(localStorage.getItem('key-1')).toBeNull();
+      expect(localStorage.getItem('key-2')).not.toBeNull();
+    });
   });
 
   describe('updateSessionMetadata', () => {
