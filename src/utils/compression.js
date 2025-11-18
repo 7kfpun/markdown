@@ -58,7 +58,8 @@ export const extractContentFromHash = () => {
     try {
       const compressed = hash.substring(6);
       const content = decompressFromBase64(compressed);
-      window.history.replaceState(null, '', window.location.pathname);
+      // Keep the hash in URL to support multiple tabs with different content
+      // window.history.replaceState(null, '', window.location.pathname);
       return content;
     } catch (error) {
       console.error('Failed to extract content from URL:', error);
@@ -75,7 +76,8 @@ export const extractContentFromUrl = () => {
     try {
       const compressed = hash.substring(6);
       const content = decompressFromBase64(compressed);
-      window.history.replaceState(null, '', window.location.pathname);
+      // Keep the hash in URL to support multiple tabs with different content
+      // window.history.replaceState(null, '', window.location.pathname);
       return content;
     } catch (error) {
       console.error('Failed to extract content from URL:', error);
@@ -86,7 +88,8 @@ export const extractContentFromUrl = () => {
   if (pathMatch?.[1]) {
     try {
       const content = decompressFromBase64(pathMatch[1]);
-      window.history.replaceState(null, '', '/');
+      // Keep the path in URL to support multiple tabs with different content
+      // window.history.replaceState(null, '', '/');
       return content;
     } catch (error) {
       console.error('Failed to extract content from path:', error);

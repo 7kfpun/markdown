@@ -8,11 +8,29 @@ import { extractContentFromUrl } from './utils/compression';
 export default function App() {
   const { darkMode, updateContent, content, resetContent } = useMarkdownStore();
 
+  // Extract and apply URL content on mount and when hash changes
   useEffect(() => {
-    const sharedContent = extractContentFromUrl();
-    if (sharedContent) {
-      updateContent(sharedContent);
-    }
+    const loadUrlContent = () => {
+      const sharedContent = extractContentFromUrl();
+      if (sharedContent) {
+        updateContent(sharedContent);
+      }
+    };
+
+    // Load on mount
+    loadUrlContent();
+
+    // Listen for hash changes (supports multiple tabs with different URLs)
+    window.addEventListener('hashchange', loadUrlContent);
+
+    // Listen for focus events to reload URL content when switching between tabs
+    // This ensures each tab maintains its own content based on its URL
+    window.addEventListener('focus', loadUrlContent);
+
+    return () => {
+      window.removeEventListener('hashchange', loadUrlContent);
+      window.removeEventListener('focus', loadUrlContent);
+    };
   }, [updateContent]);
 
   useEffect(() => {
