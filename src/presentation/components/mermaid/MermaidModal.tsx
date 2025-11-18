@@ -25,13 +25,20 @@ export default function MermaidModal({ svg, code, onClose }: Props) {
   const { darkMode } = useMarkdownStore();
   const [toast, setToast] = useState('');
   const [hasContent, setHasContent] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const inlineSvg = svg && svg.includes('<svg') ? svg : '';
 
+  // Set ready state when Dialog is mounted
   useEffect(() => {
-    // Use the same theme as Preview to avoid conflicts
-    mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: darkMode ? 'dark' : 'default' });
+    const timer = setTimeout(() => setIsReady(true), 150);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!isReady) return;
+
     const renderSvg = async () => {
       const container = containerRef.current;
       if (!container) return;
@@ -52,6 +59,7 @@ export default function MermaidModal({ svg, code, onClose }: Props) {
 
       try {
         const id = `modal-${Date.now()}`;
+        // Use mermaid.render() without re-initializing to avoid affecting preview diagrams
         const { svg: out } = await mermaid.render(id, code);
         container.innerHTML = out;
         setHasContent(true);
@@ -61,10 +69,8 @@ export default function MermaidModal({ svg, code, onClose }: Props) {
       }
     };
 
-    // slight delay to ensure dialog mounts
-    const t = setTimeout(renderSvg, 100);
-    return () => clearTimeout(t);
-  }, [inlineSvg, code]);
+    renderSvg();
+  }, [inlineSvg, code, darkMode, isReady]);
 
   const handleCopyPNG = async () => {
     const content = containerRef.current?.innerHTML || '';
