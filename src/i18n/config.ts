@@ -30,7 +30,7 @@ export const RTL_LANGUAGES = ['ar', 'ur'];
 // Language metadata for display
 export const LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English' },
-  { code: 'zh-TW', name: 'Chinese (Traditional)', nativeName: '繁體中文' },
+  { code: 'zh-TW', name: 'Chinese', nativeName: '中文' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
   { code: 'ar', name: 'Arabic', nativeName: 'العربية', rtl: true },
