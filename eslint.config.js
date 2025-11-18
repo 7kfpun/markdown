@@ -40,6 +40,7 @@ export default [
         navigator: 'readonly',
         console: 'readonly',
         localStorage: 'readonly',
+        sessionStorage: 'readonly',
         URL: 'readonly',
         Blob: 'readonly',
         File: 'readonly',
