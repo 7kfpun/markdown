@@ -52,6 +52,42 @@ export const generateShareLink = (content) => {
   return `${window.location.origin}/#paxo:${compressed}`;
 };
 
+// Get a unique storage key based on the URL hash
+// This allows multiple tabs with different URLs to maintain separate localStorage
+// Uses sessionStorage to "lock in" the key even after URL is cleared
+export const getStorageKey = () => {
+  // Check if we've already locked in a key for this session
+  const lockedKey = sessionStorage.getItem('markdown-current-storage-key');
+  if (lockedKey) {
+    return lockedKey;
+  }
+
+  const hash = window.location.hash;
+  if (hash.startsWith('#paxo:')) {
+    const compressed = hash.substring(6);
+    // Use first 16 chars of compressed data as a unique identifier
+    const sessionId = compressed.substring(0, 16);
+    const key = `markdown-storage-${sessionId}`;
+    // Lock in this key for the session
+    sessionStorage.setItem('markdown-current-storage-key', key);
+    return key;
+  }
+
+  const pathMatch = window.location.pathname.match(/\/paxo:([^/]+)/);
+  if (pathMatch?.[1]) {
+    const compressed = pathMatch[1];
+    const sessionId = compressed.substring(0, 16);
+    const key = `markdown-storage-${sessionId}`;
+    sessionStorage.setItem('markdown-current-storage-key', key);
+    return key;
+  }
+
+  // Default storage key for non-shared sessions
+  const defaultKey = 'markdown-storage';
+  sessionStorage.setItem('markdown-current-storage-key', defaultKey);
+  return defaultKey;
+};
+
 export const extractContentFromHash = () => {
   const hash = window.location.hash;
   if (hash.startsWith('#paxo:')) {
