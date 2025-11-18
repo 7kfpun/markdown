@@ -13,6 +13,7 @@ import {
 import { Close, Download } from '@mui/icons-material';
 import mermaid from 'mermaid';
 import { copySVGToClipboard, copyMermaidAsPNG } from '../../../utils/mermaidToClipboard';
+import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore';
 
 interface Props {
   svg: string;
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export default function MermaidModal({ svg, code, onClose }: Props) {
+  const { darkMode } = useMarkdownStore();
   const [toast, setToast] = useState('');
   const [hasContent, setHasContent] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -28,7 +30,8 @@ export default function MermaidModal({ svg, code, onClose }: Props) {
   const inlineSvg = svg && svg.includes('<svg') ? svg : '';
 
   useEffect(() => {
-    mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: 'default' });
+    // Use the same theme as Preview to avoid conflicts
+    mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: darkMode ? 'dark' : 'default' });
     const renderSvg = async () => {
       const container = containerRef.current;
       if (!container) return;
