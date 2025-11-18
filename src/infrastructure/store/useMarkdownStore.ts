@@ -57,7 +57,7 @@ export const useMarkdownStore = create<MarkdownState>()(
   persist(
     (set, get) => ({
       content: DEFAULT_MARKDOWN,
-      editorTheme: 'light-default',
+      editorTheme: 'one-dark',
       editorFontSize: 13,
       editorWrap: true,
       previewTheme: 'github',

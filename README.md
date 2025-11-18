@@ -7,9 +7,11 @@ Modern, browser-based markdown editor with live preview, Mermaid diagrams, KaTeX
 - Live split-view preview with GitHub-flavored markdown and 20+ language highlighting (highlight.js)
 - Mermaid diagrams with inline rendering, zoomable modal, and copy/download as PNG or SVG
 - Exports: Markdown, rendered HTML, and PDF via the browser print dialog
-- Shareable links: content compressed (pako) into the URL hash (up to ~10 KB compressed)
-- KaTeX inline/block math, drag-and-drop import, auto-save to localStorage
-- Dark/light themes, resizable panels, and responsive layout
+- Session history: Multiple documents with automatic session management and localStorage persistence
+- KaTeX inline/block math, drag-and-drop import, auto-save (5s debounce) to localStorage
+- Dark/light themes, resizable panels, responsive layout, and offline support indicator
+- Scroll synchronization between editor and preview panels
+- Debounced word/character count updates (1s) for better performance
 
 ## Tech Stack
 
@@ -41,12 +43,13 @@ yarn format          # Format with Prettier
 1. Write markdown in the left editor; see the rendered preview on the right.
 2. Hover toolbar buttons for help text; use them to import/export, share, print to PDF, or toggle themes/panels.
 3. Create Mermaid diagrams with fenced code blocks (` ```mermaid ... ``` `); click diagrams to zoom/copy.
-4. Use the Share button to copy a compressed link; content lives entirely in the URL hash.
+4. Manual save with Cmd/Ctrl+S to update URL hash and session metadata immediately.
+5. Access session history via the History button to view, load, or delete previous sessions.
+6. Editor and preview panels scroll in sync; scroll position is preserved when toggling layout modes.
 
 ## Routes
 
 - `/` – Editor (default)
-- `/view` – View-only rendered content (from compressed link)
 - `/print#paxo:...` – Print-optimized view (opened automatically for PDF export)
 - `/privacy` – Privacy policy
 - GitHub Pages: 404 fallback copies `index.html` so `/print` and other routes resolve in the SPA without changing the URL
@@ -73,8 +76,13 @@ src/
 - Markdown rendering is sanitized with DOMPurify; links open in new tabs.
 - Syntax highlighting uses a shared marked instance to avoid double-highlighting.
 - PDF export relies on the browser print dialog (no html2canvas/jsPDF in use).
-- Share links are limited by URL length (≈10 KB compressed content).
+- Content persists to localStorage only (URL hash removed for simplicity).
+- Session metadata auto-saves with 5-second debounce after content changes.
+- Word/character count updates with 1-second debounce for performance.
 - Editor/preview scroll positions stay in sync and are restored when switching layout modes.
+- Each document session is tracked with metadata (title preview, word count, timestamps).
+- Dynamic storage keys allow multiple documents to coexist in localStorage.
+- Offline indicator shows connection status with auto-hide when back online.
 
 ## Browser Support
 

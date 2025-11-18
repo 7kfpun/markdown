@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { generateShareLink } from '../../utils/compression';
 import { downloadMarkdown } from '../../utils/export';
 import { useOnlineStatus } from '../../utils/useOnlineStatus';
+import { createSessionMetadata, saveSessionMetadata, getCurrentSessionMetadata } from '../../utils/sessionHistory';
 
 const PageContainer = styled(Box)`
   display: flex;
@@ -345,6 +346,12 @@ export default function EditorPage() {
 
   const handleEditorScroll = useCallback(
     (ratio: number) => {
+      console.log('[EditorPage] handleEditorScroll called', {
+        ratio,
+        showPreview,
+        hasPreviewRef: !!previewRef.current,
+        isSyncing: syncingRef.current,
+      });
       if (!showPreview || !previewRef.current) return;
       if (syncingRef.current) return;
       syncingRef.current = true;
@@ -358,6 +365,12 @@ export default function EditorPage() {
 
   const handlePreviewScroll = useCallback(
     (ratio: number) => {
+      console.log('[EditorPage] handlePreviewScroll called', {
+        ratio,
+        showEditor,
+        hasEditorRef: !!editorRef.current,
+        isSyncing: syncingRef.current,
+      });
       if (!showEditor || !editorRef.current) return;
       if (syncingRef.current) return;
       syncingRef.current = true;
@@ -376,6 +389,48 @@ export default function EditorPage() {
     }
     resetContent();
   };
+
+  const handleManualSave = useCallback(() => {
+    try {
+      // Update URL immediately (no debounce)
+      const shareLink = generateShareLink(content);
+      const hash = shareLink.split('#')[1];
+      window.history.replaceState(null, '', `#${hash}`);
+
+      // Force localStorage save by triggering zustand persist
+      // (This happens automatically through the store's persist middleware)
+
+      // Update session metadata
+      const existingMetadata = getCurrentSessionMetadata(storageKey);
+      const metadata = createSessionMetadata(storageKey, content, existingMetadata || undefined);
+      saveSessionMetadata(metadata);
+
+      // Show success toast
+      setToast('Saved!');
+      setTimeout(() => setToast(''), 2000);
+    } catch (error) {
+      // Content too large for URL
+      const reason = error instanceof Error ? error.message : 'Failed to save';
+      setToast(reason);
+      setTimeout(() => setToast(''), 2000);
+    }
+  }, [content, storageKey]);
+
+  // Add Cmd/Ctrl+S keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check for Cmd+S (Mac) or Ctrl+S (Windows/Linux)
+      if ((event.metaKey || event.ctrlKey) && event.key === 's') {
+        event.preventDefault();
+        handleManualSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleManualSave]);
 
   return (
     <PageContainer>

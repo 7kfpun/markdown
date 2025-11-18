@@ -616,3 +616,9 @@ export const STORAGE_KEYS = {
   DARK_MODE: 'markdown-dark-mode',
   PANEL_SIZES: 'markdown-panel-sizes',
 };
+
+// Debounce timing constants (in milliseconds)
+export const DEBOUNCE_TIMES = {
+  METADATA_SAVE: 5000, // 5 seconds for session metadata updates
+  WORD_COUNT: 1000, // 1 second for word/character count updates
+};

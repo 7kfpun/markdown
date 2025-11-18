@@ -26,22 +26,24 @@ This project uses a simplified architecture focused on presentation and infrastr
 src/
 ├── infrastructure/              # Infrastructure Layer (State & Storage)
 │   └── store/
-│       └── useMarkdownStore.ts # Zustand store with localStorage persistence
+│       └── useMarkdownStore.ts # Zustand store with dynamic localStorage keys
 │
 ├── presentation/                # Presentation Layer (UI)
 │   ├── pages/
 │   │   ├── EditorPage.tsx      # Main editor page (split view)
-│   │   ├── ViewPage.tsx        # View-only page (shared links)
 │   │   ├── PrintPage.tsx       # Print-optimized page with auto-print
 │   │   └── PrivacyPage.tsx     # Privacy policy page
 │   ├── components/
 │   │   ├── editor/
-│   │   │   └── Editor.tsx      # CodeMirror-based markdown editor
+│   │   │   └── Editor.tsx      # CodeMirror 6 markdown editor with debounced counts
 │   │   ├── preview/
-│   │   │   └── Preview.tsx     # Markdown preview with live rendering
-│   │   └── mermaid/
-│   │       ├── MermaidDiagram.tsx  # Inline mermaid rendering component
-│   │       └── MermaidModal.tsx    # Full-screen mermaid diagram viewer
+│   │   │   └── Preview.tsx     # Markdown preview with lazy Mermaid rendering
+│   │   ├── mermaid/
+│   │   │   └── MermaidModal.tsx    # Full-screen mermaid diagram viewer
+│   │   ├── session/
+│   │   │   └── SessionHistory.tsx  # Session history drawer
+│   │   └── offline/
+│   │       └── OfflineIndicator.tsx # Network status indicator
 │   ├── router/
 │   │   └── AppRouter.tsx       # React Router configuration
 │   └── theme/
@@ -49,12 +51,14 @@ src/
 │
 ├── utils/                       # Utility functions
 │   ├── analytics.ts            # Google Analytics integration
-│   ├── compression.js          # Pako-based content compression for sharing
-│   ├── constants.js            # Default markdown content & constants
+│   ├── compression.js          # Pako-based content compression (for print/share)
+│   ├── constants.js            # Default markdown, debounce times, & constants
 │   ├── export.js               # PDF/HTML/PNG/Markdown export utilities
-│   └── mermaidToClipboard.js   # Clipboard operations for diagrams
+│   ├── mermaidToClipboard.js   # Clipboard operations for diagrams
+│   ├── sessionHistory.ts       # Session metadata management
+│   └── useOnlineStatus.ts      # Network status hook
 │
-├── App.tsx                      # Main application component
+├── App.tsx                      # Main app with session metadata auto-save
 └── main.tsx                     # Entry point with React strict mode
 ```
 
@@ -84,16 +88,16 @@ src/
 - **React Router v7**: BrowserRouter with SPA fallback (404.html) for static hosting
 - Routes:
   - `/` - Editor page (split view with editor + preview)
-  - `/view` - View-only page (shared links with compressed content)
   - `/print#paxo:...` - Print-optimized page with auto-print trigger
   - `/privacy` - Privacy policy page
 
-### Export & Sharing
+### Export & Storage
 
 - **Browser Print API**: Native PDF generation via print dialog
-- **Pako**: DEFLATE compression (level 9) for URL sharing
-- URL-safe base64 encoding for share links
-- Links compressed to fit browser URL limits (up to 10KB compressed)
+- **localStorage**: All content persisted locally with dynamic storage keys
+- **Session Management**: Automatic session metadata tracking with timestamps
+- **Pako**: DEFLATE compression (level 9) for print page content
+- URL-safe base64 encoding for print page hash
 
 ## Zustand Store Structure
 
@@ -102,8 +106,10 @@ src/
 interface MarkdownState {
   // Content state
   content: string;
+  storageKey: string; // Dynamic key for multi-document support
   updateContent: (content: string) => void;
   resetContent: () => void;
+  switchStorageKey: (newKey: string) => void;
 
   // Editor settings
   editorTheme: string;
@@ -141,10 +147,11 @@ interface MarkdownState {
 
 ### 1. Live Markdown Editor
 
-- Monaco editor with syntax highlighting
-- Configurable themes (vs-dark, vs-light, etc.)
+- CodeMirror 6 editor with syntax highlighting
+- Configurable themes (One Dark, GitHub Light/Dark, Monokai, Dracula, etc.)
 - Adjustable font size and word wrap
-- Auto-save to localStorage
+- Auto-save to localStorage with dynamic storage keys
+- Debounced word/character count (1-second delay)
 
 ### 2. Real-time Preview
 

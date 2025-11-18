@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { getMuiTheme } from './presentation/theme/muiTheme';
 import AppRouter from './presentation/router/AppRouter';
 import { useMarkdownStore } from './infrastructure/store/useMarkdownStore';
-import { extractContentFromUrl, getStorageKey } from './utils/compression';
+import { extractContentFromUrl } from './utils/compression';
 import {
   createSessionMetadata,
   saveSessionMetadata,
@@ -11,18 +11,16 @@ import {
   stopAutoSave,
   getCurrentSessionMetadata,
 } from './utils/sessionHistory';
+import { DEBOUNCE_TIMES } from './utils/constants';
 
 export default function App() {
-  const { darkMode, updateContent, content, resetContent, storageKey } = useMarkdownStore();
-  const initialUrlContentRef = useRef<string | null>(null);
-  const urlClearedRef = useRef(false);
+  const { darkMode, updateContent, content, storageKey } = useMarkdownStore();
   const saveMetadataTimeoutRef = useRef<number>();
 
   // Load URL content on mount
   useEffect(() => {
     const sharedContent = extractContentFromUrl();
     if (sharedContent) {
-      initialUrlContentRef.current = sharedContent;
       // Only update if localStorage doesn't have content for this key already
       // (localStorage might have edits from a previous session with this URL)
       if (!content || content === '') {
@@ -31,26 +29,6 @@ export default function App() {
     }
   }, [updateContent]);
 
-  // Clear URL on first edit
-  useEffect(() => {
-    if (initialUrlContentRef.current && !urlClearedRef.current) {
-      const hash = window.location.hash;
-      if (hash.startsWith('#paxo:')) {
-        // Check if content has been modified from the original URL content
-        if (content && content !== initialUrlContentRef.current) {
-          // User made an edit, clear the URL but keep using the locked-in storage key
-          urlClearedRef.current = true;
-          window.history.replaceState(null, '', window.location.pathname);
-        }
-      }
-    }
-  }, [content]);
-
-  useEffect(() => {
-    if (typeof content === 'string' && content.trim().length === 0) {
-      resetContent();
-    }
-  }, [content, resetContent]);
 
   // Initialize session metadata on mount
   useEffect(() => {
@@ -87,12 +65,12 @@ export default function App() {
       clearTimeout(saveMetadataTimeoutRef.current);
     }
 
-    // Debounce metadata update (save after 2 seconds of no changes)
+    // Debounce metadata update
     saveMetadataTimeoutRef.current = window.setTimeout(() => {
       const existing = getCurrentSessionMetadata(storageKey);
       const metadata = createSessionMetadata(storageKey, content, existing || undefined);
       saveSessionMetadata(metadata);
-    }, 2000);
+    }, DEBOUNCE_TIMES.METADATA_SAVE);
 
     return () => {
       if (saveMetadataTimeoutRef.current) {

@@ -18,6 +18,7 @@ import {
   formatLastModified,
   SessionMetadata,
 } from '../../../utils/sessionHistory';
+import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore';
 
 interface Props {
   open: boolean;
@@ -54,19 +55,14 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
       return;
     }
 
-    // Reload page with new storage key
-    // Clear sessionStorage to allow new key to be set
-    sessionStorage.removeItem('markdown-current-storage-key');
-
     // Get the content from the target session
     const sessionData = localStorage.getItem(storageKey);
     if (sessionData) {
       try {
         const parsed = JSON.parse(sessionData);
-        // Set the new storage key
-        sessionStorage.setItem('markdown-current-storage-key', storageKey);
-        // Reload to apply changes
-        window.location.reload();
+        // Load the content into the current session
+        useMarkdownStore.getState().updateContent(parsed.content || '');
+        onClose();
       } catch (error) {
         console.error('Failed to load session:', error);
       }

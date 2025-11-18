@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore';
+import { DEBOUNCE_TIMES } from '../../../utils/constants';
 
 export interface EditorHandle {
   scrollToRatio: (ratio: number) => void;
@@ -37,12 +38,29 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
   } = useMarkdownStore();
   const [isDragOver, setIsDragOver] = useState(false);
   const editorViewRef = useRef<EditorView | null>(null);
-  const [viewReady, setViewReady] = useState(false);
   const onScrollHandlerRef = useRef<((ratio: number) => void) | undefined>(onScrollRatioChange);
   const isSyncingRef = useRef(false);
+  const [wordCount, setWordCount] = useState(0);
+  const [charCount, setCharCount] = useState(0);
+  const countUpdateTimeoutRef = useRef<number>();
 
-  const wordCount = content.split(/\s+/).filter(Boolean).length;
-  const charCount = content.length;
+  // Debounced word/character count updates
+  useEffect(() => {
+    if (countUpdateTimeoutRef.current) {
+      clearTimeout(countUpdateTimeoutRef.current);
+    }
+
+    countUpdateTimeoutRef.current = window.setTimeout(() => {
+      setWordCount(content.split(/\s+/).filter(Boolean).length);
+      setCharCount(content.length);
+    }, DEBOUNCE_TIMES.WORD_COUNT);
+
+    return () => {
+      if (countUpdateTimeoutRef.current) {
+        clearTimeout(countUpdateTimeoutRef.current);
+      }
+    };
+  }, [content]);
 
   useEffect(() => {
     onScrollHandlerRef.current = onScrollRatioChange;
@@ -53,83 +71,90 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
       EditorView.theme({
         '.cm-header': { textDecoration: 'none' },
         '.cm-content': { fontSize: `${editorFontSize}px` },
-        '.cm-selectionBackground': { backgroundColor: 'rgba(255, 170, 25, 0.35)' },
-        '.cm-content ::selection': { backgroundColor: 'rgba(255, 170, 25, 0.35)' },
-        '.cm-line::selection': { backgroundColor: 'rgba(255, 170, 25, 0.35)' },
-        '.cm-selectionMatch': { backgroundColor: 'rgba(255, 170, 25, 0.25)' },
       }),
     [editorFontSize]
   );
 
   const themeExtensions = useMemo<Record<string, Extension>>(
     () => ({
-      'light-default': EditorView.theme(
+      'github-light': EditorView.theme(
         {
-          '&': { backgroundColor: '#f8f9fb', color: '#0f1419' },
-          '.cm-content': { caretColor: '#1f7aec' },
-          '.cm-selectionBackground': { backgroundColor: 'rgba(31,122,236,0.35) !important' },
-          '.cm-scroller': { backgroundColor: '#f8f9fb' },
-          '.cm-activeLine': { backgroundColor: '#eaf2ff' },
-          '.cm-gutters': { backgroundColor: '#f3f5f9', color: '#6b7280' },
+          '&': { backgroundColor: '#ffffff', color: '#24292f' },
+          '.cm-content': { caretColor: '#0969da' },
+          '.cm-selectionBackground': { backgroundColor: '#add6ff !important' },
+          '&.cm-focused .cm-selectionBackground': { backgroundColor: '#add6ff !important' },
+          '.cm-scroller': { backgroundColor: '#ffffff' },
+          '.cm-activeLine': { backgroundColor: '#f6f8fa' },
+          '.cm-gutters': { backgroundColor: '#f6f8fa', color: '#57606a', borderRight: '1px solid #d0d7de' },
         },
         { dark: false }
       ),
-      'light-colorblind': EditorView.theme(
+      'solarized-light': EditorView.theme(
         {
-          '&': { backgroundColor: '#f7f8f0', color: '#0f1419' },
-          '.cm-selectionBackground': { backgroundColor: 'rgba(94,134,0,0.28) !important' },
-          '.cm-scroller': { backgroundColor: '#f7f8f0' },
-          '.cm-activeLine': { backgroundColor: '#e7eedc' },
-          '.cm-gutters': { backgroundColor: '#f1f3e6', color: '#5b6455' },
+          '&': { backgroundColor: '#fdf6e3', color: '#657b83' },
+          '.cm-content': { caretColor: '#268bd2' },
+          '.cm-selectionBackground': { backgroundColor: '#93cee9 !important' },
+          '&.cm-focused .cm-selectionBackground': { backgroundColor: '#93cee9 !important' },
+          '.cm-scroller': { backgroundColor: '#fdf6e3' },
+          '.cm-activeLine': { backgroundColor: '#eee8d5' },
+          '.cm-gutters': { backgroundColor: '#eee8d5', color: '#93a1a1' },
         },
         { dark: false }
       ),
-      'light-tritanopia': EditorView.theme(
+      'vs-code-light': EditorView.theme(
         {
-          '&': { backgroundColor: '#f7fbff', color: '#0f1419' },
-          '.cm-selectionBackground': { backgroundColor: 'rgba(46,116,181,0.22) !important' },
-          '.cm-scroller': { backgroundColor: '#f7fbff' },
-          '.cm-activeLine': { backgroundColor: '#e5f0fb' },
-          '.cm-gutters': { backgroundColor: '#eef6ff', color: '#5f6a7a' },
+          '&': { backgroundColor: '#ffffff', color: '#000000' },
+          '.cm-content': { caretColor: '#000000' },
+          '.cm-selectionBackground': { backgroundColor: '#add6ff !important' },
+          '&.cm-focused .cm-selectionBackground': { backgroundColor: '#add6ff !important' },
+          '.cm-scroller': { backgroundColor: '#ffffff' },
+          '.cm-activeLine': { backgroundColor: '#f3f3f3' },
+          '.cm-gutters': { backgroundColor: '#f3f3f3', color: '#237893' },
         },
         { dark: false }
       ),
-      'dark-default': oneDark,
-      'dark-colorblind': EditorView.theme(
+      'github-dark': EditorView.theme(
         {
-          '&': { backgroundColor: '#1f2428', color: '#e5e7eb' },
-          '.cm-selectionBackground': { backgroundColor: 'rgba(255,186,69,0.28) !important' },
-          '.cm-scroller': { backgroundColor: '#1f2428' },
-          '.cm-activeLine': { backgroundColor: '#2b3035' },
-          '.cm-gutters': { backgroundColor: '#1f2428', color: '#7d8288' },
+          '&': { backgroundColor: '#0d1117', color: '#c9d1d9' },
+          '.cm-content': { caretColor: '#58a6ff' },
+          '.cm-selectionBackground': { backgroundColor: 'rgba(88,166,255,0.4) !important' },
+          '&.cm-focused .cm-selectionBackground': { backgroundColor: 'rgba(88,166,255,0.55) !important' },
+          '.cm-scroller': { backgroundColor: '#0d1117' },
+          '.cm-activeLine': { backgroundColor: '#161b22' },
+          '.cm-gutters': { backgroundColor: '#161b22', color: '#8b949e', borderRight: '1px solid #30363d' },
         },
         { dark: true }
       ),
-      'dark-tritanopia': EditorView.theme(
+      'monokai': EditorView.theme(
         {
-          '&': { backgroundColor: '#1f222a', color: '#e5e7eb' },
-          '.cm-selectionBackground': { backgroundColor: 'rgba(238,92,96,0.32) !important' },
-          '.cm-scroller': { backgroundColor: '#1f222a' },
-          '.cm-activeLine': { backgroundColor: '#2a2d36' },
-          '.cm-gutters': { backgroundColor: '#1f222a', color: '#7d8288' },
+          '&': { backgroundColor: '#272822', color: '#f8f8f2' },
+          '.cm-content': { caretColor: '#f8f8f0' },
+          '.cm-selectionBackground': { backgroundColor: 'rgba(255,217,102,0.35) !important' },
+          '&.cm-focused .cm-selectionBackground': { backgroundColor: 'rgba(255,217,102,0.5) !important' },
+          '.cm-scroller': { backgroundColor: '#272822' },
+          '.cm-activeLine': { backgroundColor: '#3e3d32' },
+          '.cm-gutters': { backgroundColor: '#272822', color: '#8f908a' },
         },
         { dark: true }
       ),
-      'soft-dark': EditorView.theme(
+      'dracula': EditorView.theme(
         {
-          '&': { backgroundColor: '#252931', color: '#e5e7eb' },
-          '.cm-selectionBackground': { backgroundColor: 'rgba(91,156,255,0.28) !important' },
-          '.cm-scroller': { backgroundColor: '#252931' },
-          '.cm-activeLine': { backgroundColor: '#313640' },
-          '.cm-gutters': { backgroundColor: '#252931', color: '#8a9099' },
+          '&': { backgroundColor: '#282a36', color: '#f8f8f2' },
+          '.cm-content': { caretColor: '#f8f8f2' },
+          '.cm-selectionBackground': { backgroundColor: 'rgba(189,147,249,0.4) !important' },
+          '&.cm-focused .cm-selectionBackground': { backgroundColor: 'rgba(189,147,249,0.55) !important' },
+          '.cm-scroller': { backgroundColor: '#282a36' },
+          '.cm-activeLine': { backgroundColor: '#44475a' },
+          '.cm-gutters': { backgroundColor: '#282a36', color: '#6272a4' },
         },
         { dark: true }
       ),
+      'one-dark': oneDark,
     }),
     []
   );
 
-  const codeMirrorTheme = themeExtensions[editorTheme] ?? themeExtensions['light-default'];
+  const codeMirrorTheme = themeExtensions[editorTheme] ?? themeExtensions['one-dark'];
 
   const toggleWrap = useCallback((view: EditorView, wrapper: string) => {
     const { state } = view;
@@ -205,25 +230,26 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
     []
   );
 
-  useEffect(() => {
-    const view = editorViewRef.current;
-    if (!view) return;
-    const scroller = view.scrollDOM;
+  const scrollHandlerExtension = useMemo(
+    () =>
+      EditorView.domEventHandlers({
+        scroll: (event, view) => {
+          if (!onScrollHandlerRef.current || isSyncingRef.current) return;
+          isSyncingRef.current = true;
 
-    const handleScroll = () => {
-      if (!onScrollHandlerRef.current || isSyncingRef.current) return;
-      isSyncingRef.current = true;
-      const maxScroll = scroller.scrollHeight - scroller.clientHeight;
-      const ratio = maxScroll > 0 ? scroller.scrollTop / maxScroll : 0;
-      onScrollHandlerRef.current(ratio);
-      requestAnimationFrame(() => {
-        isSyncingRef.current = false;
-      });
-    };
+          const scroller = view.scrollDOM;
+          const maxScroll = scroller.scrollHeight - scroller.clientHeight;
+          const ratio = maxScroll > 0 ? scroller.scrollTop / maxScroll : 0;
 
-    scroller.addEventListener('scroll', handleScroll, { passive: true });
-    return () => scroller.removeEventListener('scroll', handleScroll);
-  }, [viewReady]);
+          onScrollHandlerRef.current(ratio);
+
+          requestAnimationFrame(() => {
+            isSyncingRef.current = false;
+          });
+        },
+      }),
+    []
+  );
 
   const handleFileDrop = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
@@ -275,12 +301,17 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
         <CodeMirror
           value={content}
           height="100%"
-          extensions={[markdown(), baseMarkdownStyles, keymap.of(markdownKeymap), editorWrap ? EditorView.lineWrapping : []]}
+          extensions={[
+            markdown(),
+            baseMarkdownStyles,
+            keymap.of(markdownKeymap),
+            scrollHandlerExtension,
+            editorWrap ? EditorView.lineWrapping : [],
+          ]}
           theme={codeMirrorTheme}
           onChange={(value) => updateContent(value)}
           onCreateEditor={(view) => {
             editorViewRef.current = view;
-            setViewReady(true);
           }}
           basicSetup={{
             lineNumbers: true,
@@ -324,13 +355,13 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
             value={editorTheme}
             onChange={(e) => setEditorTheme(e.target.value as string)}
           >
-            <MenuItem value="light-default">Light default</MenuItem>
-            <MenuItem value="light-colorblind">Light colorblind</MenuItem>
-            <MenuItem value="light-tritanopia">Light Tritanopia</MenuItem>
-            <MenuItem value="dark-default">Dark default</MenuItem>
-            <MenuItem value="dark-colorblind">Dark colorblind</MenuItem>
-            <MenuItem value="dark-tritanopia">Dark Tritanopia</MenuItem>
-            <MenuItem value="soft-dark">Soft dark</MenuItem>
+            <MenuItem value="one-dark">One Dark</MenuItem>
+            <MenuItem value="github-light">GitHub Light</MenuItem>
+            <MenuItem value="solarized-light">Solarized Light</MenuItem>
+            <MenuItem value="vs-code-light">VS Code Light</MenuItem>
+            <MenuItem value="github-dark">GitHub Dark</MenuItem>
+            <MenuItem value="monokai">Monokai</MenuItem>
+            <MenuItem value="dracula">Dracula</MenuItem>
           </Select>
         </FormControl>
         <FormControl size="small" sx={{ minWidth: 100 }}>
