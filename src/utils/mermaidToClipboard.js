@@ -41,6 +41,11 @@ export const copyMermaidAsPNG = async (svgString, options = {}) => {
     canvas.height = svgHeight * dpr;
 
     const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Failed to get canvas context');
+      return false;
+    }
+
     ctx.scale(dpr, dpr);
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -50,20 +55,40 @@ export const copyMermaidAsPNG = async (svgString, options = {}) => {
     const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
 
     return new Promise((resolve) => {
+      // Add timeout to prevent hanging if image never loads
+      const timeout = setTimeout(() => {
+        console.error('Image loading timeout');
+        resolve(false);
+      }, 10000); // 10 second timeout
+
       img.onload = () => {
+        clearTimeout(timeout);
         try {
           ctx.drawImage(img, 0, 0, svgWidth, svgHeight);
           canvas.toBlob(async (blob) => {
             try {
+              if (!blob) {
+                console.error('Failed to create blob from canvas');
+                resolve(false);
+                return;
+              }
+
               if (options.downloadOnly) {
                 const dlUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = dlUrl;
                 a.download = 'diagram.png';
                 a.click();
-                URL.revokeObjectURL(dlUrl);
-                // data URL, nothing to revoke
+                // Clean up after a short delay to ensure download starts
+                setTimeout(() => URL.revokeObjectURL(dlUrl), 100);
                 resolve(true);
+                return;
+              }
+
+              // Check if clipboard API is available
+              if (!navigator.clipboard || !navigator.clipboard.write) {
+                console.error('Clipboard API not available');
+                resolve(false);
                 return;
               }
 
@@ -74,18 +99,19 @@ export const copyMermaidAsPNG = async (svgString, options = {}) => {
               ]);
               resolve(true);
             } catch (error) {
-              console.error('Failed to copy PNG:', error);
+              console.error('Failed to copy PNG to clipboard:', error);
               resolve(false);
             }
-          });
+          }, 'image/png');
         } catch (error) {
-          console.error('Failed to paint PNG:', error);
+          console.error('Failed to draw image on canvas:', error);
           resolve(false);
         }
       };
 
-      img.onerror = () => {
-        console.error('Failed to load SVG image');
+      img.onerror = (error) => {
+        clearTimeout(timeout);
+        console.error('Failed to load SVG image:', error);
         resolve(false);
       };
 

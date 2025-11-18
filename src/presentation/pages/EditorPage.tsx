@@ -73,6 +73,25 @@ const Logo = styled.div`
   font-size: 18px;
   white-space: nowrap;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const LogoImage = styled.img`
+  width: 28px;
+  height: 28px;
+  display: none;
+
+  @media (max-width: 640px) {
+    display: block;
+  }
+`;
+
+const LogoText = styled.span`
+  @media (max-width: 640px) {
+    display: none;
+  }
 `;
 
 const Segmented = styled.div<{ $dark: boolean }>`
@@ -360,7 +379,10 @@ export default function EditorPage() {
       <OfflineIndicator isOnline={isOnline} wasOffline={wasOffline} />
       <Header $dark={darkMode}>
         <HeaderSection>
-          <Logo>1Markdown</Logo>
+          <Logo>
+            <LogoImage src="/apple-touch-icon.png" alt="1Markdown" />
+            <LogoText>1Markdown</LogoText>
+          </Logo>
         </HeaderSection>
 
         <HeaderCenter>
