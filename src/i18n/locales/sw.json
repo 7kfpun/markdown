@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "Menyu",
+    "editor": "Mhariri",
+    "split": "Gawanya",
+    "preview": "Onyesho la Awali",
+    "editorOnly": "Mhariri pekee",
+    "splitView": "Mwonekano uliogawanywa",
+    "previewOnly": "Onyesho la awali pekee"
+  },
+  "tooltips": {
+    "feedback": "Maoni",
+    "privacy": "Faragha",
+    "sessionHistory": "Historia ya Kipindi",
+    "resetContent": "Weka upya maudhui",
+    "importFile": "Leta faili",
+    "shareLink": "Shiriki kiungo",
+    "downloadMd": "Pakua .md",
+    "downloadHtml": "Pakua HTML",
+    "exportPdf": "Hamisha PDF",
+    "lightMode": "Hali ya mwanga",
+    "darkMode": "Hali ya giza"
+  },
+  "aria": {
+    "reportBugOrFeature": "Ripoti hitilafu au omba kipengele",
+    "privacyPolicy": "Sera ya faragha",
+    "viewSessionHistory": "Tazama historia ya kipindi",
+    "resetToDefault": "Weka upya kwa maudhui ya chaguo-msingi",
+    "importMarkdown": "Leta faili la Markdown au maandishi",
+    "shareViaLink": "Shiriki kupitia kiungo kilichobanwa",
+    "downloadAsMarkdown": "Pakua kama Markdown (.md)",
+    "downloadRenderedHtml": "Pakua HTML iliyotolewa",
+    "exportToPdf": "Hamisha kwa PDF (mazungumzo ya uchapishaji)",
+    "switchToLightMode": "Badili kwa hali ya mwanga",
+    "switchToDarkMode": "Badili kwa hali ya giza",
+    "showEditorOnly": "Onyesha mhariri pekee",
+    "splitView": "Mwonekano uliogawanywa",
+    "showPreviewOnly": "Onyesha onyesho la awali pekee"
+  },
+  "menu": {
+    "shareLink": "Shiriki Kiungo",
+    "importFile": "Leta Faili",
+    "downloadMd": "Pakua .md",
+    "downloadHtml": "Pakua HTML",
+    "exportPdf": "Hamisha PDF",
+    "sessionHistory": "Historia ya Kipindi",
+    "resetContent": "Weka Upya Maudhui",
+    "reportBug": "Ripoti Hitilafu",
+    "privacyPolicy": "Sera ya Faragha",
+    "lightMode": "Hali ya Mwanga",
+    "darkMode": "Hali ya Giza",
+    "language": "Lugha"
+  },
+  "editor": {
+    "editorTheme": "Mandhari ya Mhariri",
+    "fontSize": "Ukubwa wa Fonti",
+    "wrap": "Funga",
+    "characters": "Herufi",
+    "words": "Maneno",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "Mandhari ya Onyesho la Awali",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "Kiungo kimenakiliwa!",
+    "saved": "Imehifadhiwa!",
+    "noChanges": "Hakuna mabadiliko ya kuhifadhi",
+    "resetConfirm": "Weka upya maudhui kwa chaguo-msingi? Mabadiliko ambayo hayajahifadhiwa yatapotea.",
+    "failedToShare": "Kushiriki kumeshindwa",
+    "failedToSave": "Kuhifadhi kumeshindwa"
+  },
+  "offline": {
+    "youAreOffline": "Uko nje ya mtandao",
+    "backOnline": "Rudi mtandaoni"
+  },
+  "sessionHistory": {
+    "title": "Historia ya Kipindi",
+    "close": "Funga",
+    "noSessions": "Hakuna vipindi vilivyohifadhiwa",
+    "current": "Ya Sasa",
+    "loadSession": "Pakia Kipindi",
+    "deleteSession": "Futa Kipindi",
+    "confirmDelete": "Una uhakika unataka kufuta kipindi hiki?"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "Menu",
+    "editor": "Éditeur",
+    "split": "Diviser",
+    "preview": "Aperçu",
+    "editorOnly": "Éditeur uniquement",
+    "splitView": "Vue fractionnée",
+    "previewOnly": "Aperçu uniquement"
+  },
+  "tooltips": {
+    "feedback": "Commentaires",
+    "privacy": "Confidentialité",
+    "sessionHistory": "Historique des sessions",
+    "resetContent": "Réinitialiser le contenu",
+    "importFile": "Importer un fichier",
+    "shareLink": "Partager le lien",
+    "downloadMd": "Télécharger .md",
+    "downloadHtml": "Télécharger HTML",
+    "exportPdf": "Exporter en PDF",
+    "lightMode": "Mode clair",
+    "darkMode": "Mode sombre"
+  },
+  "aria": {
+    "reportBugOrFeature": "Signaler un bug ou demander une fonctionnalité",
+    "privacyPolicy": "Politique de confidentialité",
+    "viewSessionHistory": "Voir l'historique des sessions",
+    "resetToDefault": "Réinitialiser au contenu par défaut",
+    "importMarkdown": "Importer un fichier Markdown ou texte",
+    "shareViaLink": "Partager via un lien compressé",
+    "downloadAsMarkdown": "Télécharger en Markdown (.md)",
+    "downloadRenderedHtml": "Télécharger le HTML rendu",
+    "exportToPdf": "Exporter en PDF (dialogue d'impression)",
+    "switchToLightMode": "Passer en mode clair",
+    "switchToDarkMode": "Passer en mode sombre",
+    "showEditorOnly": "Afficher l'éditeur uniquement",
+    "splitView": "Vue fractionnée",
+    "showPreviewOnly": "Afficher l'aperçu uniquement"
+  },
+  "menu": {
+    "shareLink": "Partager le lien",
+    "importFile": "Importer un fichier",
+    "downloadMd": "Télécharger .md",
+    "downloadHtml": "Télécharger HTML",
+    "exportPdf": "Exporter en PDF",
+    "sessionHistory": "Historique des sessions",
+    "resetContent": "Réinitialiser le contenu",
+    "reportBug": "Signaler un bug",
+    "privacyPolicy": "Politique de confidentialité",
+    "lightMode": "Mode clair",
+    "darkMode": "Mode sombre",
+    "language": "Langue"
+  },
+  "editor": {
+    "editorTheme": "Thème de l'éditeur",
+    "fontSize": "Taille de police",
+    "wrap": "Retour à la ligne",
+    "characters": "Caractères",
+    "words": "Mots",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "Thème d'aperçu",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "Lien copié !",
+    "saved": "Enregistré !",
+    "noChanges": "Aucune modification à enregistrer",
+    "resetConfirm": "Réinitialiser le contenu par défaut ? Les modifications non enregistrées seront perdues.",
+    "failedToShare": "Échec du partage",
+    "failedToSave": "Échec de l'enregistrement"
+  },
+  "offline": {
+    "youAreOffline": "Vous êtes hors ligne",
+    "backOnline": "De retour en ligne"
+  },
+  "sessionHistory": {
+    "title": "Historique des sessions",
+    "close": "Fermer",
+    "noSessions": "Aucune session enregistrée",
+    "current": "Actuel",
+    "loadSession": "Charger la session",
+    "deleteSession": "Supprimer la session",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette session ?"
+  }
+}

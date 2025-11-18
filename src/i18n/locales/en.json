@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "Menu",
+    "editor": "Editor",
+    "split": "Split",
+    "preview": "Preview",
+    "editorOnly": "Editor only",
+    "splitView": "Split view",
+    "previewOnly": "Preview only"
+  },
+  "tooltips": {
+    "feedback": "Feedback",
+    "privacy": "Privacy",
+    "sessionHistory": "Session History",
+    "resetContent": "Reset content",
+    "importFile": "Import file",
+    "shareLink": "Share link",
+    "downloadMd": "Download .md",
+    "downloadHtml": "Download HTML",
+    "exportPdf": "Export PDF",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode"
+  },
+  "aria": {
+    "reportBugOrFeature": "Report a bug or request a feature",
+    "privacyPolicy": "Privacy policy",
+    "viewSessionHistory": "View session history",
+    "resetToDefault": "Reset to default content",
+    "importMarkdown": "Import Markdown or text file",
+    "shareViaLink": "Share via compressed link",
+    "downloadAsMarkdown": "Download as Markdown (.md)",
+    "downloadRenderedHtml": "Download rendered HTML",
+    "exportToPdf": "Export to PDF (print dialog)",
+    "switchToLightMode": "Switch to light mode",
+    "switchToDarkMode": "Switch to dark mode",
+    "showEditorOnly": "Show editor only",
+    "splitView": "Split view",
+    "showPreviewOnly": "Show preview only"
+  },
+  "menu": {
+    "shareLink": "Share Link",
+    "importFile": "Import File",
+    "downloadMd": "Download .md",
+    "downloadHtml": "Download HTML",
+    "exportPdf": "Export PDF",
+    "sessionHistory": "Session History",
+    "resetContent": "Reset Content",
+    "reportBug": "Report Bug",
+    "privacyPolicy": "Privacy Policy",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "language": "Language"
+  },
+  "editor": {
+    "editorTheme": "Editor Theme",
+    "fontSize": "Font Size",
+    "wrap": "Wrap",
+    "characters": "Characters",
+    "words": "Words",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "Preview Theme",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "Link copied!",
+    "saved": "Saved!",
+    "noChanges": "No changes to save",
+    "resetConfirm": "Reset content to default? Unsaved changes will be lost.",
+    "failedToShare": "Failed to share",
+    "failedToSave": "Failed to save"
+  },
+  "offline": {
+    "youAreOffline": "You are offline",
+    "backOnline": "Back online"
+  },
+  "sessionHistory": {
+    "title": "Session History",
+    "close": "Close",
+    "noSessions": "No saved sessions",
+    "current": "Current",
+    "loadSession": "Load Session",
+    "deleteSession": "Delete Session",
+    "confirmDelete": "Are you sure you want to delete this session?"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "メニュー",
+    "editor": "エディター",
+    "split": "分割",
+    "preview": "プレビュー",
+    "editorOnly": "エディターのみ",
+    "splitView": "分割表示",
+    "previewOnly": "プレビューのみ"
+  },
+  "tooltips": {
+    "feedback": "フィードバック",
+    "privacy": "プライバシー",
+    "sessionHistory": "セッション履歴",
+    "resetContent": "コンテンツをリセット",
+    "importFile": "ファイルをインポート",
+    "shareLink": "リンクを共有",
+    "downloadMd": ".mdをダウンロード",
+    "downloadHtml": "HTMLをダウンロード",
+    "exportPdf": "PDFをエクスポート",
+    "lightMode": "ライトモード",
+    "darkMode": "ダークモード"
+  },
+  "aria": {
+    "reportBugOrFeature": "バグを報告または機能をリクエスト",
+    "privacyPolicy": "プライバシーポリシー",
+    "viewSessionHistory": "セッション履歴を表示",
+    "resetToDefault": "デフォルトコンテンツにリセット",
+    "importMarkdown": "Markdownまたはテキストファイルをインポート",
+    "shareViaLink": "圧縮リンクで共有",
+    "downloadAsMarkdown": "Markdown (.md)としてダウンロード",
+    "downloadRenderedHtml": "レンダリングされたHTMLをダウンロード",
+    "exportToPdf": "PDFにエクスポート（印刷ダイアログ）",
+    "switchToLightMode": "ライトモードに切り替え",
+    "switchToDarkMode": "ダークモードに切り替え",
+    "showEditorOnly": "エディターのみを表示",
+    "splitView": "分割表示",
+    "showPreviewOnly": "プレビューのみを表示"
+  },
+  "menu": {
+    "shareLink": "リンクを共有",
+    "importFile": "ファイルをインポート",
+    "downloadMd": ".mdをダウンロード",
+    "downloadHtml": "HTMLをダウンロード",
+    "exportPdf": "PDFをエクスポート",
+    "sessionHistory": "セッション履歴",
+    "resetContent": "コンテンツをリセット",
+    "reportBug": "バグを報告",
+    "privacyPolicy": "プライバシーポリシー",
+    "lightMode": "ライトモード",
+    "darkMode": "ダークモード",
+    "language": "言語"
+  },
+  "editor": {
+    "editorTheme": "エディターテーマ",
+    "fontSize": "フォントサイズ",
+    "wrap": "折り返し",
+    "characters": "文字数",
+    "words": "単語数",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "プレビューテーマ",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "リンクをコピーしました！",
+    "saved": "保存しました！",
+    "noChanges": "保存する変更はありません",
+    "resetConfirm": "コンテンツをデフォルトにリセットしますか？保存されていない変更は失われます。",
+    "failedToShare": "共有に失敗しました",
+    "failedToSave": "保存に失敗しました"
+  },
+  "offline": {
+    "youAreOffline": "オフラインです",
+    "backOnline": "オンラインに戻りました"
+  },
+  "sessionHistory": {
+    "title": "セッション履歴",
+    "close": "閉じる",
+    "noSessions": "保存されたセッションはありません",
+    "current": "現在",
+    "loadSession": "セッションを読み込む",
+    "deleteSession": "セッションを削除",
+    "confirmDelete": "このセッションを削除してもよろしいですか？"
+  }
+}

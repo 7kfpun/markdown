@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "మెను",
+    "editor": "ఎడిటర్",
+    "split": "విభజించు",
+    "preview": "ప్రివ్యూ",
+    "editorOnly": "ఎడిటర్ మాత్రమే",
+    "splitView": "విభజించిన వీక్షణ",
+    "previewOnly": "ప్రివ్యూ మాత్రమే"
+  },
+  "tooltips": {
+    "feedback": "అభిప్రాయం",
+    "privacy": "గోప్యత",
+    "sessionHistory": "సెషన్ చరిత్ర",
+    "resetContent": "కంటెంట్‌ను రీసెట్ చేయండి",
+    "importFile": "ఫైల్‌ను దిగుమతి చేయండి",
+    "shareLink": "లింక్‌ను భాగస్వామ్యం చేయండి",
+    "downloadMd": ".md డౌన్‌లోడ్ చేయండి",
+    "downloadHtml": "HTML డౌన్‌లోడ్ చేయండి",
+    "exportPdf": "PDF ఎగుమతి చేయండి",
+    "lightMode": "లైట్ మోడ్",
+    "darkMode": "డార్క్ మోడ్"
+  },
+  "aria": {
+    "reportBugOrFeature": "బగ్‌ను నివేదించండి లేదా ఫీచర్‌ను అభ్యర్థించండి",
+    "privacyPolicy": "గోప్యతా విధానం",
+    "viewSessionHistory": "సెషన్ చరిత్రను వీక్షించండి",
+    "resetToDefault": "డిఫాల్ట్ కంటెంట్‌కు రీసెట్ చేయండి",
+    "importMarkdown": "Markdown లేదా టెక్స్ట్ ఫైల్‌ను దిగుమతి చేయండి",
+    "shareViaLink": "కంప్రెస్డ్ లింక్ ద్వారా భాగస్వామ్యం చేయండి",
+    "downloadAsMarkdown": "Markdown (.md)గా డౌన్‌లోడ్ చేయండి",
+    "downloadRenderedHtml": "రెండర్ చేసిన HTML ను డౌన్‌లోడ్ చేయండి",
+    "exportToPdf": "PDFకు ఎగుమతి చేయండి (ప్రింట్ డైలాగ్)",
+    "switchToLightMode": "లైట్ మోడ్‌కు మారండి",
+    "switchToDarkMode": "డార్క్ మోడ్‌కు మారండి",
+    "showEditorOnly": "ఎడిటర్ మాత్రమే చూపించు",
+    "splitView": "విభజించిన వీక్షణ",
+    "showPreviewOnly": "ప్రివ్యూ మాత్రమే చూపించు"
+  },
+  "menu": {
+    "shareLink": "లింక్‌ను భాగస్వామ్యం చేయండి",
+    "importFile": "ఫైల్‌ను దిగుమతి చేయండి",
+    "downloadMd": ".md డౌన్‌లోడ్ చేయండి",
+    "downloadHtml": "HTML డౌన్‌లోడ్ చేయండి",
+    "exportPdf": "PDF ఎగుమతి చేయండి",
+    "sessionHistory": "సెషన్ చరిత్ర",
+    "resetContent": "కంటెంట్‌ను రీసెట్ చేయండి",
+    "reportBug": "బగ్‌ను నివేదించండి",
+    "privacyPolicy": "గోప్యతా విధానం",
+    "lightMode": "లైట్ మోడ్",
+    "darkMode": "డార్క్ మోడ్",
+    "language": "భాష"
+  },
+  "editor": {
+    "editorTheme": "ఎడిటర్ థీమ్",
+    "fontSize": "ఫాంట్ పరిమాణం",
+    "wrap": "చుట్టు",
+    "characters": "అక్షరాలు",
+    "words": "పదాలు",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "ప్రివ్యూ థీమ్",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "లింక్ కాపీ చేయబడింది!",
+    "saved": "సేవ్ చేయబడింది!",
+    "noChanges": "సేవ్ చేయడానికి మార్పులు లేవు",
+    "resetConfirm": "కంటెంట్‌ను డిఫాల్ట్‌కు రీసెట్ చేయాలా? సేవ్ చేయని మార్పులు పోతాయి.",
+    "failedToShare": "భాగస్వామ్యం విఫలమైంది",
+    "failedToSave": "సేవ్ చేయడం విఫలమైంది"
+  },
+  "offline": {
+    "youAreOffline": "మీరు ఆఫ్‌లైన్‌లో ఉన్నారు",
+    "backOnline": "తిరిగి ఆన్‌లైన్"
+  },
+  "sessionHistory": {
+    "title": "సెషన్ చరిత్ర",
+    "close": "మూసివేయి",
+    "noSessions": "సేవ్ చేసిన సెషన్‌లు లేవు",
+    "current": "ప్రస్తుతం",
+    "loadSession": "సెషన్‌ను లోడ్ చేయండి",
+    "deleteSession": "సెషన్‌ను తొలగించండి",
+    "confirmDelete": "మీరు ఖచ్చితంగా ఈ సెషన్‌ను తొలగించాలనుకుంటున్నారా?"
+  }
+}

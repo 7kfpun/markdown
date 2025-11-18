@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "Меню",
+    "editor": "Редактор",
+    "split": "Разделить",
+    "preview": "Предпросмотр",
+    "editorOnly": "Только редактор",
+    "splitView": "Разделенный вид",
+    "previewOnly": "Только предпросмотр"
+  },
+  "tooltips": {
+    "feedback": "Обратная связь",
+    "privacy": "Конфиденциальность",
+    "sessionHistory": "История сеансов",
+    "resetContent": "Сбросить содержимое",
+    "importFile": "Импортировать файл",
+    "shareLink": "Поделиться ссылкой",
+    "downloadMd": "Скачать .md",
+    "downloadHtml": "Скачать HTML",
+    "exportPdf": "Экспорт в PDF",
+    "lightMode": "Светлый режим",
+    "darkMode": "Темный режим"
+  },
+  "aria": {
+    "reportBugOrFeature": "Сообщить об ошибке или запросить функцию",
+    "privacyPolicy": "Политика конфиденциальности",
+    "viewSessionHistory": "Просмотреть историю сеансов",
+    "resetToDefault": "Сбросить к содержимому по умолчанию",
+    "importMarkdown": "Импортировать файл Markdown или текстовый файл",
+    "shareViaLink": "Поделиться через сжатую ссылку",
+    "downloadAsMarkdown": "Скачать как Markdown (.md)",
+    "downloadRenderedHtml": "Скачать отрендеренный HTML",
+    "exportToPdf": "Экспорт в PDF (диалог печати)",
+    "switchToLightMode": "Переключиться на светлый режим",
+    "switchToDarkMode": "Переключиться на темный режим",
+    "showEditorOnly": "Показать только редактор",
+    "splitView": "Разделенный вид",
+    "showPreviewOnly": "Показать только предпросмотр"
+  },
+  "menu": {
+    "shareLink": "Поделиться ссылкой",
+    "importFile": "Импортировать файл",
+    "downloadMd": "Скачать .md",
+    "downloadHtml": "Скачать HTML",
+    "exportPdf": "Экспорт в PDF",
+    "sessionHistory": "История сеансов",
+    "resetContent": "Сбросить содержимое",
+    "reportBug": "Сообщить об ошибке",
+    "privacyPolicy": "Политика конфиденциальности",
+    "lightMode": "Светлый режим",
+    "darkMode": "Темный режим",
+    "language": "Язык"
+  },
+  "editor": {
+    "editorTheme": "Тема редактора",
+    "fontSize": "Размер шрифта",
+    "wrap": "Перенос",
+    "characters": "Символы",
+    "words": "Слова",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "Тема предпросмотра",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "Ссылка скопирована!",
+    "saved": "Сохранено!",
+    "noChanges": "Нет изменений для сохранения",
+    "resetConfirm": "Сбросить содержимое к значению по умолчанию? Несохраненные изменения будут потеряны.",
+    "failedToShare": "Не удалось поделиться",
+    "failedToSave": "Не удалось сохранить"
+  },
+  "offline": {
+    "youAreOffline": "Вы не в сети",
+    "backOnline": "Снова в сети"
+  },
+  "sessionHistory": {
+    "title": "История сеансов",
+    "close": "Закрыть",
+    "noSessions": "Нет сохраненных сеансов",
+    "current": "Текущий",
+    "loadSession": "Загрузить сеанс",
+    "deleteSession": "Удалить сеанс",
+    "confirmDelete": "Вы уверены, что хотите удалить этот сеанс?"
+  }
+}

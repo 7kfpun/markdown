@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "Menú",
+    "editor": "Editor",
+    "split": "Dividir",
+    "preview": "Vista previa",
+    "editorOnly": "Solo editor",
+    "splitView": "Vista dividida",
+    "previewOnly": "Solo vista previa"
+  },
+  "tooltips": {
+    "feedback": "Comentarios",
+    "privacy": "Privacidad",
+    "sessionHistory": "Historial de sesiones",
+    "resetContent": "Restablecer contenido",
+    "importFile": "Importar archivo",
+    "shareLink": "Compartir enlace",
+    "downloadMd": "Descargar .md",
+    "downloadHtml": "Descargar HTML",
+    "exportPdf": "Exportar PDF",
+    "lightMode": "Modo claro",
+    "darkMode": "Modo oscuro"
+  },
+  "aria": {
+    "reportBugOrFeature": "Reportar un error o solicitar una función",
+    "privacyPolicy": "Política de privacidad",
+    "viewSessionHistory": "Ver historial de sesiones",
+    "resetToDefault": "Restablecer al contenido predeterminado",
+    "importMarkdown": "Importar archivo Markdown o de texto",
+    "shareViaLink": "Compartir mediante enlace comprimido",
+    "downloadAsMarkdown": "Descargar como Markdown (.md)",
+    "downloadRenderedHtml": "Descargar HTML renderizado",
+    "exportToPdf": "Exportar a PDF (diálogo de impresión)",
+    "switchToLightMode": "Cambiar a modo claro",
+    "switchToDarkMode": "Cambiar a modo oscuro",
+    "showEditorOnly": "Mostrar solo editor",
+    "splitView": "Vista dividida",
+    "showPreviewOnly": "Mostrar solo vista previa"
+  },
+  "menu": {
+    "shareLink": "Compartir enlace",
+    "importFile": "Importar archivo",
+    "downloadMd": "Descargar .md",
+    "downloadHtml": "Descargar HTML",
+    "exportPdf": "Exportar PDF",
+    "sessionHistory": "Historial de sesiones",
+    "resetContent": "Restablecer contenido",
+    "reportBug": "Reportar error",
+    "privacyPolicy": "Política de privacidad",
+    "lightMode": "Modo claro",
+    "darkMode": "Modo oscuro",
+    "language": "Idioma"
+  },
+  "editor": {
+    "editorTheme": "Tema del editor",
+    "fontSize": "Tamaño de fuente",
+    "wrap": "Ajustar línea",
+    "characters": "Caracteres",
+    "words": "Palabras",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "Tema de vista previa",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "¡Enlace copiado!",
+    "saved": "¡Guardado!",
+    "noChanges": "No hay cambios para guardar",
+    "resetConfirm": "¿Restablecer contenido al predeterminado? Se perderán los cambios no guardados.",
+    "failedToShare": "Error al compartir",
+    "failedToSave": "Error al guardar"
+  },
+  "offline": {
+    "youAreOffline": "Estás desconectado",
+    "backOnline": "Conectado de nuevo"
+  },
+  "sessionHistory": {
+    "title": "Historial de sesiones",
+    "close": "Cerrar",
+    "noSessions": "No hay sesiones guardadas",
+    "current": "Actual",
+    "loadSession": "Cargar sesión",
+    "deleteSession": "Eliminar sesión",
+    "confirmDelete": "¿Estás seguro de que quieres eliminar esta sesión?"
+  }
+}

@@ -14,6 +14,8 @@ import { generateShareLink } from '../../utils/compression';
 import { downloadMarkdown } from '../../utils/export';
 import { useOnlineStatus } from '../../utils/useOnlineStatus';
 import { createSessionMetadata, saveSessionMetadata, getCurrentSessionMetadata, createSnapshot } from '../../utils/sessionHistory';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/language/LanguageSwitcher';
 
 const PageContainer = styled(Box)`
   display: flex;
@@ -232,6 +234,7 @@ export default function EditorPage() {
     editorWrap,
     previewTheme,
   } = useMarkdownStore();
+  const { t } = useTranslation();
 
   const [toast, setToast] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -269,10 +272,10 @@ export default function EditorPage() {
     try {
       const link = generateShareLink(content);
       await navigator.clipboard.writeText(link);
-      setToast('Link copied!');
+      setToast(t('messages.linkCopied'));
       setTimeout(() => setToast(''), 2000);
     } catch (error) {
-      const reason = error instanceof Error ? error.message : 'Failed to share';
+      const reason = error instanceof Error ? error.message : t('messages.failedToShare');
       setToast(reason);
       setTimeout(() => setToast(''), 2000);
     }
@@ -395,7 +398,7 @@ export default function EditorPage() {
 
   const handleReset = () => {
     if (content !== DEFAULT_MARKDOWN) {
-      const confirmed = window.confirm('Reset content to default? Unsaved changes will be lost.');
+      const confirmed = window.confirm(t('messages.resetConfirm'));
       if (!confirmed) return;
     }
     resetContent();
@@ -406,7 +409,7 @@ export default function EditorPage() {
       // Check if content has changed since last save
       if (content === lastSavedContentRef.current) {
         // Content unchanged - show toast but don't create new snapshot
-        setToast('No changes to save');
+        setToast(t('messages.noChanges'));
         setTimeout(() => setToast(''), 2000);
         return;
       }
@@ -442,14 +445,14 @@ export default function EditorPage() {
       }
 
       // Show success toast
-      setToast('Saved!');
+      setToast(t('messages.saved'));
       setTimeout(() => setToast(''), 2000);
     } catch (error) {
-      const reason = error instanceof Error ? error.message : 'Failed to save';
+      const reason = error instanceof Error ? error.message : t('messages.failedToSave');
       setToast(reason);
       setTimeout(() => setToast(''), 2000);
     }
-  }, [content, storageKey, switchStorageKey, editorTheme, editorFontSize, editorWrap, previewTheme, darkMode]);
+  }, [content, storageKey, switchStorageKey, editorTheme, editorFontSize, editorWrap, previewTheme, darkMode, t]);
 
   // Add Cmd/Ctrl+S keyboard shortcut
   useEffect(() => {
@@ -473,113 +476,114 @@ export default function EditorPage() {
       <Header $dark={darkMode}>
         <HeaderSection>
           <Logo>
-            <LogoImage src="/apple-touch-icon.png" alt="1Markdown" />
-            <LogoText>1Markdown</LogoText>
+            <LogoImage src="/apple-touch-icon.png" alt={t('app.name')} />
+            <LogoText>{t('app.name')}</LogoText>
           </Logo>
         </HeaderSection>
 
         <HeaderCenter>
           <Segmented $dark={darkMode}>
-            <Tooltip title="Editor only" arrow>
+            <Tooltip title={t('header.editorOnly')} arrow>
               <SegmentedButton
-                aria-label="Show editor only"
+                aria-label={t('aria.showEditorOnly')}
                 $active={layoutMode === 'editor-only'}
                 $dark={darkMode}
                 onClick={() => togglePanels('editor-only')}
               >
-                Editor
+                {t('header.editor')}
               </SegmentedButton>
             </Tooltip>
-            <Tooltip title="Split view" arrow>
+            <Tooltip title={t('header.splitView')} arrow>
               <SegmentedButton
-                aria-label="Split view"
+                aria-label={t('aria.splitView')}
                 $active={layoutMode === 'split'}
                 $dark={darkMode}
                 onClick={() => togglePanels('split')}
               >
-                Split
+                {t('header.split')}
               </SegmentedButton>
             </Tooltip>
-            <Tooltip title="Preview only" arrow>
+            <Tooltip title={t('header.previewOnly')} arrow>
               <SegmentedButton
-                aria-label="Show preview only"
+                aria-label={t('aria.showPreviewOnly')}
                 $active={layoutMode === 'preview-only'}
                 $dark={darkMode}
                 onClick={() => togglePanels('preview-only')}
               >
-                Preview
+                {t('header.preview')}
               </SegmentedButton>
             </Tooltip>
           </Segmented>
         </HeaderCenter>
 
         <HeaderRightDesktop>
-          <Tooltip title="Feedback" arrow>
+          <Tooltip title={t('tooltips.feedback')} arrow>
             <ToolbarIconButton
-              aria-label="Report a bug or request a feature"
+              aria-label={t('aria.reportBugOrFeature')}
               onClick={() => window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank')}
               $dark={darkMode}
             >
               <BugReport fontSize="small" />
             </ToolbarIconButton>
           </Tooltip>
-          <Tooltip title="Privacy" arrow>
+          <Tooltip title={t('tooltips.privacy')} arrow>
             <ToolbarIconButton
-              aria-label="Privacy policy"
+              aria-label={t('aria.privacyPolicy')}
               onClick={() => window.open('/privacy', '_blank')}
               $dark={darkMode}
             >
               <Policy fontSize="small" />
             </ToolbarIconButton>
           </Tooltip>
-          <Tooltip title="Session History" arrow>
+          <Tooltip title={t('tooltips.sessionHistory')} arrow>
             <ToolbarIconButton
-              aria-label="View session history"
+              aria-label={t('aria.viewSessionHistory')}
               onClick={() => setHistoryOpen(true)}
               $dark={darkMode}
             >
               <History fontSize="small" />
             </ToolbarIconButton>
           </Tooltip>
-          <Tooltip title="Reset content" arrow>
-            <ToolbarIconButton aria-label="Reset to default content" onClick={handleReset} $dark={darkMode}>
+          <Tooltip title={t('tooltips.resetContent')} arrow>
+            <ToolbarIconButton aria-label={t('aria.resetToDefault')} onClick={handleReset} $dark={darkMode}>
               <RestartAlt fontSize="small" />
             </ToolbarIconButton>
           </Tooltip>
-          <Tooltip title="Import file" arrow>
-            <ToolbarIconButton aria-label="Import Markdown or text file" onClick={handleImport} $dark={darkMode}>
+          <Tooltip title={t('tooltips.importFile')} arrow>
+            <ToolbarIconButton aria-label={t('aria.importMarkdown')} onClick={handleImport} $dark={darkMode}>
               <Upload fontSize="small" />
             </ToolbarIconButton>
           </Tooltip>
-          <Tooltip title="Share link" arrow>
-            <ToolbarIconButton aria-label="Share via compressed link" onClick={handleShare} $dark={darkMode}>
+          <Tooltip title={t('tooltips.shareLink')} arrow>
+            <ToolbarIconButton aria-label={t('aria.shareViaLink')} onClick={handleShare} $dark={darkMode}>
               <Share fontSize="small" />
             </ToolbarIconButton>
           </Tooltip>
-          <Tooltip title="Download .md" arrow>
-            <ToolbarIconButton aria-label="Download as Markdown (.md)" onClick={handleExport} $dark={darkMode}>
+          <Tooltip title={t('tooltips.downloadMd')} arrow>
+            <ToolbarIconButton aria-label={t('aria.downloadAsMarkdown')} onClick={handleExport} $dark={darkMode}>
               <GetApp fontSize="small" />
             </ToolbarIconButton>
           </Tooltip>
-          <Tooltip title="Download HTML" arrow>
-            <ToolbarIconButton aria-label="Download rendered HTML" onClick={handleExportHTML} $dark={darkMode}>
+          <Tooltip title={t('tooltips.downloadHtml')} arrow>
+            <ToolbarIconButton aria-label={t('aria.downloadRenderedHtml')} onClick={handleExportHTML} $dark={darkMode}>
               <Description fontSize="small" />
             </ToolbarIconButton>
           </Tooltip>
-          <Tooltip title="Export PDF" arrow>
-            <ToolbarIconButton aria-label="Export to PDF (print dialog)" onClick={handleExportPDF} $dark={darkMode}>
+          <Tooltip title={t('tooltips.exportPdf')} arrow>
+            <ToolbarIconButton aria-label={t('aria.exportToPdf')} onClick={handleExportPDF} $dark={darkMode}>
               <PictureAsPdf fontSize="small" />
             </ToolbarIconButton>
           </Tooltip>
-          <Tooltip title={darkMode ? 'Light mode' : 'Dark mode'} arrow>
+          <Tooltip title={darkMode ? t('tooltips.lightMode') : t('tooltips.darkMode')} arrow>
             <ToolbarIconButton
-              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={darkMode ? t('aria.switchToLightMode') : t('aria.switchToDarkMode')}
               onClick={toggleDarkMode}
               $dark={darkMode}
             >
               {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
             </ToolbarIconButton>
           </Tooltip>
+          <LanguageSwitcher size="small" variant="standard" />
         </HeaderRightDesktop>
 
         <MenuButton $dark={darkMode} onClick={() => setMobileMenuOpen(true)}>
@@ -590,62 +594,66 @@ export default function EditorPage() {
           <MobileMenuContainer sx={{ width: 280, bgcolor: darkMode ? '#1f2937' : '#f8fbff' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                Menu
+                {t('header.menu')}
               </Typography>
               <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: darkMode ? '#e5e7eb' : '#1f1f1f' }}>
                 <Close />
               </button>
             </Box>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleShare(); }} title="Share link">
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleShare(); }} title={t('tooltips.shareLink')}>
               <Share fontSize="small" />
-              Share Link
+              {t('menu.shareLink')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleImport(); }} title="Import file">
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleImport(); }} title={t('tooltips.importFile')}>
               <Upload fontSize="small" />
-              Import File
+              {t('menu.importFile')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExport(); }} title="Download .md">
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExport(); }} title={t('tooltips.downloadMd')}>
               <GetApp fontSize="small" />
-              Download .md
+              {t('menu.downloadMd')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExportHTML(); }} title="Download HTML">
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExportHTML(); }} title={t('tooltips.downloadHtml')}>
               <Description fontSize="small" />
-              Download HTML
+              {t('menu.downloadHtml')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExportPDF(); }} title="Export PDF">
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExportPDF(); }} title={t('tooltips.exportPdf')}>
               <PictureAsPdf fontSize="small" />
-              Export PDF
+              {t('menu.exportPdf')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); setHistoryOpen(true); }} title="Session History">
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); setHistoryOpen(true); }} title={t('tooltips.sessionHistory')}>
               <History fontSize="small" />
-              Session History
+              {t('menu.sessionHistory')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleReset(); }} title="Reset content">
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleReset(); }} title={t('tooltips.resetContent')}>
               <RestartAlt fontSize="small" />
-              Reset Content
+              {t('menu.resetContent')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank'); }} title="Feedback">
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank'); }} title={t('tooltips.feedback')}>
               <BugReport fontSize="small" />
-              Report Bug
+              {t('menu.reportBug')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); window.open('/privacy', '_blank'); }} title="Privacy">
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); window.open('/privacy', '_blank'); }} title={t('tooltips.privacy')}>
               <Policy fontSize="small" />
-              Privacy Policy
+              {t('menu.privacyPolicy')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); toggleDarkMode(); }} title="Toggle theme">
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); toggleDarkMode(); }} title={darkMode ? t('tooltips.lightMode') : t('tooltips.darkMode')}>
               {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
-              {darkMode ? 'Light Mode' : 'Dark Mode'}
+              {darkMode ? t('menu.lightMode') : t('menu.darkMode')}
             </MobileMenuButton>
+
+            <Box sx={{ px: 2, py: 1 }}>
+              <LanguageSwitcher size="small" variant="outlined" />
+            </Box>
           </MobileMenuContainer>
         </Drawer>
       </Header>

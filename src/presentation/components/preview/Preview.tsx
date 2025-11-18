@@ -18,7 +18,7 @@ interface Props {
 }
 
 const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) => {
-  const { content, openMermaidModal, showPreview, showEditor, mermaidModal, darkMode } = useMarkdownStore();
+  const { content, openMermaidModal, showPreview, showEditor, darkMode } = useMarkdownStore();
   const [html, setHtml] = useState('');
   const [mermaidBlocks, setMermaidBlocks] = useState<{ code: string; id: string; cacheKey: string }[]>([]);
   const previewRef = useRef<HTMLDivElement>(null);

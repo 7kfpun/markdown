@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "القائمة",
+    "editor": "المحرر",
+    "split": "تقسيم",
+    "preview": "معاينة",
+    "editorOnly": "المحرر فقط",
+    "splitView": "عرض مقسم",
+    "previewOnly": "المعاينة فقط"
+  },
+  "tooltips": {
+    "feedback": "ملاحظات",
+    "privacy": "الخصوصية",
+    "sessionHistory": "سجل الجلسات",
+    "resetContent": "إعادة تعيين المحتوى",
+    "importFile": "استيراد ملف",
+    "shareLink": "مشاركة الرابط",
+    "downloadMd": "تنزيل .md",
+    "downloadHtml": "تنزيل HTML",
+    "exportPdf": "تصدير PDF",
+    "lightMode": "الوضع الفاتح",
+    "darkMode": "الوضع الداكن"
+  },
+  "aria": {
+    "reportBugOrFeature": "الإبلاغ عن خطأ أو طلب ميزة",
+    "privacyPolicy": "سياسة الخصوصية",
+    "viewSessionHistory": "عرض سجل الجلسات",
+    "resetToDefault": "إعادة تعيين إلى المحتوى الافتراضي",
+    "importMarkdown": "استيراد ملف Markdown أو نص",
+    "shareViaLink": "مشاركة عبر رابط مضغوط",
+    "downloadAsMarkdown": "تنزيل كـ Markdown (.md)",
+    "downloadRenderedHtml": "تنزيل HTML المعروض",
+    "exportToPdf": "تصدير إلى PDF (مربع حوار الطباعة)",
+    "switchToLightMode": "التبديل إلى الوضع الفاتح",
+    "switchToDarkMode": "التبديل إلى الوضع الداكن",
+    "showEditorOnly": "إظهار المحرر فقط",
+    "splitView": "عرض مقسم",
+    "showPreviewOnly": "إظهار المعاينة فقط"
+  },
+  "menu": {
+    "shareLink": "مشاركة الرابط",
+    "importFile": "استيراد ملف",
+    "downloadMd": "تنزيل .md",
+    "downloadHtml": "تنزيل HTML",
+    "exportPdf": "تصدير PDF",
+    "sessionHistory": "سجل الجلسات",
+    "resetContent": "إعادة تعيين المحتوى",
+    "reportBug": "الإبلاغ عن خطأ",
+    "privacyPolicy": "سياسة الخصوصية",
+    "lightMode": "الوضع الفاتح",
+    "darkMode": "الوضع الداكن",
+    "language": "اللغة"
+  },
+  "editor": {
+    "editorTheme": "سمة المحرر",
+    "fontSize": "حجم الخط",
+    "wrap": "التفاف",
+    "characters": "أحرف",
+    "words": "كلمات",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "سمة المعاينة",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "تم نسخ الرابط!",
+    "saved": "تم الحفظ!",
+    "noChanges": "لا توجد تغييرات للحفظ",
+    "resetConfirm": "إعادة تعيين المحتوى إلى الافتراضي؟ سيتم فقدان التغييرات غير المحفوظة.",
+    "failedToShare": "فشلت المشاركة",
+    "failedToSave": "فشل الحفظ"
+  },
+  "offline": {
+    "youAreOffline": "أنت غير متصل",
+    "backOnline": "العودة إلى الاتصال"
+  },
+  "sessionHistory": {
+    "title": "سجل الجلسات",
+    "close": "إغلاق",
+    "noSessions": "لا توجد جلسات محفوظة",
+    "current": "الحالي",
+    "loadSession": "تحميل الجلسة",
+    "deleteSession": "حذف الجلسة",
+    "confirmDelete": "هل أنت متأكد من أنك تريد حذف هذه الجلسة؟"
+  }
+}

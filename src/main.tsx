@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import { initAnalytics } from './utils/analytics';
+import './i18n/config';
 
 // Initialize analytics
 initAnalytics();

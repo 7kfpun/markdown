@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "選單",
+    "editor": "編輯器",
+    "split": "分割",
+    "preview": "預覽",
+    "editorOnly": "僅編輯器",
+    "splitView": "分割視圖",
+    "previewOnly": "僅預覽"
+  },
+  "tooltips": {
+    "feedback": "意見回饋",
+    "privacy": "隱私",
+    "sessionHistory": "會話歷史",
+    "resetContent": "重置內容",
+    "importFile": "匯入檔案",
+    "shareLink": "分享連結",
+    "downloadMd": "下載 .md",
+    "downloadHtml": "下載 HTML",
+    "exportPdf": "匯出 PDF",
+    "lightMode": "淺色模式",
+    "darkMode": "深色模式"
+  },
+  "aria": {
+    "reportBugOrFeature": "回報錯誤或請求功能",
+    "privacyPolicy": "隱私政策",
+    "viewSessionHistory": "查看會話歷史",
+    "resetToDefault": "重置為預設內容",
+    "importMarkdown": "匯入 Markdown 或文字檔案",
+    "shareViaLink": "透過壓縮連結分享",
+    "downloadAsMarkdown": "下載為 Markdown (.md)",
+    "downloadRenderedHtml": "下載渲染後的 HTML",
+    "exportToPdf": "匯出為 PDF（列印對話框）",
+    "switchToLightMode": "切換到淺色模式",
+    "switchToDarkMode": "切換到深色模式",
+    "showEditorOnly": "僅顯示編輯器",
+    "splitView": "分割視圖",
+    "showPreviewOnly": "僅顯示預覽"
+  },
+  "menu": {
+    "shareLink": "分享連結",
+    "importFile": "匯入檔案",
+    "downloadMd": "下載 .md",
+    "downloadHtml": "下載 HTML",
+    "exportPdf": "匯出 PDF",
+    "sessionHistory": "會話歷史",
+    "resetContent": "重置內容",
+    "reportBug": "回報錯誤",
+    "privacyPolicy": "隱私政策",
+    "lightMode": "淺色模式",
+    "darkMode": "深色模式",
+    "language": "語言"
+  },
+  "editor": {
+    "editorTheme": "編輯器主題",
+    "fontSize": "字體大小",
+    "wrap": "自動換行",
+    "characters": "字元",
+    "words": "字數",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "預覽主題",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "連結已複製！",
+    "saved": "已儲存！",
+    "noChanges": "沒有變更需要儲存",
+    "resetConfirm": "重置內容為預設值？未儲存的變更將會遺失。",
+    "failedToShare": "分享失敗",
+    "failedToSave": "儲存失敗"
+  },
+  "offline": {
+    "youAreOffline": "您目前離線",
+    "backOnline": "已重新上線"
+  },
+  "sessionHistory": {
+    "title": "會話歷史",
+    "close": "關閉",
+    "noSessions": "沒有已儲存的會話",
+    "current": "目前",
+    "loadSession": "載入會話",
+    "deleteSession": "刪除會話",
+    "confirmDelete": "您確定要刪除這個會話嗎？"
+  }
+}
