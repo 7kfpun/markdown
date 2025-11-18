@@ -52,6 +52,31 @@ export const generateShareLink = (content) => {
   return `${window.location.origin}/#paxo:${compressed}`;
 };
 
+// Generate a hash from a string (synchronous for storage compatibility)
+// Uses a combination of multiple hash functions for better distribution
+const hashString = (str) => {
+  // FNV-1a hash - better distribution than simple multiplicative hash
+  let hash = 2166136261; // FNV offset basis
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+  }
+
+  // Convert to unsigned 32-bit integer and then to base36
+  const hash1 = (hash >>> 0).toString(36);
+
+  // Second hash using different algorithm for extra uniqueness
+  let hash2 = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash2 = ((hash2 << 5) - hash2) + str.charCodeAt(i);
+    hash2 = hash2 & hash2;
+  }
+  const hash2Str = Math.abs(hash2).toString(36);
+
+  // Combine both hashes
+  return (hash1 + hash2Str).substring(0, 16);
+};
+
 // Get a unique storage key based on the URL hash
 // This allows multiple tabs with different URLs to maintain separate localStorage
 // Uses sessionStorage to "lock in" the key even after URL is cleared
@@ -65,8 +90,8 @@ export const getStorageKey = () => {
   const hash = window.location.hash;
   if (hash.startsWith('#paxo:')) {
     const compressed = hash.substring(6);
-    // Use first 16 chars of compressed data as a unique identifier
-    const sessionId = compressed.substring(0, 16);
+    // Use hash of entire compressed data for better uniqueness
+    const sessionId = hashString(compressed);
     const key = `markdown-storage-${sessionId}`;
     // Lock in this key for the session
     sessionStorage.setItem('markdown-current-storage-key', key);
@@ -76,7 +101,7 @@ export const getStorageKey = () => {
   const pathMatch = window.location.pathname.match(/\/paxo:([^/]+)/);
   if (pathMatch?.[1]) {
     const compressed = pathMatch[1];
-    const sessionId = compressed.substring(0, 16);
+    const sessionId = hashString(compressed);
     const key = `markdown-storage-${sessionId}`;
     sessionStorage.setItem('markdown-current-storage-key', key);
     return key;
