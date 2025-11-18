@@ -2,6 +2,7 @@ import React from 'react';
 import { Box } from '@mui/material';
 import styled from 'styled-components';
 import { Wifi, WifiOff } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const OfflineIndicatorBar = styled(Box) <{ $show: boolean }>`
   display: ${(props) => (props.$show ? 'flex' : 'none')};
@@ -61,12 +62,14 @@ interface OfflineIndicatorProps {
 }
 
 export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({ isOnline, wasOffline = false }) => {
+    const { t } = useTranslation();
+
     // Show offline message when offline
     if (!isOnline) {
         return (
             <OfflineIndicatorBar $show={true} role="status" aria-live="polite">
                 <WifiOff fontSize="small" />
-                <span>You're offline - all changes are saved locally</span>
+                <span>{t('offline.youAreOffline')}</span>
             </OfflineIndicatorBar>
         );
     }
@@ -76,7 +79,7 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({ isOnline, wa
         return (
             <OnlineIndicatorBar $show={true} role="status" aria-live="polite">
                 <Wifi fontSize="small" />
-                <span>Back online!</span>
+                <span>{t('offline.backOnline')}</span>
             </OnlineIndicatorBar>
         );
     }

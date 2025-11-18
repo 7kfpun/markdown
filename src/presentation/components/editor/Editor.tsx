@@ -16,6 +16,7 @@ import {
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore';
 import { DEBOUNCE_TIMES } from '../../../utils/constants';
+import { useTranslation } from 'react-i18next';
 
 export interface EditorHandle {
   scrollToRatio: (ratio: number) => void;
@@ -36,6 +37,7 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
     setEditorFontSize,
     setEditorWrap,
   } = useMarkdownStore();
+  const { t } = useTranslation();
   const [isDragOver, setIsDragOver] = useState(false);
   const editorViewRef = useRef<EditorView | null>(null);
   const onScrollHandlerRef = useRef<((ratio: number) => void) | undefined>(onScrollRatioChange);
@@ -348,27 +350,27 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
         }}
       >
         <FormControl size="small" sx={{ minWidth: 140 }}>
-          <InputLabel id="editor-theme-label">Editor Theme</InputLabel>
+          <InputLabel id="editor-theme-label">{t('editor.editorTheme')}</InputLabel>
           <Select
             labelId="editor-theme-label"
-            label="Editor Theme"
+            label={t('editor.editorTheme')}
             value={editorTheme}
             onChange={(e) => setEditorTheme(e.target.value as string)}
           >
-            <MenuItem value="one-dark">One Dark</MenuItem>
-            <MenuItem value="github-light">GitHub Light</MenuItem>
-            <MenuItem value="solarized-light">Solarized Light</MenuItem>
-            <MenuItem value="vs-code-light">VS Code Light</MenuItem>
-            <MenuItem value="github-dark">GitHub Dark</MenuItem>
-            <MenuItem value="monokai">Monokai</MenuItem>
-            <MenuItem value="dracula">Dracula</MenuItem>
+            <MenuItem value="one-dark">{t('editor.themes.oneDark')}</MenuItem>
+            <MenuItem value="github-light">{t('editor.themes.githubLight')}</MenuItem>
+            <MenuItem value="solarized-light">{t('editor.themes.solarizedLight')}</MenuItem>
+            <MenuItem value="vs-code-light">{t('editor.themes.vsCodeLight')}</MenuItem>
+            <MenuItem value="github-dark">{t('editor.themes.githubDark')}</MenuItem>
+            <MenuItem value="monokai">{t('editor.themes.monokai')}</MenuItem>
+            <MenuItem value="dracula">{t('editor.themes.dracula')}</MenuItem>
           </Select>
         </FormControl>
         <FormControl size="small" sx={{ minWidth: 100 }}>
-          <InputLabel id="editor-fontsize-label">Font Size</InputLabel>
+          <InputLabel id="editor-fontsize-label">{t('editor.fontSize')}</InputLabel>
           <Select
             labelId="editor-fontsize-label"
-            label="Font Size"
+            label={t('editor.fontSize')}
             value={editorFontSize}
             onChange={(e) => setEditorFontSize(Number(e.target.value))}
           >
@@ -381,10 +383,10 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
         </FormControl>
         <FormControlLabel
           control={<Switch size="small" checked={editorWrap} onChange={(e) => setEditorWrap(e.target.checked)} />}
-          label="Wrap"
+          label={t('editor.wrap')}
         />
         <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
-          Characters: {charCount} | Words: {wordCount}
+          {t('editor.characters')}: {charCount} | {t('editor.words')}: {wordCount}
         </Typography>
       </Box>
     </Box>

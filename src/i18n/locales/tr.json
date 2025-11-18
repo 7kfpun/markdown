@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "Menü",
+    "editor": "Düzenleyici",
+    "split": "Böl",
+    "preview": "Önizleme",
+    "editorOnly": "Sadece düzenleyici",
+    "splitView": "Bölünmüş görünüm",
+    "previewOnly": "Sadece önizleme"
+  },
+  "tooltips": {
+    "feedback": "Geri bildirim",
+    "privacy": "Gizlilik",
+    "sessionHistory": "Oturum geçmişi",
+    "resetContent": "İçeriği sıfırla",
+    "importFile": "Dosya içe aktar",
+    "shareLink": "Bağlantı paylaş",
+    "downloadMd": ".md indir",
+    "downloadHtml": "HTML indir",
+    "exportPdf": "PDF dışa aktar",
+    "lightMode": "Açık mod",
+    "darkMode": "Koyu mod"
+  },
+  "aria": {
+    "reportBugOrFeature": "Hata bildirin veya özellik isteyin",
+    "privacyPolicy": "Gizlilik politikası",
+    "viewSessionHistory": "Oturum geçmişini görüntüle",
+    "resetToDefault": "Varsayılan içeriğe sıfırla",
+    "importMarkdown": "Markdown veya metin dosyası içe aktar",
+    "shareViaLink": "Sıkıştırılmış bağlantı ile paylaş",
+    "downloadAsMarkdown": "Markdown (.md) olarak indir",
+    "downloadRenderedHtml": "Oluşturulmuş HTML'yi indir",
+    "exportToPdf": "PDF'ye aktar (yazdırma iletişim kutusu)",
+    "switchToLightMode": "Açık moda geç",
+    "switchToDarkMode": "Koyu moda geç",
+    "showEditorOnly": "Sadece düzenleyiciyi göster",
+    "splitView": "Bölünmüş görünüm",
+    "showPreviewOnly": "Sadece önizlemeyi göster"
+  },
+  "menu": {
+    "shareLink": "Bağlantı Paylaş",
+    "importFile": "Dosya İçe Aktar",
+    "downloadMd": ".md İndir",
+    "downloadHtml": "HTML İndir",
+    "exportPdf": "PDF Dışa Aktar",
+    "sessionHistory": "Oturum Geçmişi",
+    "resetContent": "İçeriği Sıfırla",
+    "reportBug": "Hata Bildir",
+    "privacyPolicy": "Gizlilik Politikası",
+    "lightMode": "Açık Mod",
+    "darkMode": "Koyu Mod",
+    "language": "Dil"
+  },
+  "editor": {
+    "editorTheme": "Düzenleyici Teması",
+    "fontSize": "Yazı Boyutu",
+    "wrap": "Kaydır",
+    "characters": "Karakter",
+    "words": "Kelime",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "Önizleme Teması",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "Bağlantı kopyalandı!",
+    "saved": "Kaydedildi!",
+    "noChanges": "Kaydedilecek değişiklik yok",
+    "resetConfirm": "İçerik varsayılana sıfırlansın mı? Kaydedilmemiş değişiklikler kaybolacak.",
+    "failedToShare": "Paylaşım başarısız",
+    "failedToSave": "Kaydetme başarısız"
+  },
+  "offline": {
+    "youAreOffline": "Çevrimdışısınız",
+    "backOnline": "Tekrar çevrimiçi"
+  },
+  "sessionHistory": {
+    "title": "Oturum Geçmişi",
+    "close": "Kapat",
+    "noSessions": "Kaydedilmiş oturum yok",
+    "current": "Mevcut",
+    "loadSession": "Oturumu Yükle",
+    "deleteSession": "Oturumu Sil",
+    "confirmDelete": "Bu oturumu silmek istediğinizden emin misiniz?"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "메뉴",
+    "editor": "편집기",
+    "split": "분할",
+    "preview": "미리보기",
+    "editorOnly": "편집기만",
+    "splitView": "분할 보기",
+    "previewOnly": "미리보기만"
+  },
+  "tooltips": {
+    "feedback": "피드백",
+    "privacy": "개인정보",
+    "sessionHistory": "세션 기록",
+    "resetContent": "콘텐츠 재설정",
+    "importFile": "파일 가져오기",
+    "shareLink": "링크 공유",
+    "downloadMd": ".md 다운로드",
+    "downloadHtml": "HTML 다운로드",
+    "exportPdf": "PDF 내보내기",
+    "lightMode": "라이트 모드",
+    "darkMode": "다크 모드"
+  },
+  "aria": {
+    "reportBugOrFeature": "버그 보고 또는 기능 요청",
+    "privacyPolicy": "개인정보 보호정책",
+    "viewSessionHistory": "세션 기록 보기",
+    "resetToDefault": "기본 콘텐츠로 재설정",
+    "importMarkdown": "Markdown 또는 텍스트 파일 가져오기",
+    "shareViaLink": "압축된 링크로 공유",
+    "downloadAsMarkdown": "Markdown (.md)으로 다운로드",
+    "downloadRenderedHtml": "렌더링된 HTML 다운로드",
+    "exportToPdf": "PDF로 내보내기 (인쇄 대화상자)",
+    "switchToLightMode": "라이트 모드로 전환",
+    "switchToDarkMode": "다크 모드로 전환",
+    "showEditorOnly": "편집기만 표시",
+    "splitView": "분할 보기",
+    "showPreviewOnly": "미리보기만 표시"
+  },
+  "menu": {
+    "shareLink": "링크 공유",
+    "importFile": "파일 가져오기",
+    "downloadMd": ".md 다운로드",
+    "downloadHtml": "HTML 다운로드",
+    "exportPdf": "PDF 내보내기",
+    "sessionHistory": "세션 기록",
+    "resetContent": "콘텐츠 재설정",
+    "reportBug": "버그 보고",
+    "privacyPolicy": "개인정보 보호정책",
+    "lightMode": "라이트 모드",
+    "darkMode": "다크 모드",
+    "language": "언어"
+  },
+  "editor": {
+    "editorTheme": "편집기 테마",
+    "fontSize": "글꼴 크기",
+    "wrap": "줄 바꿈",
+    "characters": "문자",
+    "words": "단어",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "미리보기 테마",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "링크가 복사되었습니다!",
+    "saved": "저장되었습니다!",
+    "noChanges": "저장할 변경 사항이 없습니다",
+    "resetConfirm": "콘텐츠를 기본값으로 재설정하시겠습니까? 저장되지 않은 변경 사항은 손실됩니다.",
+    "failedToShare": "공유 실패",
+    "failedToSave": "저장 실패"
+  },
+  "offline": {
+    "youAreOffline": "오프라인입니다",
+    "backOnline": "다시 온라인"
+  },
+  "sessionHistory": {
+    "title": "세션 기록",
+    "close": "닫기",
+    "noSessions": "저장된 세션이 없습니다",
+    "current": "현재",
+    "loadSession": "세션 불러오기",
+    "deleteSession": "세션 삭제",
+    "confirmDelete": "이 세션을 삭제하시겠습니까?"
+  }
+}

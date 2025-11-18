@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "Menu",
+    "editor": "Trình soạn thảo",
+    "split": "Chia",
+    "preview": "Xem trước",
+    "editorOnly": "Chỉ trình soạn thảo",
+    "splitView": "Chế độ xem chia",
+    "previewOnly": "Chỉ xem trước"
+  },
+  "tooltips": {
+    "feedback": "Phản hồi",
+    "privacy": "Quyền riêng tư",
+    "sessionHistory": "Lịch sử phiên",
+    "resetContent": "Đặt lại nội dung",
+    "importFile": "Nhập tệp",
+    "shareLink": "Chia sẻ liên kết",
+    "downloadMd": "Tải xuống .md",
+    "downloadHtml": "Tải xuống HTML",
+    "exportPdf": "Xuất PDF",
+    "lightMode": "Chế độ sáng",
+    "darkMode": "Chế độ tối"
+  },
+  "aria": {
+    "reportBugOrFeature": "Báo cáo lỗi hoặc yêu cầu tính năng",
+    "privacyPolicy": "Chính sách quyền riêng tư",
+    "viewSessionHistory": "Xem lịch sử phiên",
+    "resetToDefault": "Đặt lại về nội dung mặc định",
+    "importMarkdown": "Nhập tệp Markdown hoặc văn bản",
+    "shareViaLink": "Chia sẻ qua liên kết nén",
+    "downloadAsMarkdown": "Tải xuống dưới dạng Markdown (.md)",
+    "downloadRenderedHtml": "Tải xuống HTML đã kết xuất",
+    "exportToPdf": "Xuất sang PDF (hộp thoại in)",
+    "switchToLightMode": "Chuyển sang chế độ sáng",
+    "switchToDarkMode": "Chuyển sang chế độ tối",
+    "showEditorOnly": "Chỉ hiển thị trình soạn thảo",
+    "splitView": "Chế độ xem chia",
+    "showPreviewOnly": "Chỉ hiển thị xem trước"
+  },
+  "menu": {
+    "shareLink": "Chia sẻ liên kết",
+    "importFile": "Nhập tệp",
+    "downloadMd": "Tải xuống .md",
+    "downloadHtml": "Tải xuống HTML",
+    "exportPdf": "Xuất PDF",
+    "sessionHistory": "Lịch sử phiên",
+    "resetContent": "Đặt lại nội dung",
+    "reportBug": "Báo cáo lỗi",
+    "privacyPolicy": "Chính sách quyền riêng tư",
+    "lightMode": "Chế độ sáng",
+    "darkMode": "Chế độ tối",
+    "language": "Ngôn ngữ"
+  },
+  "editor": {
+    "editorTheme": "Chủ đề trình soạn thảo",
+    "fontSize": "Kích thước phông chữ",
+    "wrap": "Gói",
+    "characters": "Ký tự",
+    "words": "Từ",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "Chủ đề xem trước",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "Đã sao chép liên kết!",
+    "saved": "Đã lưu!",
+    "noChanges": "Không có thay đổi để lưu",
+    "resetConfirm": "Đặt lại nội dung về mặc định? Các thay đổi chưa lưu sẽ bị mất.",
+    "failedToShare": "Không thể chia sẻ",
+    "failedToSave": "Không thể lưu"
+  },
+  "offline": {
+    "youAreOffline": "Bạn đang ngoại tuyến",
+    "backOnline": "Trở lại trực tuyến"
+  },
+  "sessionHistory": {
+    "title": "Lịch sử phiên",
+    "close": "Đóng",
+    "noSessions": "Không có phiên đã lưu",
+    "current": "Hiện tại",
+    "loadSession": "Tải phiên",
+    "deleteSession": "Xóa phiên",
+    "confirmDelete": "Bạn có chắc chắn muốn xóa phiên này?"
+  }
+}

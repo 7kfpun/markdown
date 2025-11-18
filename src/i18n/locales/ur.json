@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "مینو",
+    "editor": "ایڈیٹر",
+    "split": "تقسیم",
+    "preview": "پیش نظارہ",
+    "editorOnly": "صرف ایڈیٹر",
+    "splitView": "تقسیم شدہ منظر",
+    "previewOnly": "صرف پیش نظارہ"
+  },
+  "tooltips": {
+    "feedback": "تاثرات",
+    "privacy": "رازداری",
+    "sessionHistory": "سیشن کی تاریخ",
+    "resetContent": "مواد کو دوبارہ ترتیب دیں",
+    "importFile": "فائل درآمد کریں",
+    "shareLink": "لنک شیئر کریں",
+    "downloadMd": ".md ڈاؤن لوڈ کریں",
+    "downloadHtml": "HTML ڈاؤن لوڈ کریں",
+    "exportPdf": "PDF برآمد کریں",
+    "lightMode": "روشن موڈ",
+    "darkMode": "تاریک موڈ"
+  },
+  "aria": {
+    "reportBugOrFeature": "بگ کی اطلاع دیں یا فیچر کی درخواست کریں",
+    "privacyPolicy": "رازداری کی پالیسی",
+    "viewSessionHistory": "سیشن کی تاریخ دیکھیں",
+    "resetToDefault": "ڈیفالٹ مواد پر دوبارہ ترتیب دیں",
+    "importMarkdown": "Markdown یا ٹیکسٹ فائل درآمد کریں",
+    "shareViaLink": "کمپریسڈ لنک کے ذریعے شیئر کریں",
+    "downloadAsMarkdown": "Markdown (.md) کے طور پر ڈاؤن لوڈ کریں",
+    "downloadRenderedHtml": "رینڈر شدہ HTML ڈاؤن لوڈ کریں",
+    "exportToPdf": "PDF میں برآمد کریں (پرنٹ ڈائیلاگ)",
+    "switchToLightMode": "روشن موڈ میں تبدیل کریں",
+    "switchToDarkMode": "تاریک موڈ میں تبدیل کریں",
+    "showEditorOnly": "صرف ایڈیٹر دکھائیں",
+    "splitView": "تقسیم شدہ منظر",
+    "showPreviewOnly": "صرف پیش نظارہ دکھائیں"
+  },
+  "menu": {
+    "shareLink": "لنک شیئر کریں",
+    "importFile": "فائل درآمد کریں",
+    "downloadMd": ".md ڈاؤن لوڈ کریں",
+    "downloadHtml": "HTML ڈاؤن لوڈ کریں",
+    "exportPdf": "PDF برآمد کریں",
+    "sessionHistory": "سیشن کی تاریخ",
+    "resetContent": "مواد کو دوبارہ ترتیب دیں",
+    "reportBug": "بگ کی اطلاع دیں",
+    "privacyPolicy": "رازداری کی پالیسی",
+    "lightMode": "روشن موڈ",
+    "darkMode": "تاریک موڈ",
+    "language": "زبان"
+  },
+  "editor": {
+    "editorTheme": "ایڈیٹر تھیم",
+    "fontSize": "فونٹ سائز",
+    "wrap": "لپیٹیں",
+    "characters": "حروف",
+    "words": "الفاظ",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "پیش نظارہ تھیم",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "لنک کاپی ہو گیا!",
+    "saved": "محفوظ ہو گیا!",
+    "noChanges": "محفوظ کرنے کے لیے کوئی تبدیلیاں نہیں",
+    "resetConfirm": "مواد کو ڈیفالٹ پر دوبارہ ترتیب دیں؟ غیر محفوظ شدہ تبدیلیاں ضائع ہو جائیں گی۔",
+    "failedToShare": "شیئر کرنے میں ناکام",
+    "failedToSave": "محفوظ کرنے میں ناکام"
+  },
+  "offline": {
+    "youAreOffline": "آپ آف لائن ہیں",
+    "backOnline": "واپس آن لائن"
+  },
+  "sessionHistory": {
+    "title": "سیشن کی تاریخ",
+    "close": "بند کریں",
+    "noSessions": "کوئی محفوظ شدہ سیشن نہیں",
+    "current": "موجودہ",
+    "loadSession": "سیشن لوڈ کریں",
+    "deleteSession": "سیشن حذف کریں",
+    "confirmDelete": "کیا آپ واقعی اس سیشن کو حذف کرنا چاہتے ہیں؟"
+  }
+}

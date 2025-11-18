@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "मेनू",
+    "editor": "संपादक",
+    "split": "विभाजित",
+    "preview": "पूर्वावलोकन",
+    "editorOnly": "केवल संपादक",
+    "splitView": "विभाजित दृश्य",
+    "previewOnly": "केवल पूर्वावलोकन"
+  },
+  "tooltips": {
+    "feedback": "प्रतिक्रिया",
+    "privacy": "गोपनीयता",
+    "sessionHistory": "सत्र इतिहास",
+    "resetContent": "सामग्री रीसेट करें",
+    "importFile": "फ़ाइल आयात करें",
+    "shareLink": "लिंक साझा करें",
+    "downloadMd": ".md डाउनलोड करें",
+    "downloadHtml": "HTML डाउनलोड करें",
+    "exportPdf": "PDF निर्यात करें",
+    "lightMode": "लाइट मोड",
+    "darkMode": "डार्क मोड"
+  },
+  "aria": {
+    "reportBugOrFeature": "बग रिपोर्ट करें या फीचर का अनुरोध करें",
+    "privacyPolicy": "गोपनीयता नीति",
+    "viewSessionHistory": "सत्र इतिहास देखें",
+    "resetToDefault": "डिफ़ॉल्ट सामग्री पर रीसेट करें",
+    "importMarkdown": "Markdown या टेक्स्ट फ़ाइल आयात करें",
+    "shareViaLink": "संपीड़ित लिंक के माध्यम से साझा करें",
+    "downloadAsMarkdown": "Markdown (.md) के रूप में डाउनलोड करें",
+    "downloadRenderedHtml": "रेंडर किया गया HTML डाउनलोड करें",
+    "exportToPdf": "PDF में निर्यात करें (प्रिंट डायलॉग)",
+    "switchToLightMode": "लाइट मोड पर स्विच करें",
+    "switchToDarkMode": "डार्क मोड पर स्विच करें",
+    "showEditorOnly": "केवल संपादक दिखाएं",
+    "splitView": "विभाजित दृश्य",
+    "showPreviewOnly": "केवल पूर्वावलोकन दिखाएं"
+  },
+  "menu": {
+    "shareLink": "लिंक साझा करें",
+    "importFile": "फ़ाइल आयात करें",
+    "downloadMd": ".md डाउनलोड करें",
+    "downloadHtml": "HTML डाउनलोड करें",
+    "exportPdf": "PDF निर्यात करें",
+    "sessionHistory": "सत्र इतिहास",
+    "resetContent": "सामग्री रीसेट करें",
+    "reportBug": "बग रिपोर्ट करें",
+    "privacyPolicy": "गोपनीयता नीति",
+    "lightMode": "लाइट मोड",
+    "darkMode": "डार्क मोड",
+    "language": "भाषा"
+  },
+  "editor": {
+    "editorTheme": "संपादक थीम",
+    "fontSize": "फ़ॉन्ट आकार",
+    "wrap": "लपेटें",
+    "characters": "वर्ण",
+    "words": "शब्द",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "पूर्वावलोकन थीम",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "लिंक कॉपी किया गया!",
+    "saved": "सहेजा गया!",
+    "noChanges": "सहेजने के लिए कोई परिवर्तन नहीं",
+    "resetConfirm": "सामग्री को डिफ़ॉल्ट पर रीसेट करें? असहेजे गए परिवर्तन खो जाएंगे।",
+    "failedToShare": "साझा करने में विफल",
+    "failedToSave": "सहेजने में विफल"
+  },
+  "offline": {
+    "youAreOffline": "आप ऑफ़लाइन हैं",
+    "backOnline": "वापस ऑनलाइन"
+  },
+  "sessionHistory": {
+    "title": "सत्र इतिहास",
+    "close": "बंद करें",
+    "noSessions": "कोई सहेजे गए सत्र नहीं",
+    "current": "वर्तमान",
+    "loadSession": "सत्र लोड करें",
+    "deleteSession": "सत्र हटाएं",
+    "confirmDelete": "क्या आप वाकई इस सत्र को हटाना चाहते हैं?"
+  }
+}

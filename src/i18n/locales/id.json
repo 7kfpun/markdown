@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "Menu",
+    "editor": "Editor",
+    "split": "Pisah",
+    "preview": "Pratinjau",
+    "editorOnly": "Hanya editor",
+    "splitView": "Tampilan terpisah",
+    "previewOnly": "Hanya pratinjau"
+  },
+  "tooltips": {
+    "feedback": "Umpan balik",
+    "privacy": "Privasi",
+    "sessionHistory": "Riwayat sesi",
+    "resetContent": "Setel ulang konten",
+    "importFile": "Impor file",
+    "shareLink": "Bagikan tautan",
+    "downloadMd": "Unduh .md",
+    "downloadHtml": "Unduh HTML",
+    "exportPdf": "Ekspor PDF",
+    "lightMode": "Mode terang",
+    "darkMode": "Mode gelap"
+  },
+  "aria": {
+    "reportBugOrFeature": "Laporkan bug atau minta fitur",
+    "privacyPolicy": "Kebijakan privasi",
+    "viewSessionHistory": "Lihat riwayat sesi",
+    "resetToDefault": "Setel ulang ke konten default",
+    "importMarkdown": "Impor file Markdown atau teks",
+    "shareViaLink": "Bagikan melalui tautan terkompresi",
+    "downloadAsMarkdown": "Unduh sebagai Markdown (.md)",
+    "downloadRenderedHtml": "Unduh HTML yang dirender",
+    "exportToPdf": "Ekspor ke PDF (dialog cetak)",
+    "switchToLightMode": "Beralih ke mode terang",
+    "switchToDarkMode": "Beralih ke mode gelap",
+    "showEditorOnly": "Tampilkan hanya editor",
+    "splitView": "Tampilan terpisah",
+    "showPreviewOnly": "Tampilkan hanya pratinjau"
+  },
+  "menu": {
+    "shareLink": "Bagikan Tautan",
+    "importFile": "Impor File",
+    "downloadMd": "Unduh .md",
+    "downloadHtml": "Unduh HTML",
+    "exportPdf": "Ekspor PDF",
+    "sessionHistory": "Riwayat Sesi",
+    "resetContent": "Setel Ulang Konten",
+    "reportBug": "Laporkan Bug",
+    "privacyPolicy": "Kebijakan Privasi",
+    "lightMode": "Mode Terang",
+    "darkMode": "Mode Gelap",
+    "language": "Bahasa"
+  },
+  "editor": {
+    "editorTheme": "Tema Editor",
+    "fontSize": "Ukuran Font",
+    "wrap": "Bungkus",
+    "characters": "Karakter",
+    "words": "Kata",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "Tema Pratinjau",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "Tautan disalin!",
+    "saved": "Tersimpan!",
+    "noChanges": "Tidak ada perubahan untuk disimpan",
+    "resetConfirm": "Setel ulang konten ke default? Perubahan yang belum disimpan akan hilang.",
+    "failedToShare": "Gagal membagikan",
+    "failedToSave": "Gagal menyimpan"
+  },
+  "offline": {
+    "youAreOffline": "Anda sedang offline",
+    "backOnline": "Kembali online"
+  },
+  "sessionHistory": {
+    "title": "Riwayat Sesi",
+    "close": "Tutup",
+    "noSessions": "Tidak ada sesi tersimpan",
+    "current": "Saat ini",
+    "loadSession": "Muat Sesi",
+    "deleteSession": "Hapus Sesi",
+    "confirmDelete": "Apakah Anda yakin ingin menghapus sesi ini?"
+  }
+}

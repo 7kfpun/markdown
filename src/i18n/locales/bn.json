@@ -1,0 +1,106 @@
+{
+  "app": {
+    "name": "1Markdown"
+  },
+  "header": {
+    "menu": "মেনু",
+    "editor": "সম্পাদক",
+    "split": "বিভক্ত",
+    "preview": "পূর্বরূপ",
+    "editorOnly": "শুধুমাত্র সম্পাদক",
+    "splitView": "বিভক্ত দৃশ্য",
+    "previewOnly": "শুধুমাত্র পূর্বরূপ"
+  },
+  "tooltips": {
+    "feedback": "প্রতিক্রিয়া",
+    "privacy": "গোপনীয়তা",
+    "sessionHistory": "সেশন ইতিহাস",
+    "resetContent": "বিষয়বস্তু রিসেট করুন",
+    "importFile": "ফাইল আমদানি করুন",
+    "shareLink": "লিঙ্ক শেয়ার করুন",
+    "downloadMd": ".md ডাউনলোড করুন",
+    "downloadHtml": "HTML ডাউনলোড করুন",
+    "exportPdf": "PDF রপ্তানি করুন",
+    "lightMode": "হালকা মোড",
+    "darkMode": "গাঢ় মোড"
+  },
+  "aria": {
+    "reportBugOrFeature": "বাগ রিপোর্ট করুন বা বৈশিষ্ট্যের অনুরোধ করুন",
+    "privacyPolicy": "গোপনীয়তা নীতি",
+    "viewSessionHistory": "সেশন ইতিহাস দেখুন",
+    "resetToDefault": "ডিফল্ট বিষয়বস্তুতে রিসেট করুন",
+    "importMarkdown": "Markdown বা টেক্সট ফাইল আমদানি করুন",
+    "shareViaLink": "সংকুচিত লিঙ্কের মাধ্যমে শেয়ার করুন",
+    "downloadAsMarkdown": "Markdown (.md) হিসাবে ডাউনলোড করুন",
+    "downloadRenderedHtml": "রেন্ডার করা HTML ডাউনলোড করুন",
+    "exportToPdf": "PDF এ রপ্তানি করুন (প্রিন্ট ডায়ালগ)",
+    "switchToLightMode": "হালকা মোডে স্যুইচ করুন",
+    "switchToDarkMode": "গাঢ় মোডে স্যুইচ করুন",
+    "showEditorOnly": "শুধুমাত্র সম্পাদক দেখান",
+    "splitView": "বিভক্ত দৃশ্য",
+    "showPreviewOnly": "শুধুমাত্র পূর্বরূপ দেখান"
+  },
+  "menu": {
+    "shareLink": "লিঙ্ক শেয়ার করুন",
+    "importFile": "ফাইল আমদানি করুন",
+    "downloadMd": ".md ডাউনলোড করুন",
+    "downloadHtml": "HTML ডাউনলোড করুন",
+    "exportPdf": "PDF রপ্তানি করুন",
+    "sessionHistory": "সেশন ইতিহাস",
+    "resetContent": "বিষয়বস্তু রিসেট করুন",
+    "reportBug": "বাগ রিপোর্ট করুন",
+    "privacyPolicy": "গোপনীয়তা নীতি",
+    "lightMode": "হালকা মোড",
+    "darkMode": "গাঢ় মোড",
+    "language": "ভাষা"
+  },
+  "editor": {
+    "editorTheme": "সম্পাদক থিম",
+    "fontSize": "ফন্ট আকার",
+    "wrap": "মোড়ানো",
+    "characters": "অক্ষর",
+    "words": "শব্দ",
+    "themes": {
+      "oneDark": "One Dark",
+      "githubLight": "GitHub Light",
+      "solarizedLight": "Solarized Light",
+      "vsCodeLight": "VS Code Light",
+      "githubDark": "GitHub Dark",
+      "monokai": "Monokai",
+      "dracula": "Dracula"
+    }
+  },
+  "preview": {
+    "previewTheme": "পূর্বরূপ থিম",
+    "themes": {
+      "github": "GitHub",
+      "gitlab": "GitLab",
+      "solarizedLight": "Solarized Light",
+      "solarizedDark": "Solarized Dark",
+      "notion": "Notion",
+      "bear": "Bear",
+      "ulysses": "Ulysses"
+    }
+  },
+  "messages": {
+    "linkCopied": "লিঙ্ক কপি করা হয়েছে!",
+    "saved": "সংরক্ষিত!",
+    "noChanges": "সংরক্ষণ করার জন্য কোনো পরিবর্তন নেই",
+    "resetConfirm": "ডিফল্টে বিষয়বস্তু রিসেট করবেন? অসংরক্ষিত পরিবর্তনগুলি হারিয়ে যাবে।",
+    "failedToShare": "শেয়ার করতে ব্যর্থ",
+    "failedToSave": "সংরক্ষণ করতে ব্যর্থ"
+  },
+  "offline": {
+    "youAreOffline": "আপনি অফলাইন আছেন",
+    "backOnline": "আবার অনলাইন"
+  },
+  "sessionHistory": {
+    "title": "সেশন ইতিহাস",
+    "close": "বন্ধ করুন",
+    "noSessions": "কোনো সংরক্ষিত সেশন নেই",
+    "current": "বর্তমান",
+    "loadSession": "সেশন লোড করুন",
+    "deleteSession": "সেশন মুছুন",
+    "confirmDelete": "আপনি কি নিশ্চিত যে আপনি এই সেশনটি মুছতে চান?"
+  }
+}
