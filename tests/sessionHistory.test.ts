@@ -33,36 +33,85 @@ describe('sessionHistory utilities', () => {
       expect(sessions).toEqual([]);
     });
 
+    it('clears and returns empty array for incompatible data types (array)', () => {
+      // Store old array format
+      const oldArrayData = [
+        { storageKey: 'key1', title: 'Doc 1', lastModified: 1000, contentPreview: '', createdAt: 1000 },
+        { storageKey: 'key2', title: 'Doc 2', lastModified: 2000, contentPreview: '', createdAt: 2000 },
+      ];
+      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(oldArrayData));
+
+      const sessions = getAllSessions();
+
+      // Should return empty and clear the old data
+      expect(sessions).toEqual([]);
+      const stored = localStorage.getItem('markdown-sessions-metadata');
+      expect(JSON.parse(stored!)).toEqual({});
+    });
+
+    it('clears and returns empty array for corrupted data', () => {
+      // Store corrupted data
+      localStorage.setItem('markdown-sessions-metadata', 'invalid json {{{');
+
+      const sessions = getAllSessions();
+
+      // Should return empty and clear the corrupted data
+      expect(sessions).toEqual([]);
+      const stored = localStorage.getItem('markdown-sessions-metadata');
+      expect(JSON.parse(stored!)).toEqual({});
+    });
+
+    it('clears and returns empty array for non-object types', () => {
+      // Store primitive types
+      localStorage.setItem('markdown-sessions-metadata', JSON.stringify('string'));
+
+      const sessions1 = getAllSessions();
+      expect(sessions1).toEqual([]);
+
+      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(123));
+      const sessions2 = getAllSessions();
+      expect(sessions2).toEqual([]);
+
+      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(null));
+      const sessions3 = getAllSessions();
+      expect(sessions3).toEqual([]);
+    });
+
     it('returns all sessions from localStorage', () => {
-      const mockSessions: SessionMetadata[] = [
-        {
+      const mockSessionsObj: Record<string, SessionMetadata> = {
+        key1: {
           storageKey: 'key1',
           title: 'Document 1',
-          lastModified: Date.now(),
+          lastModified: 2000,
           contentPreview: 'Preview 1',
-          createdAt: Date.now(),
+          createdAt: 2000,
         },
-        {
+        key2: {
           storageKey: 'key2',
           title: 'Document 2',
-          lastModified: Date.now(),
+          lastModified: 1000,
           contentPreview: 'Preview 2',
-          createdAt: Date.now(),
+          createdAt: 1000,
         },
-      ];
-      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(mockSessions));
+      };
+      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(mockSessionsObj));
 
       const sessions = getAllSessions();
       expect(sessions).toHaveLength(2);
+      // Sorted by lastModified descending, so key1 (2000) should be first
       expect(sessions[0].title).toBe('Document 1');
       expect(sessions[1].title).toBe('Document 2');
     });
 
-    it('returns empty array when localStorage contains invalid JSON', () => {
+    it('clears corrupted JSON and returns empty array', () => {
       localStorage.setItem('markdown-sessions-metadata', 'invalid json');
       const sessions = getAllSessions();
       expect(sessions).toEqual([]);
       expect(console.error).toHaveBeenCalled();
+
+      // Should have cleared the corrupted data
+      const stored = localStorage.getItem('markdown-sessions-metadata');
+      expect(JSON.parse(stored!)).toEqual({});
     });
   });
 

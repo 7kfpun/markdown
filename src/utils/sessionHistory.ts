@@ -17,18 +17,22 @@ const getSessionsObject = (): Record<string, SessionMetadata> => {
   try {
     const stored = localStorage.getItem(SESSIONS_METADATA_KEY);
     if (!stored) return {};
+
     const parsed = JSON.parse(stored);
-    // Handle migration from array to object
-    if (Array.isArray(parsed)) {
-      const obj: Record<string, SessionMetadata> = {};
-      parsed.forEach((session) => {
-        obj[session.storageKey] = session;
-      });
-      return obj;
+
+    // Type validation: must be a plain object, not array or other types
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      // Old/incompatible data format - clear and start fresh
+      console.warn('Incompatible session data format detected, clearing and starting fresh');
+      localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify({}));
+      return {};
     }
+
     return parsed;
   } catch (error) {
     console.error('Failed to get sessions:', error);
+    // Clear corrupted data
+    localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify({}));
     return {};
   }
 };
