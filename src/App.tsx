@@ -3,12 +3,20 @@ import { useEffect, useRef } from 'react';
 import { getMuiTheme } from './presentation/theme/muiTheme';
 import AppRouter from './presentation/router/AppRouter';
 import { useMarkdownStore } from './infrastructure/store/useMarkdownStore';
-import { extractContentFromUrl } from './utils/compression';
+import { extractContentFromUrl, getStorageKey } from './utils/compression';
+import {
+  createSessionMetadata,
+  saveSessionMetadata,
+  startAutoSave,
+  stopAutoSave,
+  getCurrentSessionMetadata,
+} from './utils/sessionHistory';
 
 export default function App() {
-  const { darkMode, updateContent, content, resetContent } = useMarkdownStore();
+  const { darkMode, updateContent, content, resetContent, storageKey } = useMarkdownStore();
   const initialUrlContentRef = useRef<string | null>(null);
   const urlClearedRef = useRef(false);
+  const saveMetadataTimeoutRef = useRef<number>();
 
   // Load URL content on mount
   useEffect(() => {
@@ -43,6 +51,55 @@ export default function App() {
       resetContent();
     }
   }, [content, resetContent]);
+
+  // Initialize session metadata on mount
+  useEffect(() => {
+    if (content && storageKey) {
+      const existing = getCurrentSessionMetadata(storageKey);
+      const metadata = createSessionMetadata(storageKey, content, existing || undefined);
+      saveSessionMetadata(metadata);
+    }
+  }, []); // Only run on mount
+
+  // Auto-save: update session metadata every 10 minutes
+  useEffect(() => {
+    const saveMetadata = () => {
+      if (content && storageKey) {
+        const existing = getCurrentSessionMetadata(storageKey);
+        const metadata = createSessionMetadata(storageKey, content, existing || undefined);
+        saveSessionMetadata(metadata);
+      }
+    };
+
+    startAutoSave(saveMetadata);
+
+    return () => {
+      stopAutoSave();
+    };
+  }, [content, storageKey]);
+
+  // Update session metadata when content changes (debounced)
+  useEffect(() => {
+    if (!content || !storageKey) return;
+
+    // Clear previous timeout
+    if (saveMetadataTimeoutRef.current) {
+      clearTimeout(saveMetadataTimeoutRef.current);
+    }
+
+    // Debounce metadata update (save after 2 seconds of no changes)
+    saveMetadataTimeoutRef.current = window.setTimeout(() => {
+      const existing = getCurrentSessionMetadata(storageKey);
+      const metadata = createSessionMetadata(storageKey, content, existing || undefined);
+      saveSessionMetadata(metadata);
+    }, 2000);
+
+    return () => {
+      if (saveMetadataTimeoutRef.current) {
+        clearTimeout(saveMetadataTimeoutRef.current);
+      }
+    };
+  }, [content, storageKey]);
 
   const theme = getMuiTheme(darkMode);
 
