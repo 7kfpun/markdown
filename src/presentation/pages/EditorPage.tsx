@@ -13,7 +13,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { generateShareLink } from '../../utils/compression';
 import { downloadMarkdown } from '../../utils/export';
 import { useOnlineStatus } from '../../utils/useOnlineStatus';
-import { createSessionMetadata, saveSessionMetadata, getCurrentSessionMetadata } from '../../utils/sessionHistory';
+import { createSessionMetadata, saveSessionMetadata, getCurrentSessionMetadata, createSnapshot } from '../../utils/sessionHistory';
 
 const PageContainer = styled(Box)`
   display: flex;
@@ -226,6 +226,11 @@ export default function EditorPage() {
     mermaidModal,
     closeMermaidModal,
     storageKey,
+    switchStorageKey,
+    editorTheme,
+    editorFontSize,
+    editorWrap,
+    previewTheme,
   } = useMarkdownStore();
 
   const [toast, setToast] = useState('');
@@ -392,11 +397,26 @@ export default function EditorPage() {
 
   const handleManualSave = useCallback(() => {
     try {
-      // Save to localStorage happens automatically through zustand persist middleware
-      // Just update session metadata to reflect the latest save
-      const existingMetadata = getCurrentSessionMetadata(storageKey);
-      const metadata = createSessionMetadata(storageKey, content, existingMetadata || undefined);
-      saveSessionMetadata(metadata);
+      // Create a new snapshot with current state (version control)
+      const fullState = {
+        state: {
+          content,
+          editorTheme,
+          editorFontSize,
+          editorWrap,
+          previewTheme,
+          darkMode,
+          storageKey, // Will be replaced by createSnapshot
+        },
+      };
+
+      const newKey = createSnapshot(content, fullState);
+
+      // Switch to the new storage key
+      switchStorageKey(newKey);
+
+      // Update sessionStorage to lock in the new key
+      sessionStorage.setItem('markdown-current-storage-key', newKey);
 
       // Show success toast
       setToast('Saved!');
@@ -406,7 +426,7 @@ export default function EditorPage() {
       setToast(reason);
       setTimeout(() => setToast(''), 2000);
     }
-  }, [content, storageKey]);
+  }, [content, storageKey, switchStorageKey, editorTheme, editorFontSize, editorWrap, previewTheme, darkMode]);
 
   // Add Cmd/Ctrl+S keyboard shortcut
   useEffect(() => {
