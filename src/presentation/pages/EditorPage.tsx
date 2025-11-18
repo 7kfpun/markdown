@@ -158,7 +158,7 @@ const Resizer = styled.div`
 `;
 
 const HeaderRightDesktop = styled(HeaderRight)`
-  @media (max-width: 1024px) {
+  @media (max-width: 1100px) {
     display: none;
   }
 `;
@@ -174,7 +174,7 @@ const MenuButton = styled.button<{ $dark: boolean }>`
   border-radius: 9px;
   transition: all 0.15s ease;
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1100px) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
