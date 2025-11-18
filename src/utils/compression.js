@@ -52,29 +52,24 @@ export const generateShareLink = (content) => {
   return `${window.location.origin}/#paxo:${compressed}`;
 };
 
-// Generate a hash from a string (synchronous for storage compatibility)
-// Uses a combination of multiple hash functions for better distribution
+// Simple MD5-like hash (non-cryptographic, for collision resistance only)
 const hashString = (str) => {
-  // FNV-1a hash - better distribution than simple multiplicative hash
-  let hash = 2166136261; // FNV offset basis
+  // Use built-in hash if available (some browsers)
+  let h1 = 0xdeadbeef;
+  let h2 = 0x41c6ce57;
+
   for (let i = 0; i < str.length; i++) {
-    hash ^= str.charCodeAt(i);
-    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
   }
 
-  // Convert to unsigned 32-bit integer and then to base36
-  const hash1 = (hash >>> 0).toString(36);
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
 
-  // Second hash using different algorithm for extra uniqueness
-  let hash2 = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash2 = ((hash2 << 5) - hash2) + str.charCodeAt(i);
-    hash2 = hash2 & hash2;
-  }
-  const hash2Str = Math.abs(hash2).toString(36);
-
-  // Combine both hashes
-  return (hash1 + hash2Str).substring(0, 16);
+  // Combine and convert to base36 (shorter than hex)
+  const combined = 4294967296 * (2097151 & h2) + (h1 >>> 0);
+  return Math.abs(combined).toString(36).substring(0, 10);
 };
 
 // Get a unique storage key based on the URL hash
