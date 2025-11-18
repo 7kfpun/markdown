@@ -17,8 +17,9 @@ import { DEBOUNCE_TIMES } from './utils/constants';
 export default function App() {
   const { darkMode, updateContent, content, storageKey, switchStorageKey } = useMarkdownStore();
   const saveMetadataTimeoutRef = useRef<number>();
+  const lastAutoSavedContentRef = useRef<string>('');
 
-  // Load URL content on mount
+  // Load URL content on mount and clear hash after loading
   useEffect(() => {
     const sharedContent = extractContentFromUrl();
     if (sharedContent) {
@@ -27,8 +28,15 @@ export default function App() {
       if (!content || content === '') {
         updateContent(sharedContent);
       }
+      // Clear paxo URL hash after loading shared content
+      // This transitions from shared URL to local storage
+      if (window.location.hash.startsWith('#paxo:')) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
     }
-  }, [updateContent]);
+    // Initialize auto-save tracker with current content
+    lastAutoSavedContentRef.current = content;
+  }, [updateContent]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   // Initialize session metadata on mount
@@ -40,15 +48,23 @@ export default function App() {
     }
   }, []); // Only run on mount
 
-  // Auto-save: create snapshot every 10 minutes
+  // Auto-save: create snapshot every 10 minutes (only if content changed)
   useEffect(() => {
     const createAutoSnapshot = () => {
-      if (content) {
+      if (content && content !== lastAutoSavedContentRef.current) {
         // Create a new snapshot (new storage key + metadata)
         const newKey = createSnapshot(content);
         console.log('Auto-snapshot created:', newKey);
         // Update store to use new storage key
         switchStorageKey(newKey);
+        // Track the saved content to avoid duplicate snapshots
+        lastAutoSavedContentRef.current = content;
+        // Clear paxo URL hash if it exists (we're now using local storage, not shared URL)
+        if (window.location.hash.startsWith('#paxo:')) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      } else if (content === lastAutoSavedContentRef.current) {
+        console.log('Auto-save skipped: content unchanged');
       }
     };
 

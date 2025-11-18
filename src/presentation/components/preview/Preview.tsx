@@ -17,7 +17,7 @@ interface Props {
   onScrollRatioChange?: (ratio: number) => void;
 }
 
-const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) => {
+const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) => {
   const { content, openMermaidModal, showPreview, showEditor, mermaidModal, darkMode } = useMarkdownStore();
   const [html, setHtml] = useState('');
   const [mermaidBlocks, setMermaidBlocks] = useState<{ code: string; id: string; cacheKey: string }[]>([]);
@@ -358,4 +358,8 @@ const Preview = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) 
     </Paper>
   );
 });
+
+// Wrap in React.memo to prevent unnecessary re-renders when parent re-renders
+// This prevents Mermaid diagrams from reloading when unrelated UI changes occur (e.g., opening menus)
+const Preview = React.memo(PreviewComponent);
 export default Preview;
