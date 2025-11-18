@@ -221,8 +221,8 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
         const scroller = editorViewRef.current?.scrollDOM;
         if (!scroller) return;
         isSyncingRef.current = true;
-        const maxScroll = scroller.scrollHeight - scroller.clientHeight;
-        scroller.scrollTop = ratio * maxScroll;
+        // Use full height calculation for better content alignment
+        scroller.scrollTop = ratio * scroller.scrollHeight - scroller.clientHeight / 2;
         // Release the lock on the next frame to allow incoming sync
         requestAnimationFrame(() => {
           isSyncingRef.current = false;
@@ -240,8 +240,8 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
           isSyncingRef.current = true;
 
           const scroller = view.scrollDOM;
-          const maxScroll = scroller.scrollHeight - scroller.clientHeight;
-          const ratio = maxScroll > 0 ? scroller.scrollTop / maxScroll : 0;
+          // Use full height calculation: center of viewport position relative to total content
+          const ratio = scroller.scrollHeight > 0 ? (scroller.scrollTop + scroller.clientHeight / 2) / scroller.scrollHeight : 0;
 
           onScrollHandlerRef.current(ratio);
 
