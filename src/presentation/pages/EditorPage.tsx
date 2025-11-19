@@ -245,7 +245,6 @@ export default function EditorPage() {
   const contentRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<EditorHandle>(null);
   const previewRef = useRef<PreviewHandle>(null);
-  const syncingRef = useRef(false);
   const lastSavedContentRef = useRef<string>('');
   const dragState = useRef<{ active: boolean; startX: number; startSizes: { editor: number; preview: number } }>({
     active: false,
@@ -358,43 +357,6 @@ export default function EditorPage() {
     return 'preview-only';
   }, [showEditor, showPreview]);
 
-  const handleEditorScroll = useCallback(
-    (ratio: number) => {
-      console.log('[EditorPage] handleEditorScroll called', {
-        ratio,
-        showPreview,
-        hasPreviewRef: !!previewRef.current,
-        isSyncing: syncingRef.current,
-      });
-      if (!showPreview || !previewRef.current) return;
-      if (syncingRef.current) return;
-      syncingRef.current = true;
-      previewRef.current.scrollToRatio(ratio);
-      requestAnimationFrame(() => {
-        syncingRef.current = false;
-      });
-    },
-    [showPreview]
-  );
-
-  const handlePreviewScroll = useCallback(
-    (ratio: number) => {
-      console.log('[EditorPage] handlePreviewScroll called', {
-        ratio,
-        showEditor,
-        hasEditorRef: !!editorRef.current,
-        isSyncing: syncingRef.current,
-      });
-      if (!showEditor || !editorRef.current) return;
-      if (syncingRef.current) return;
-      syncingRef.current = true;
-      editorRef.current.scrollToRatio(ratio);
-      requestAnimationFrame(() => {
-        syncingRef.current = false;
-      });
-    },
-    [showEditor]
-  );
 
   const handleReset = () => {
     if (content !== DEFAULT_MARKDOWN) {
@@ -665,7 +627,7 @@ export default function EditorPage() {
             flex: showEditor && showPreview ? `${splitSizes.editor}` : 1,
           }}
         >
-          <Editor ref={editorRef} onScrollRatioChange={handleEditorScroll} />
+          <Editor ref={editorRef} />
         </PanelContainer>
 
         {showEditor && showPreview && <Resizer onMouseDown={handleStartResize} />}
@@ -676,7 +638,7 @@ export default function EditorPage() {
             flex: showEditor && showPreview ? `${splitSizes.preview}` : 1,
           }}
         >
-          <Preview ref={previewRef} onScrollRatioChange={handlePreviewScroll} />
+          <Preview ref={previewRef} />
         </PanelContainer>
       </ContentContainer>
 

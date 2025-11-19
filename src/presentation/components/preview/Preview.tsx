@@ -9,22 +9,14 @@ import 'highlight.js/styles/github-dark.css';
 
 const marked = getMarkedInstance();
 
-export interface PreviewHandle {
-  scrollToRatio: (ratio: number) => void;
-}
+export interface PreviewHandle { }
 
-interface Props {
-  onScrollRatioChange?: (ratio: number) => void;
-}
-
-const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) => {
+const PreviewComponent = forwardRef<PreviewHandle>((_, ref) => {
   const { content, openMermaidModal, showPreview, showEditor, darkMode } = useMarkdownStore();
   const [html, setHtml] = useState('');
   const [mermaidBlocks, setMermaidBlocks] = useState<{ code: string; id: string; cacheKey: string }[]>([]);
   const previewRef = useRef<HTMLDivElement>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
-  const onScrollHandlerRef = useRef<((ratio: number) => void) | undefined>(onScrollRatioChange);
-  const isSyncingRef = useRef(false);
   const latestSvgCache = useRef(new Map<string, string>());
   const renderTimeoutRef = useRef<number>();
   const lastHtmlRef = useRef<string>('');
@@ -57,9 +49,7 @@ const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange
     });
   }, [html, mermaidBlocks]);
 
-  useEffect(() => {
-    onScrollHandlerRef.current = onScrollRatioChange;
-  }, [onScrollRatioChange]);
+
 
   // Initialize mermaid with theme based on dark mode
   useEffect(() => {
@@ -250,18 +240,7 @@ const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange
 
   useImperativeHandle(
     ref,
-    () => ({
-      scrollToRatio: (ratio: number) => {
-        const scroller = previewRef.current;
-        if (!scroller) return;
-        isSyncingRef.current = true;
-        // Use full height calculation for better content alignment
-        scroller.scrollTop = ratio * scroller.scrollHeight - scroller.clientHeight / 2;
-        requestAnimationFrame(() => {
-          isSyncingRef.current = false;
-        });
-      },
-    }),
+    () => ({}),
     []
   );
 
@@ -269,17 +248,6 @@ const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange
     <Paper
       ref={previewRef}
       elevation={0}
-      onScroll={() => {
-        const scroller = previewRef.current;
-        if (!scroller || !onScrollHandlerRef.current || isSyncingRef.current) return;
-        isSyncingRef.current = true;
-        // Use full height calculation: center of viewport position relative to total content
-        const ratio = scroller.scrollHeight > 0 ? (scroller.scrollTop + scroller.clientHeight / 2) / scroller.scrollHeight : 0;
-        onScrollHandlerRef.current(ratio);
-        requestAnimationFrame(() => {
-          isSyncingRef.current = false;
-        });
-      }}
       sx={{
         height: '100%',
         overflow: 'auto',

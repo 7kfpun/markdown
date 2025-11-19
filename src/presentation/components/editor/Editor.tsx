@@ -18,15 +18,11 @@ import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore
 import { DEBOUNCE_TIMES } from '../../../utils/constants';
 import { useTranslation } from 'react-i18next';
 
-export interface EditorHandle {
-  scrollToRatio: (ratio: number) => void;
-}
+export interface EditorHandle { }
 
-interface Props {
-  onScrollRatioChange?: (ratio: number) => void;
-}
+interface Props { }
 
-const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) => {
+const Editor = forwardRef<EditorHandle, Props>((_, ref) => {
   const {
     content,
     updateContent,
@@ -40,8 +36,6 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
   const { t } = useTranslation();
   const [isDragOver, setIsDragOver] = useState(false);
   const editorViewRef = useRef<EditorView | null>(null);
-  const onScrollHandlerRef = useRef<((ratio: number) => void) | undefined>(onScrollRatioChange);
-  const isSyncingRef = useRef(false);
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
   const countUpdateTimeoutRef = useRef<number>();
@@ -64,9 +58,6 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
     };
   }, [content]);
 
-  useEffect(() => {
-    onScrollHandlerRef.current = onScrollRatioChange;
-  }, [onScrollRatioChange]);
 
   const baseMarkdownStyles = useMemo(
     () =>
@@ -216,42 +207,10 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
 
   useImperativeHandle(
     ref,
-    () => ({
-      scrollToRatio: (ratio: number) => {
-        const scroller = editorViewRef.current?.scrollDOM;
-        if (!scroller) return;
-        isSyncingRef.current = true;
-        // Use full height calculation for better content alignment
-        scroller.scrollTop = ratio * scroller.scrollHeight - scroller.clientHeight / 2;
-        // Release the lock on the next frame to allow incoming sync
-        requestAnimationFrame(() => {
-          isSyncingRef.current = false;
-        });
-      },
-    }),
+    () => ({}),
     []
   );
 
-  const scrollHandlerExtension = useMemo(
-    () =>
-      EditorView.domEventHandlers({
-        scroll: (event, view) => {
-          if (!onScrollHandlerRef.current || isSyncingRef.current) return;
-          isSyncingRef.current = true;
-
-          const scroller = view.scrollDOM;
-          // Use full height calculation: center of viewport position relative to total content
-          const ratio = scroller.scrollHeight > 0 ? (scroller.scrollTop + scroller.clientHeight / 2) / scroller.scrollHeight : 0;
-
-          onScrollHandlerRef.current(ratio);
-
-          requestAnimationFrame(() => {
-            isSyncingRef.current = false;
-          });
-        },
-      }),
-    []
-  );
 
   const handleFileDrop = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
@@ -307,7 +266,6 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
             markdown(),
             baseMarkdownStyles,
             keymap.of(markdownKeymap),
-            scrollHandlerExtension,
             editorWrap ? EditorView.lineWrapping : [],
           ]}
           theme={codeMirrorTheme}
