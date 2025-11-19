@@ -1,0 +1,27 @@
+name = "1markdown"
+compatibility_date = "2024-11-19"
+
+pages_build_output_dir = "./dist/client"
+
+[site]
+bucket = "./dist/client"
+
+# Configure routing for SSR
+[[routes]]
+pattern = "/*"
+custom_domain = true
+
+# Environment variables
+[vars]
+NODE_ENV = "production"
+
+# Build configuration
+[build]
+command = "yarn build:ssr"
+
+# Cloudflare Pages settings
+[env.production]
+vars = { NODE_ENV = "production" }
+
+[env.preview]
+vars = { NODE_ENV = "preview" }

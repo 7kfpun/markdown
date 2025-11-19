@@ -38,17 +38,40 @@ function injectServiceWorkerVersion() {
   };
 }
 
-export default defineConfig({
-  plugins: [react(), injectServiceWorkerVersion()],
-  base: '/',
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    // Copy service worker to dist
-    rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
+export default defineConfig(({ mode }) => {
+  const isSSR = mode === 'ssr';
+
+  return {
+    plugins: [react(), !isSSR && injectServiceWorkerVersion()].filter(Boolean),
+    base: '/',
+    build: {
+      outDir: isSSR ? 'dist/server' : 'dist/client',
+      assetsDir: 'assets',
+      ssr: isSSR ? 'src/entry-server.tsx' : undefined,
+      rollupOptions: {
+        input: isSSR
+          ? 'src/entry-server.tsx'
+          : resolve(__dirname, 'index.html'),
+        output: isSSR
+          ? {
+              format: 'es',
+              entryFileNames: 'entry-server.js',
+            }
+          : undefined,
       },
+      manifest: !isSSR,
+      ssrManifest: !isSSR,
     },
-  },
+    ssr: {
+      noExternal: isSSR
+        ? [
+            '@mui/material',
+            '@mui/icons-material',
+            '@emotion/react',
+            '@emotion/styled',
+            'react-router-dom',
+          ]
+        : undefined,
+    },
+  };
 });
