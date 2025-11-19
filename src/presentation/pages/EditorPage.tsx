@@ -359,17 +359,11 @@ export default function EditorPage() {
   }, [showEditor, showPreview]);
 
   const handleEditorScroll = useCallback(
-    (ratio: number) => {
-      console.log('[EditorPage] handleEditorScroll called', {
-        ratio,
-        showPreview,
-        hasPreviewRef: !!previewRef.current,
-        isSyncing: syncingRef.current,
-      });
+    (line: number) => {
       if (!showPreview || !previewRef.current) return;
       if (syncingRef.current) return;
       syncingRef.current = true;
-      previewRef.current.scrollToRatio(ratio);
+      previewRef.current.scrollToLine(line);
       requestAnimationFrame(() => {
         syncingRef.current = false;
       });
@@ -377,24 +371,6 @@ export default function EditorPage() {
     [showPreview]
   );
 
-  const handlePreviewScroll = useCallback(
-    (ratio: number) => {
-      console.log('[EditorPage] handlePreviewScroll called', {
-        ratio,
-        showEditor,
-        hasEditorRef: !!editorRef.current,
-        isSyncing: syncingRef.current,
-      });
-      if (!showEditor || !editorRef.current) return;
-      if (syncingRef.current) return;
-      syncingRef.current = true;
-      editorRef.current.scrollToRatio(ratio);
-      requestAnimationFrame(() => {
-        syncingRef.current = false;
-      });
-    },
-    [showEditor]
-  );
 
   const handleReset = () => {
     if (content !== DEFAULT_MARKDOWN) {
@@ -665,7 +641,7 @@ export default function EditorPage() {
             flex: showEditor && showPreview ? `${splitSizes.editor}` : 1,
           }}
         >
-          <Editor ref={editorRef} onScrollRatioChange={handleEditorScroll} />
+          <Editor ref={editorRef} onScrollLineChange={handleEditorScroll} />
         </PanelContainer>
 
         {showEditor && showPreview && <Resizer onMouseDown={handleStartResize} />}
@@ -676,7 +652,7 @@ export default function EditorPage() {
             flex: showEditor && showPreview ? `${splitSizes.preview}` : 1,
           }}
         >
-          <Preview ref={previewRef} onScrollRatioChange={handlePreviewScroll} />
+          <Preview ref={previewRef} />
         </PanelContainer>
       </ContentContainer>
 

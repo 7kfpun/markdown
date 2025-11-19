@@ -4,26 +4,27 @@ import DOMPurify from 'dompurify';
 import mermaid from 'mermaid';
 import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore';
 import { getMarkedInstance } from '../../../utils/markedInstance';
+import { getMarkdownLineNumbers } from '../../../utils/markdownLineNumbers';
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/github-dark.css';
 
 const marked = getMarkedInstance();
 
 export interface PreviewHandle {
-  scrollToRatio: (ratio: number) => void;
+  scrollToLine: (line: number) => void;
 }
 
 interface Props {
-  onScrollRatioChange?: (ratio: number) => void;
+  onScrollLineChange?: (line: number) => void;
 }
 
-const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange }, ref) => {
+const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollLineChange }, ref) => {
   const { content, openMermaidModal, showPreview, showEditor, darkMode } = useMarkdownStore();
   const [html, setHtml] = useState('');
   const [mermaidBlocks, setMermaidBlocks] = useState<{ code: string; id: string; cacheKey: string }[]>([]);
   const previewRef = useRef<HTMLDivElement>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
-  const onScrollHandlerRef = useRef<((ratio: number) => void) | undefined>(onScrollRatioChange);
+  const onScrollHandlerRef = useRef<((line: number) => void) | undefined>(onScrollLineChange);
   const isSyncingRef = useRef(false);
   const latestSvgCache = useRef(new Map<string, string>());
   const renderTimeoutRef = useRef<number>();
@@ -58,8 +59,22 @@ const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange
   }, [html, mermaidBlocks]);
 
   useEffect(() => {
-    onScrollHandlerRef.current = onScrollRatioChange;
-  }, [onScrollRatioChange]);
+    onScrollHandlerRef.current = onScrollLineChange;
+  }, [onScrollLineChange]);
+
+  useEffect(() => {
+    if (html && previewContainerRef.current) {
+      const lineNumbers = getMarkdownLineNumbers(content);
+      const elements = previewContainerRef.current.querySelectorAll(
+        'p, h1, h2, h3, h4, h5, h6, li, pre, blockquote, hr, table'
+      );
+      elements.forEach((el, i) => {
+        if (lineNumbers[i]) {
+          el.setAttribute('data-line', `${lineNumbers[i]}`);
+        }
+      });
+    }
+  }, [html, content]);
 
   // Initialize mermaid with theme based on dark mode
   useEffect(() => {
@@ -251,15 +266,27 @@ const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange
   useImperativeHandle(
     ref,
     () => ({
-      scrollToRatio: (ratio: number) => {
+      scrollToLine: (line: number) => {
         const scroller = previewRef.current;
         if (!scroller) return;
-        isSyncingRef.current = true;
-        // Use full height calculation for better content alignment
-        scroller.scrollTop = ratio * scroller.scrollHeight - scroller.clientHeight / 2;
-        requestAnimationFrame(() => {
-          isSyncingRef.current = false;
-        });
+
+        let element: HTMLElement | null = null;
+        // Find the closest element with a data-line attribute at or before the current line
+        for (let i = line; i > 0; i--) {
+          element = scroller.querySelector(`[data-line="${i}"]`) as HTMLElement;
+          if (element) break;
+        }
+
+        if (element) {
+          isSyncingRef.current = true;
+          const scrollerRect = scroller.getBoundingClientRect();
+          const elementRect = element.getBoundingClientRect();
+          const scrollTop = elementRect.top - scrollerRect.top + scroller.scrollTop;
+          scroller.scrollTop = scrollTop;
+          requestAnimationFrame(() => {
+            isSyncingRef.current = false;
+          });
+        }
       },
     }),
     []
@@ -384,7 +411,7 @@ const PreviewComponent = forwardRef<PreviewHandle, Props>(({ onScrollRatioChange
         },
       }}
     >
-      <Box id="preview-container" ref={previewContainerRef} />
+      <Box id="preview-container" ref={previewContainerRef} data-testid="preview-container" />
     </Paper>
   );
 });

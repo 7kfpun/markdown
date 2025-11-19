@@ -19,14 +19,14 @@ import { DEBOUNCE_TIMES } from '../../../utils/constants';
 import { useTranslation } from 'react-i18next';
 
 export interface EditorHandle {
-  scrollToRatio: (ratio: number) => void;
+  scrollToLine: (line: number) => void;
 }
 
 interface Props {
-  onScrollRatioChange?: (ratio: number) => void;
+  onScrollLineChange?: (line: number) => void;
 }
 
-const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) => {
+const Editor = forwardRef<EditorHandle, Props>(({ onScrollLineChange }, ref) => {
   const {
     content,
     updateContent,
@@ -40,7 +40,7 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
   const { t } = useTranslation();
   const [isDragOver, setIsDragOver] = useState(false);
   const editorViewRef = useRef<EditorView | null>(null);
-  const onScrollHandlerRef = useRef<((ratio: number) => void) | undefined>(onScrollRatioChange);
+  const onScrollHandlerRef = useRef<((line: number) => void) | undefined>(onScrollLineChange);
   const isSyncingRef = useRef(false);
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
@@ -65,8 +65,8 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
   }, [content]);
 
   useEffect(() => {
-    onScrollHandlerRef.current = onScrollRatioChange;
-  }, [onScrollRatioChange]);
+    onScrollHandlerRef.current = onScrollLineChange;
+  }, [onScrollLineChange]);
 
   const baseMarkdownStyles = useMemo(
     () =>
@@ -217,13 +217,14 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
   useImperativeHandle(
     ref,
     () => ({
-      scrollToRatio: (ratio: number) => {
-        const scroller = editorViewRef.current?.scrollDOM;
-        if (!scroller) return;
+      scrollToLine: (line: number) => {
+        const view = editorViewRef.current;
+        if (!view) return;
         isSyncingRef.current = true;
-        // Use full height calculation for better content alignment
-        scroller.scrollTop = ratio * scroller.scrollHeight - scroller.clientHeight / 2;
-        // Release the lock on the next frame to allow incoming sync
+        const linePos = view.state.doc.line(line).from;
+        view.dispatch({
+          effects: EditorView.scrollIntoView(linePos, { y: 'start' }),
+        });
         requestAnimationFrame(() => {
           isSyncingRef.current = false;
         });
@@ -238,13 +239,10 @@ const Editor = forwardRef<EditorHandle, Props>(({ onScrollRatioChange }, ref) =>
         scroll: (event, view) => {
           if (!onScrollHandlerRef.current || isSyncingRef.current) return;
           isSyncingRef.current = true;
-
-          const scroller = view.scrollDOM;
-          // Use full height calculation: center of viewport position relative to total content
-          const ratio = scroller.scrollHeight > 0 ? (scroller.scrollTop + scroller.clientHeight / 2) / scroller.scrollHeight : 0;
-
-          onScrollHandlerRef.current(ratio);
-
+          const fromLine = view.state.doc.lineAt(view.viewport.from).number;
+          const toLine = view.state.doc.lineAt(view.viewport.to).number;
+          const middleLine = Math.floor((fromLine + toLine) / 2);
+          onScrollHandlerRef.current(middleLine);
           requestAnimationFrame(() => {
             isSyncingRef.current = false;
           });
