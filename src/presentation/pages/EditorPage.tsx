@@ -13,7 +13,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { generateShareLink } from '../../utils/compression';
 import { downloadMarkdown } from '../../utils/export';
 import { useOnlineStatus } from '../../utils/useOnlineStatus';
-import { createSessionMetadata, saveSessionMetadata, getCurrentSessionMetadata, createSnapshot } from '../../utils/sessionHistory';
+import { createSessionMetadata, createSnapshot } from '../../utils/sessionHistory';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/language/LanguageSwitcher';
 
@@ -255,7 +255,6 @@ export default function EditorPage() {
     mermaidModal,
     closeMermaidModal,
     storageKey,
-    switchStorageKey,
     editorTheme,
     editorFontSize,
     editorWrap,
@@ -418,11 +417,9 @@ export default function EditorPage() {
 
       const newKey = createSnapshot(content, fullState);
 
-      // Switch to the new storage key
-      switchStorageKey(newKey);
-
-      // Update sessionStorage to lock in the new key
-      sessionStorage.setItem('markdown-current-storage-key', newKey);
+      // Create and add metadata to store
+      const metadata = createSessionMetadata(newKey, content);
+      useMarkdownStore.getState().addSession(metadata);
 
       // Track saved content to avoid duplicate saves
       lastSavedContentRef.current = content;
@@ -441,7 +438,7 @@ export default function EditorPage() {
       setToast(reason);
       setTimeout(() => setToast(''), 2000);
     }
-  }, [content, storageKey, switchStorageKey, editorTheme, editorFontSize, editorWrap, previewTheme, darkMode, t]);
+  }, [content, storageKey, editorTheme, editorFontSize, editorWrap, previewTheme, darkMode, t]);
 
   // Add Cmd/Ctrl+S keyboard shortcut
   useEffect(() => {
@@ -689,7 +686,7 @@ export default function EditorPage() {
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
         currentStorageKey={storageKey}
-        onLoadSession={(key) => {
+        onLoadSession={() => {
           // Session loading is handled within SessionHistory component
           setHistoryOpen(false);
         }}

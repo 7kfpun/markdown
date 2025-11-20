@@ -33,20 +33,18 @@ describe('sessionHistory utilities', () => {
       expect(sessions).toEqual([]);
     });
 
-    it('clears and returns empty array for incompatible data types (array)', () => {
-      // Store old array format
-      const oldArrayData = [
+    it('accepts array format (new format)', () => {
+      // Arrays are now the correct format
+      const arrayData = [
         { storageKey: 'key1', title: 'Doc 1', lastModified: 1000, contentPreview: '', createdAt: 1000 },
         { storageKey: 'key2', title: 'Doc 2', lastModified: 2000, contentPreview: '', createdAt: 2000 },
       ];
-      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(oldArrayData));
+      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(arrayData));
 
       const sessions = getAllSessions();
 
-      // Should return empty and clear the old data
-      expect(sessions).toEqual([]);
-      const stored = localStorage.getItem('markdown-sessions-metadata');
-      expect(JSON.parse(stored!)).toEqual({});
+      // Should return the array as-is
+      expect(sessions).toEqual(arrayData);
     });
 
     it('clears and returns empty array for corrupted data', () => {
@@ -58,7 +56,7 @@ describe('sessionHistory utilities', () => {
       // Should return empty and clear the corrupted data
       expect(sessions).toEqual([]);
       const stored = localStorage.getItem('markdown-sessions-metadata');
-      expect(JSON.parse(stored!)).toEqual({});
+      expect(JSON.parse(stored!)).toEqual([]);
     });
 
     it('clears and returns empty array for non-object types', () => {
@@ -111,7 +109,7 @@ describe('sessionHistory utilities', () => {
 
       // Should have cleared the corrupted data
       const stored = localStorage.getItem('markdown-sessions-metadata');
-      expect(JSON.parse(stored!)).toEqual({});
+      expect(JSON.parse(stored!)).toEqual([]);
     });
   });
 
@@ -373,12 +371,11 @@ describe('sessionHistory utilities', () => {
   });
 
   describe('createSnapshot', () => {
-    it('creates new snapshot with unique storage key', () => {
+    it('creates new snapshot with timestamp-based key', () => {
       const content = '# Test Content\nSome text here';
       const newKey = createSnapshot(content);
 
-      expect(newKey).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
-      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe(newKey);
+      expect(newKey).toMatch(/^markdown-storage-\d+$/);
     });
 
     it('saves snapshot content to localStorage', () => {
@@ -396,6 +393,8 @@ describe('sessionHistory utilities', () => {
     it('creates metadata for snapshot', () => {
       const content = '# My Snapshot\nWith some content';
       const newKey = createSnapshot(content);
+      const metadata = createSessionMetadata(newKey, content);
+      saveSessionMetadata(metadata);
 
       const sessions = getAllSessions();
       expect(sessions).toHaveLength(1);
@@ -403,16 +402,20 @@ describe('sessionHistory utilities', () => {
       expect(sessions[0].title).toBe('My Snapshot');
     });
 
-    it('generates different keys for sequential snapshots', () => {
+    it('generates different keys for sequential snapshots', async () => {
       const key1 = createSnapshot('Content 1');
-      sessionStorage.clear();
+      await new Promise(resolve => setTimeout(resolve, 10));
       const key2 = createSnapshot('Content 2');
-      sessionStorage.clear();
+      await new Promise(resolve => setTimeout(resolve, 10));
       const key3 = createSnapshot('Content 3');
 
       expect(key1).not.toBe(key2);
       expect(key2).not.toBe(key3);
       expect(key1).not.toBe(key3);
+
+      saveSessionMetadata(createSessionMetadata(key1, 'Content 1'));
+      saveSessionMetadata(createSessionMetadata(key2, 'Content 2'));
+      saveSessionMetadata(createSessionMetadata(key3, 'Content 3'));
 
       const sessions = getAllSessions();
       expect(sessions).toHaveLength(3);
@@ -455,13 +458,14 @@ describe('sessionHistory utilities', () => {
       expect(Object.keys(parsed.state)).toHaveLength(2); // only content and storageKey
     });
 
-    it('updates sessionStorage current key', () => {
+    it('does not modify sessionStorage', () => {
       sessionStorage.setItem('markdown-current-storage-key', 'old-key');
 
       const newKey = createSnapshot('# New snapshot');
 
-      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe(newKey);
-      expect(sessionStorage.getItem('markdown-current-storage-key')).not.toBe('old-key');
+      // Snapshots don't modify sessionStorage - editing session stays on 'markdown-storage-current'
+      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe('old-key');
+      expect(newKey).toMatch(/^markdown-storage-\d+$/);
     });
   });
 

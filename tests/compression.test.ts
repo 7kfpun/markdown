@@ -117,68 +117,25 @@ describe('compression utilities', () => {
   });
 
   describe('getStorageKey', () => {
-    it('generates unique storage key when no hash or path', () => {
+    it('returns fixed key for current editing session', () => {
       const key = getStorageKey();
-      expect(key).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
-      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe(key);
+      expect(key).toBe('markdown-storage-current');
     });
 
-    it('generates unique key from hash', () => {
+    it('returns fixed key regardless of hash', () => {
       const content = '# Test content';
       const compressed = compressToBase64(content);
       window.location.hash = `#paxo:${compressed}`;
 
       const key = getStorageKey();
-      expect(key).toMatch(/^markdown-storage-/);
-      expect(key).not.toBe('markdown-storage');
-      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe(key);
+      expect(key).toBe('markdown-storage-current');
     });
 
-    it('locks in storage key across multiple calls', () => {
-      const content = '# Test content';
-      const compressed = compressToBase64(content);
-      window.location.hash = `#paxo:${compressed}`;
-
+    it('returns same key across multiple calls', () => {
       const key1 = getStorageKey();
-      window.location.hash = ''; // Clear hash
       const key2 = getStorageKey();
-
-      // Should return same key even after hash is cleared
       expect(key1).toBe(key2);
-    });
-
-    it('generates different keys for different content', () => {
-      const compressed1 = compressToBase64('# Content 1');
-      const compressed2 = compressToBase64('# Content 2');
-
-      window.location.hash = `#paxo:${compressed1}`;
-      const key1 = getStorageKey();
-
-      sessionStorage.clear();
-      window.location.hash = `#paxo:${compressed2}`;
-      const key2 = getStorageKey();
-
-      expect(key1).not.toBe(key2);
-    });
-
-    it('generates different unique keys for new sessions', () => {
-      const key1 = getStorageKey();
-
-      sessionStorage.clear();
-      const key2 = getStorageKey();
-
-      sessionStorage.clear();
-      const key3 = getStorageKey();
-
-      // All keys should be different (uniqueness)
-      expect(key1).not.toBe(key2);
-      expect(key2).not.toBe(key3);
-      expect(key1).not.toBe(key3);
-
-      // All should match the pattern
-      expect(key1).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
-      expect(key2).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
-      expect(key3).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
+      expect(key1).toBe('markdown-storage-current');
     });
   });
 

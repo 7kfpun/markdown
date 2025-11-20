@@ -15,6 +15,8 @@ import {
   createSnapshot,
   getAllSessions,
   deleteAllSessions,
+  saveSessionMetadata,
+  createSessionMetadata,
 } from '../src/utils/sessionHistory';
 
 /**
@@ -304,12 +306,14 @@ describe('Header Features Integration', () => {
       expect(DEFAULT_MARKDOWN).toContain('# ');
     });
 
-    it('reset preserves existing sessions', () => {
+    it('reset preserves existing sessions', async () => {
       // Create some sessions
-      sessionStorage.clear();
-      createSnapshot('# Session 1');
-      sessionStorage.clear();
-      createSnapshot('# Session 2');
+      const key1 = createSnapshot('# Session 1');
+      saveSessionMetadata(createSessionMetadata(key1, '# Session 1'));
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const key2 = createSnapshot('# Session 2');
+      saveSessionMetadata(createSessionMetadata(key2, '# Session 2'));
 
       const sessionsBefore = getAllSessions();
       expect(sessionsBefore).toHaveLength(2);
@@ -322,12 +326,14 @@ describe('Header Features Integration', () => {
   });
 
   describe('Session History Integration', () => {
-    it('opens session history drawer', () => {
+    it('opens session history drawer', async () => {
       // Create test sessions
-      sessionStorage.clear();
       const key1 = createSnapshot('# Session 1\nFirst session');
-      sessionStorage.clear();
+      saveSessionMetadata(createSessionMetadata(key1, '# Session 1\nFirst session'));
+      await new Promise(resolve => setTimeout(resolve, 10));
+
       const key2 = createSnapshot('# Session 2\nSecond session');
+      saveSessionMetadata(createSessionMetadata(key2, '# Session 2\nSecond session'));
 
       const sessions = getAllSessions();
 
@@ -336,13 +342,14 @@ describe('Header Features Integration', () => {
       expect(sessions.some(s => s.storageKey === key2)).toBe(true);
     });
 
-    it('displays sessions in chronological order', () => {
+    it('displays sessions in chronological order', async () => {
       // Create sessions with delays
-      sessionStorage.clear();
       const key1 = createSnapshot('# Old Session');
+      saveSessionMetadata(createSessionMetadata(key1, '# Old Session'));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
-      sessionStorage.clear();
       const key2 = createSnapshot('# Recent Session');
+      saveSessionMetadata(createSessionMetadata(key2, '# Recent Session'));
 
       const sessions = getAllSessions();
 
@@ -357,13 +364,17 @@ describe('Header Features Integration', () => {
       }
     });
 
-    it('deletes all sessions when requested', () => {
-      sessionStorage.clear();
-      createSnapshot('# Session 1');
-      sessionStorage.clear();
-      createSnapshot('# Session 2');
-      sessionStorage.clear();
-      createSnapshot('# Session 3');
+    it('deletes all sessions when requested', async () => {
+      const key1 = createSnapshot('# Session 1');
+      saveSessionMetadata(createSessionMetadata(key1, '# Session 1'));
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const key2 = createSnapshot('# Session 2');
+      saveSessionMetadata(createSessionMetadata(key2, '# Session 2'));
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const key3 = createSnapshot('# Session 3');
+      saveSessionMetadata(createSessionMetadata(key3, '# Session 3'));
 
       expect(getAllSessions()).toHaveLength(3);
 
@@ -374,15 +385,16 @@ describe('Header Features Integration', () => {
   });
 
   describe('Manual Save (Cmd+S)', () => {
-    it('creates new snapshot when content changes', () => {
+    it('creates new snapshot when content changes', async () => {
       const content1 = '# Version 1';
       const content2 = '# Version 2';
 
-      sessionStorage.clear();
       const key1 = createSnapshot(content1);
+      saveSessionMetadata(createSessionMetadata(key1, content1));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
-      sessionStorage.clear();
       const key2 = createSnapshot(content2);
+      saveSessionMetadata(createSessionMetadata(key2, content2));
 
       expect(key1).not.toBe(key2);
 
@@ -405,12 +417,12 @@ describe('Header Features Integration', () => {
       expect(window.location.hash).toBe('');
     });
 
-    it('locks storage key after save', () => {
+    it('creates snapshot with timestamp-based key', () => {
       const content = '# New Save';
       const newKey = createSnapshot(content);
 
-      const lockedKey = sessionStorage.getItem('markdown-current-storage-key');
-      expect(lockedKey).toBe(newKey);
+      expect(newKey).toMatch(/^markdown-storage-\d+$/);
+      expect(localStorage.getItem(newKey)).toBeTruthy();
     });
   });
 
@@ -544,13 +556,15 @@ describe('Header Features Integration', () => {
       expect(decompressed).toBe(specialContent);
     });
 
-    it('handles rapid sequential operations', () => {
+    it('handles rapid sequential operations', async () => {
       const operations: string[] = [];
 
       for (let i = 0; i < 10; i++) {
-        sessionStorage.clear();
-        const key = createSnapshot(`# Operation ${i}`);
+        const content = `# Operation ${i}`;
+        const key = createSnapshot(content);
+        saveSessionMetadata(createSessionMetadata(key, content));
         operations.push(key);
+        await new Promise(resolve => setTimeout(resolve, 2));
       }
 
       expect(new Set(operations).size).toBe(10); // All unique
@@ -617,7 +631,7 @@ describe('Header Features Integration', () => {
       expect(shareLink).toContain(edited ? 'paxo:' : '');
     });
 
-    it('workflow: reset -> import -> save -> history', () => {
+    it('workflow: reset -> import -> save -> history', async () => {
       // 1. Reset clears current content
       const resetContent = DEFAULT_MARKDOWN;
 
@@ -625,12 +639,14 @@ describe('Header Features Integration', () => {
       const importedContent = '# New Import\nFresh start';
 
       // 3. Save
-      sessionStorage.clear();
       const key1 = createSnapshot(importedContent);
+      saveSessionMetadata(createSessionMetadata(key1, importedContent));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       // 4. Make more changes and save
-      sessionStorage.clear();
-      const key2 = createSnapshot(importedContent + '\n\nMore content');
+      const content2 = importedContent + '\n\nMore content';
+      const key2 = createSnapshot(content2);
+      saveSessionMetadata(createSessionMetadata(key2, content2));
 
       // 5. Check history
       const sessions = getAllSessions();

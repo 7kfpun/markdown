@@ -52,67 +52,10 @@ export const generateShareLink = (content) => {
   return `${window.location.origin}/#paxo:${compressed}`;
 };
 
-// Simple MD5-like hash (non-cryptographic, for collision resistance only)
-const hashString = (str) => {
-  // Use built-in hash if available (some browsers)
-  let h1 = 0xdeadbeef;
-  let h2 = 0x41c6ce57;
-
-  for (let i = 0; i < str.length; i++) {
-    const ch = str.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
-  }
-
-  h1 =
-    Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^
-    Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 =
-    Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^
-    Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-
-  // Combine and convert to base36 (shorter than hex)
-  const combined = 4294967296 * (2097151 & h2) + (h1 >>> 0);
-  return Math.abs(combined).toString(36).substring(0, 10);
-};
-
-// Get a unique storage key based on the URL hash or generate a new one
-// This allows multiple tabs with different URLs to maintain separate localStorage
-// Uses sessionStorage to "lock in" the key even after URL is cleared
+// No longer needed - we use fixed key 'markdown-storage-current' in sessionStorage
+// Keeping this for backwards compatibility with any existing code that imports it
 export const getStorageKey = () => {
-  // Check if we've already locked in a key for this session
-  const lockedKey = sessionStorage.getItem('markdown-current-storage-key');
-  if (lockedKey) {
-    return lockedKey;
-  }
-
-  const hash = window.location.hash;
-  if (hash.startsWith('#paxo:')) {
-    const compressed = hash.substring(6);
-    // Use hash of entire compressed data for better uniqueness
-    const sessionId = hashString(compressed);
-    const key = `markdown-storage-${sessionId}`;
-    // Lock in this key for the session
-    sessionStorage.setItem('markdown-current-storage-key', key);
-    return key;
-  }
-
-  const pathMatch = window.location.pathname.match(/\/paxo:([^/]+)/);
-  if (pathMatch?.[1]) {
-    const compressed = pathMatch[1];
-    const sessionId = hashString(compressed);
-    const key = `markdown-storage-${sessionId}`;
-    sessionStorage.setItem('markdown-current-storage-key', key);
-    return key;
-  }
-
-  // Generate a unique storage key for new sessions
-  // Use timestamp + random value for uniqueness
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 9);
-  const uniqueKey = `markdown-storage-${timestamp}-${random}`;
-  sessionStorage.setItem('markdown-current-storage-key', uniqueKey);
-  return uniqueKey;
+  return 'markdown-storage-current';
 };
 
 export const extractContentFromHash = () => {

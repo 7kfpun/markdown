@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Drawer,
   Box,
@@ -18,13 +18,7 @@ import {
 } from '@mui/material';
 import { Close, Delete, History as HistoryIcon, Restore, Edit, DeleteSweep } from '@mui/icons-material';
 import {
-  getAllSessions,
-  deleteSession,
-  deleteAllSessions,
-  renameSession,
   formatLastModified,
-  createSnapshot,
-  SessionMetadata,
 } from '../../../utils/sessionHistory';
 import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore';
 
@@ -36,34 +30,25 @@ interface Props {
 }
 
 export default function SessionHistory({ open, onClose, currentStorageKey, onLoadSession }: Props) {
-  const [sessions, setSessions] = useState<SessionMetadata[]>([]);
+  const sessions = useMarkdownStore(state => state.sessions);
+  const updateSession = useMarkdownStore(state => state.updateSession);
+  const deleteSessionFromStore = useMarkdownStore(state => state.deleteSession);
+  const deleteAllSessions = useMarkdownStore(state => state.deleteAllSessions);
+
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [renameStorageKey, setRenameStorageKey] = useState('');
   const [renameValue, setRenameValue] = useState('');
 
-  const loadSessions = () => {
-    const allSessions = getAllSessions();
-    setSessions(allSessions);
-  };
-
-  useEffect(() => {
-    if (open) {
-      loadSessions();
-    }
-  }, [open]);
-
   const handleDelete = (storageKey: string, event: React.MouseEvent) => {
     event.stopPropagation();
     if (confirm('Delete this session? This cannot be undone.')) {
-      deleteSession(storageKey);
-      loadSessions();
+      deleteSessionFromStore(storageKey);
     }
   };
 
   const handleDeleteAll = () => {
     if (confirm('Delete ALL sessions? This cannot be undone.')) {
       deleteAllSessions();
-      loadSessions();
     }
   };
 
@@ -76,8 +61,10 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
 
   const handleRenameSubmit = () => {
     if (renameValue.trim()) {
-      renameSession(renameStorageKey, renameValue.trim());
-      loadSessions();
+      updateSession(renameStorageKey, {
+        title: renameValue.trim(),
+        lastModified: Date.now(),
+      });
     }
     setRenameDialogOpen(false);
   };
@@ -92,22 +79,13 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
       return;
     }
 
-    // Get the content from the target session
     const sessionData = localStorage.getItem(storageKey);
     if (sessionData) {
       try {
         const parsed = JSON.parse(sessionData);
         const restoredContent = parsed.state?.content || parsed.content || '';
-
-        // Create a NEW snapshot with restored content only (adds to top of history)
-        const newKey = createSnapshot(restoredContent);
-
-        // Update current content and switch to new key
-        useMarkdownStore.getState().updateContent(restoredContent);
-        useMarkdownStore.getState().switchStorageKey(newKey);
-
+        useMarkdownStore.setState({ content: restoredContent });
         onClose();
-        loadSessions(); // Refresh to show new snapshot at top
       } catch (error) {
         console.error('Failed to load session:', error);
       }

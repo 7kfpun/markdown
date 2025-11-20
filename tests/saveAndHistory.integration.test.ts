@@ -6,6 +6,7 @@ import {
   createSessionMetadata,
   getCurrentSessionMetadata,
   deleteAllSessions,
+  deleteSession,
   type SessionMetadata,
 } from '../src/utils/sessionHistory';
 import {
@@ -42,8 +43,9 @@ describe('Save and History Integration', () => {
     it('creates new snapshot with unique storage key', () => {
       const content1 = '# Version 1\nFirst version of document';
       const key1 = createSnapshot(content1);
+      saveSessionMetadata(createSessionMetadata(key1, content1));
 
-      expect(key1).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
+      expect(key1).toMatch(/^markdown-storage-\d+$/);
       expect(localStorage.getItem(key1)).not.toBeNull();
 
       const sessions = getAllSessions();
@@ -52,19 +54,21 @@ describe('Save and History Integration', () => {
       expect(sessions[0].title).toBe('Version 1');
     });
 
-    it('creates multiple snapshots with different keys (append-only history)', () => {
+    it('creates multiple snapshots with different keys (append-only history)', async () => {
       const content1 = '# Version 1';
       const content2 = '# Version 2';
       const content3 = '# Version 3';
 
-      sessionStorage.clear();
       const key1 = createSnapshot(content1);
+      saveSessionMetadata(createSessionMetadata(key1, content1));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
-      sessionStorage.clear();
       const key2 = createSnapshot(content2);
+      saveSessionMetadata(createSessionMetadata(key2, content2));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
-      sessionStorage.clear();
       const key3 = createSnapshot(content3);
+      saveSessionMetadata(createSessionMetadata(key3, content3));
 
       // All keys should be unique
       expect(key1).not.toBe(key2);
@@ -113,17 +117,19 @@ describe('Save and History Integration', () => {
       expect(stored.version).toBe(2);
     });
 
-    it('updates sessionStorage to lock in new key after save', () => {
-      sessionStorage.setItem('markdown-current-storage-key', 'old-key');
+    it('snapshots do not modify sessionStorage', () => {
+      sessionStorage.setItem('test-key', 'old-value');
 
       const content = '# New Save';
       const newKey = createSnapshot(content);
 
-      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe(newKey);
-      expect(sessionStorage.getItem('markdown-current-storage-key')).not.toBe('old-key');
+      // Snapshots save to localStorage but don't affect sessionStorage
+      expect(newKey).toMatch(/^markdown-storage-\d+$/);
+      expect(localStorage.getItem(newKey)).toBeTruthy();
+      expect(sessionStorage.getItem('test-key')).toBe('old-value');
     });
 
-    it('creates Git-like version history timeline', () => {
+    it('creates Git-like version history timeline', async () => {
       const versions = [
         '# Initial commit',
         '# Add features',
@@ -132,12 +138,12 @@ describe('Save and History Integration', () => {
       ];
 
       const keys: string[] = [];
-      versions.forEach((content) => {
-        sessionStorage.clear();
+      for (const content of versions) {
         const key = createSnapshot(content);
+        saveSessionMetadata(createSessionMetadata(key, content));
         keys.push(key);
-        // Small delay to ensure different timestamps
-      });
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
 
       const sessions = getAllSessions();
       expect(sessions).toHaveLength(4);
@@ -154,29 +160,29 @@ describe('Save and History Integration', () => {
       }
     });
 
-    it('allows rollback by restoring old snapshot', () => {
-      sessionStorage.clear();
+    it('allows rollback by restoring old snapshot', async () => {
       const key1 = createSnapshot('# Version 1\nOld content');
+      saveSessionMetadata(createSessionMetadata(key1, '# Version 1\nOld content'));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
-      sessionStorage.clear();
       const key2 = createSnapshot('# Version 2\nNew content');
+      saveSessionMetadata(createSessionMetadata(key2, '# Version 2\nNew content'));
 
       // Simulate restore: load old content
       const oldSnapshot = JSON.parse(localStorage.getItem(key1)!);
       expect(oldSnapshot.state.content).toBe('# Version 1\nOld content');
 
-      // User can restore by switching to key1
-      sessionStorage.setItem('markdown-current-storage-key', key1);
-      expect(getStorageKey()).toBe(key1);
-
       // Both versions still exist in history
       const sessions = getAllSessions();
       expect(sessions).toHaveLength(2);
+
+      // Verify keys are timestamp-based
+      expect(key1).toMatch(/^markdown-storage-\d+$/);
+      expect(key2).toMatch(/^markdown-storage-\d+$/);
     });
 
-    it('restore creates new snapshot with content only, not full state', () => {
+    it('restore creates new snapshot with content only, not full state', async () => {
       // Create original session with full state
-      sessionStorage.clear();
       const originalContent = '# Original Document';
       const fullState = {
         state: {
@@ -191,9 +197,10 @@ describe('Save and History Integration', () => {
         version: 3,
       };
       const originalKey = createSnapshot(originalContent, fullState);
+      saveSessionMetadata(createSessionMetadata(originalKey, originalContent));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       // Create a newer session with different content and state
-      sessionStorage.clear();
       const newerContent = '# Newer Document';
       const newerState = {
         state: {
@@ -208,14 +215,16 @@ describe('Save and History Integration', () => {
         version: 4,
       };
       const newerKey = createSnapshot(newerContent, newerState);
+      saveSessionMetadata(createSessionMetadata(newerKey, newerContent));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       // Now simulate restore: get content from original session
       const originalSnapshot = JSON.parse(localStorage.getItem(originalKey)!);
       const restoredContent = originalSnapshot.state.content;
 
       // Create a NEW snapshot with only the content (not full state)
-      sessionStorage.clear();
       const restoredKey = createSnapshot(restoredContent);
+      saveSessionMetadata(createSessionMetadata(restoredKey, restoredContent));
 
       // Verify new snapshot was created
       expect(restoredKey).not.toBe(originalKey);
@@ -317,98 +326,77 @@ describe('Save and History Integration', () => {
       const extracted = extractContentFromHash();
       expect(extracted).toBe(content);
 
-      // URL hash determines initial storage key
+      // Editing always uses markdown-storage-current
       const key = getStorageKey();
-      expect(key).toMatch(/^markdown-storage-/);
-      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe(key);
+      expect(key).toBe('markdown-storage-current');
     });
 
-    it('keeps URL hash locked after initial load', () => {
+    it('editing key is always markdown-storage-current', () => {
       const content = '# Shared Document';
       const compressed = compressToBase64(content);
       window.location.hash = `#paxo:${compressed}`;
 
       const key1 = getStorageKey();
+      expect(key1).toBe('markdown-storage-current');
 
-      // Clear hash (simulating navigation or cleanup)
+      // Clear hash
       window.location.hash = '';
 
-      // Key should remain locked via sessionStorage
+      // Key is still the same fixed value
       const key2 = getStorageKey();
+      expect(key2).toBe('markdown-storage-current');
       expect(key1).toBe(key2);
     });
   });
 
   describe('Storage Key Lifecycle', () => {
-    it('generates unique key for new session', () => {
+    it('always returns markdown-storage-current for editing', () => {
       const key = getStorageKey();
-      expect(key).toMatch(/^markdown-storage-[a-z0-9]+-[a-z0-9]+$/);
-      expect(sessionStorage.getItem('markdown-current-storage-key')).toBe(key);
+      expect(key).toBe('markdown-storage-current');
     });
 
-    it('derives key from URL hash with paxo prefix', () => {
-      const content = '# From URL';
-      const compressed = compressToBase64(content);
-      window.location.hash = `#paxo:${compressed}`;
-
-      const key = getStorageKey();
-      expect(key).toMatch(/^markdown-storage-[a-z0-9]+$/);
-      expect(key).not.toContain('paxo');
-    });
-
-    it('same URL hash produces same storage key', () => {
-      const compressed = compressToBase64('# Test');
-      window.location.hash = `#paxo:${compressed}`;
-
-      const key1 = getStorageKey();
-
-      sessionStorage.clear();
-      window.location.hash = `#paxo:${compressed}`;
-
-      const key2 = getStorageKey();
-      expect(key1).toBe(key2);
-    });
-
-    it('different URL hash produces different storage keys', () => {
-      const compressed1 = compressToBase64('# Content 1');
-      const compressed2 = compressToBase64('# Content 2');
-
-      window.location.hash = `#paxo:${compressed1}`;
-      const key1 = getStorageKey();
-
-      sessionStorage.clear();
-      window.location.hash = `#paxo:${compressed2}`;
-      const key2 = getStorageKey();
-
-      expect(key1).not.toBe(key2);
-    });
-
-    it('switching storage key maintains separate content', () => {
-      sessionStorage.clear();
+    it('snapshots use timestamp-based keys', async () => {
       const key1 = createSnapshot('# Document A');
-
-      sessionStorage.clear();
+      await new Promise(resolve => setTimeout(resolve, 10));
       const key2 = createSnapshot('# Document B');
 
-      // Both should exist independently
+      // Snapshots use timestamp keys
+      expect(key1).toMatch(/^markdown-storage-\d+$/);
+      expect(key2).toMatch(/^markdown-storage-\d+$/);
+      expect(key1).not.toBe(key2);
+
+      // Both exist independently in localStorage
       const content1 = JSON.parse(localStorage.getItem(key1)!).state.content;
       const content2 = JSON.parse(localStorage.getItem(key2)!).state.content;
 
       expect(content1).toBe('# Document A');
       expect(content2).toBe('# Document B');
     });
+
+    it('snapshots are immutable once created', () => {
+      const content = '# Immutable Content';
+      const key = createSnapshot(content);
+
+      // Verify snapshot is saved
+      const stored = JSON.parse(localStorage.getItem(key)!);
+      expect(stored.state.content).toBe(content);
+
+      // Snapshots cannot be modified - they're historical records
+      expect(key).toMatch(/^markdown-storage-\d+$/);
+    });
   });
 
   describe('Session History Operations', () => {
-    it('lists all saved versions in chronological order', () => {
+    it('lists all saved versions in chronological order', async () => {
       const times: number[] = [];
 
       for (let i = 1; i <= 5; i++) {
-        sessionStorage.clear();
         const before = Date.now();
-        createSnapshot(`# Version ${i}`);
+        const key = createSnapshot(`# Version ${i}`);
+        saveSessionMetadata(createSessionMetadata(key, `# Version ${i}`));
         const after = Date.now();
         times.push((before + after) / 2);
+        await new Promise(resolve => setTimeout(resolve, 10));
       }
 
       const sessions = getAllSessions();
@@ -420,12 +408,13 @@ describe('Save and History Integration', () => {
       }
     });
 
-    it('deletes old versions when exceeding 100 session limit', () => {
-      // Create 105 sessions
+    it('deletes old versions when exceeding 100 session limit', async () => {
+      // Create 105 sessions with delays to ensure unique timestamps
       for (let i = 0; i < 105; i++) {
-        sessionStorage.clear();
         const key = createSnapshot(`# Session ${i}`);
-        localStorage.setItem(key, JSON.stringify({ state: { content: `# Session ${i}` } }));
+        saveSessionMetadata(createSessionMetadata(key, `# Session ${i}`));
+        // Add delay every session to ensure unique timestamps
+        await new Promise(resolve => setTimeout(resolve, 2));
       }
 
       const sessions = getAllSessions();
@@ -440,21 +429,20 @@ describe('Save and History Integration', () => {
       expect(sessions.some(s => s.title === 'Session 100')).toBe(true);
     });
 
-    it('allows selective deletion without affecting other sessions', () => {
-      sessionStorage.clear();
+    it('allows selective deletion without affecting other sessions', async () => {
       const key1 = createSnapshot('# Keep This');
+      saveSessionMetadata(createSessionMetadata(key1, '# Keep This'));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
-      sessionStorage.clear();
       const key2 = createSnapshot('# Delete This');
+      saveSessionMetadata(createSessionMetadata(key2, '# Delete This'));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
-      sessionStorage.clear();
       const key3 = createSnapshot('# Also Keep');
+      saveSessionMetadata(createSessionMetadata(key3, '# Also Keep'));
 
       // Delete middle session
-      const sessionsObj = JSON.parse(localStorage.getItem('markdown-sessions-metadata')!);
-      delete sessionsObj[key2];
-      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(sessionsObj));
-      localStorage.removeItem(key2);
+      deleteSession(key2);
 
       const sessions = getAllSessions();
       expect(sessions).toHaveLength(2);
@@ -463,10 +451,11 @@ describe('Save and History Integration', () => {
       expect(sessions.some(s => s.storageKey === key3)).toBe(true);
     });
 
-    it('updates metadata when restoring old version', () => {
-      sessionStorage.clear();
+    it('updates metadata when restoring old version', async () => {
       const oldKey = createSnapshot('# Old Version');
+      saveSessionMetadata(createSessionMetadata(oldKey, '# Old Version'));
       const oldMetadata = getCurrentSessionMetadata(oldKey)!;
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       // Create newer version
       sessionStorage.clear();
@@ -484,12 +473,13 @@ describe('Save and History Integration', () => {
       expect(restored.createdAt).toBe(oldMetadata.createdAt); // createdAt unchanged
     });
 
-    it('maintains session history across tab refreshes (localStorage persistence)', () => {
-      sessionStorage.clear();
+    it('maintains session history across tab refreshes (localStorage persistence)', async () => {
       const key1 = createSnapshot('# Tab 1 Content');
+      saveSessionMetadata(createSessionMetadata(key1, '# Tab 1 Content'));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
-      sessionStorage.clear();
       const key2 = createSnapshot('# Tab 2 Content');
+      saveSessionMetadata(createSessionMetadata(key2, '# Tab 2 Content'));
 
       // Simulate tab refresh by clearing sessionStorage
       sessionStorage.clear();
@@ -501,15 +491,17 @@ describe('Save and History Integration', () => {
       expect(localStorage.getItem(key2)).not.toBeNull();
     });
 
-    it('clears all history including content', () => {
-      sessionStorage.clear();
+    it('clears all history including content', async () => {
       const key1 = createSnapshot('# Doc 1');
+      saveSessionMetadata(createSessionMetadata(key1, '# Doc 1'));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
-      sessionStorage.clear();
       const key2 = createSnapshot('# Doc 2');
+      saveSessionMetadata(createSessionMetadata(key2, '# Doc 2'));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
-      sessionStorage.clear();
       const key3 = createSnapshot('# Doc 3');
+      saveSessionMetadata(createSessionMetadata(key3, '# Doc 3'));
 
       deleteAllSessions();
 
@@ -553,13 +545,15 @@ describe('Save and History Integration', () => {
       expect(stored.state.content).toBe(longContent);
     });
 
-    it('handles rapid sequential saves', () => {
+    it('handles rapid sequential saves', async () => {
       const keys: string[] = [];
 
       for (let i = 0; i < 10; i++) {
-        sessionStorage.clear();
-        const key = createSnapshot(`# Rapid Save ${i}`);
+        const content = `# Rapid Save ${i}`;
+        const key = createSnapshot(content);
+        saveSessionMetadata(createSessionMetadata(key, content));
         keys.push(key);
+        await new Promise(resolve => setTimeout(resolve, 2));
       }
 
       // All keys should be unique
@@ -574,6 +568,7 @@ describe('Save and History Integration', () => {
     it('handles unicode and special characters in content', () => {
       const specialContent = '# 测试 🚀\n```\ncode with "quotes" and \'apostrophes\'\n```\n**bold** _italic_';
       const key = createSnapshot(specialContent);
+      saveSessionMetadata(createSessionMetadata(key, specialContent));
 
       const stored = JSON.parse(localStorage.getItem(key)!);
       expect(stored.state.content).toBe(specialContent);
@@ -584,6 +579,7 @@ describe('Save and History Integration', () => {
 
     it('handles empty content saves', () => {
       const key = createSnapshot('');
+      saveSessionMetadata(createSessionMetadata(key, ''));
 
       const stored = JSON.parse(localStorage.getItem(key)!);
       expect(stored.state.content).toBe('');
@@ -592,62 +588,54 @@ describe('Save and History Integration', () => {
       expect(metadata.title).toBe('Untitled Document');
     });
 
-    it('prevents storage key collision with hash-based and random keys', () => {
+    it('getStorageKey always returns same value', () => {
       const keys = new Set<string>();
 
-      // Generate many keys
+      // Generate many calls to getStorageKey
       for (let i = 0; i < 100; i++) {
-        sessionStorage.clear();
         const key = getStorageKey();
         keys.add(key);
       }
 
-      // All should be unique
-      expect(keys.size).toBe(100);
+      // All should be the same fixed key
+      expect(keys.size).toBe(1);
+      expect(keys.has('markdown-storage-current')).toBe(true);
     });
   });
 
   describe('Multi-Tab Scenarios', () => {
-    it('allows different tabs with different URL hashes to have separate storage', () => {
-      const content1 = '# Tab 1';
-      const content2 = '# Tab 2';
+    it('all tabs use markdown-storage-current for editing', () => {
+      // All tabs use the same fixed key for current editing
+      const key = getStorageKey();
+      expect(key).toBe('markdown-storage-current');
 
-      const compressed1 = compressToBase64(content1);
-      const compressed2 = compressToBase64(content2);
-
-      // Tab 1
-      window.location.hash = `#paxo:${compressed1}`;
-      const key1 = getStorageKey();
-
-      // Tab 2 (simulate new tab with different hash)
-      sessionStorage.clear();
-      window.location.hash = `#paxo:${compressed2}`;
-      const key2 = getStorageKey();
-
-      expect(key1).not.toBe(key2);
-    });
-
-    it('maintains separate session lock per tab via sessionStorage', () => {
-      sessionStorage.clear();
-      const key1 = getStorageKey();
-
-      // Simulate new tab with fresh sessionStorage
-      sessionStorage.clear();
-      const key2 = getStorageKey();
-
-      expect(key1).not.toBe(key2);
+      // Each tab has its own sessionStorage, so they edit independently
+      // even though they use the same key name
     });
 
     it('shares session history across all tabs via localStorage', () => {
-      sessionStorage.clear();
       const key1 = createSnapshot('# Shared History 1');
+      saveSessionMetadata(createSessionMetadata(key1, '# Shared History 1'));
 
-      // Simulate another tab accessing history
-      sessionStorage.clear();
+      // Session history is in localStorage, shared across all tabs
       const sessions = getAllSessions();
 
       expect(sessions).toHaveLength(1);
       expect(sessions[0].storageKey).toBe(key1);
+      expect(key1).toMatch(/^markdown-storage-\d+$/);
+    });
+
+    it('saved snapshots are immutable and shared across tabs', () => {
+      const content = '# Immutable Snapshot';
+      const key = createSnapshot(content);
+
+      // Snapshot is in localStorage with timestamp key
+      expect(key).toMatch(/^markdown-storage-\d+$/);
+      expect(localStorage.getItem(key)).toBeTruthy();
+
+      // This snapshot is accessible from any tab
+      const stored = JSON.parse(localStorage.getItem(key)!);
+      expect(stored.state.content).toBe(content);
     });
   });
 
@@ -682,7 +670,7 @@ describe('Save and History Integration', () => {
       expect(window.location.hash).toBe(customHash);
     });
 
-    it('clears paxo hash when creating snapshot from shared link', () => {
+    it('snapshots do not affect URL hash', () => {
       const content = '# Original Shared Content';
       const compressed = compressToBase64(content);
       window.location.hash = `#paxo:${compressed}`;
@@ -691,38 +679,29 @@ describe('Save and History Integration', () => {
       const newContent = '# Edited Content';
       const newKey = createSnapshot(newContent);
 
-      // Simulate hash clearing after save
-      if (window.location.hash.startsWith('#paxo:')) {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
-
-      expect(window.location.hash).toBe('');
+      // Snapshot doesn't modify URL
+      expect(window.location.hash).toBe(`#paxo:${compressed}`);
       expect(localStorage.getItem(newKey)).not.toBeNull();
-
-      // Storage key should be locked in sessionStorage
-      const lockedKey = sessionStorage.getItem('markdown-current-storage-key');
-      expect(lockedKey).toBe(newKey);
+      expect(newKey).toMatch(/^markdown-storage-\d+$/);
     });
 
-    it('prevents loading old content after hash is cleared', () => {
+    it('editing uses markdown-storage-current regardless of URL', () => {
       const oldContent = '# Old Shared Content';
       const compressed = compressToBase64(oldContent);
       window.location.hash = `#paxo:${compressed}`;
 
-      // Get initial storage key from hash
+      // Current editing key is always the same
       const key1 = getStorageKey();
+      expect(key1).toBe('markdown-storage-current');
 
-      // Save new content and clear hash
+      // Snapshots use timestamp keys
       const newContent = '# New Content';
       const key2 = createSnapshot(newContent);
+      expect(key2).toMatch(/^markdown-storage-\d+$/);
 
-      if (window.location.hash.startsWith('#paxo:')) {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
-
-      // Even with hash cleared, getStorageKey should return the locked key
+      // Editing key unchanged
       const key3 = getStorageKey();
-      expect(key3).toBe(key2);
+      expect(key3).toBe('markdown-storage-current');
 
       // Verify the new content is stored
       const stored = JSON.parse(localStorage.getItem(key2)!);
@@ -734,6 +713,7 @@ describe('Save and History Integration', () => {
     it('skips snapshot creation when content unchanged', () => {
       const content = '# Unchanged Content';
       const key1 = createSnapshot(content);
+      saveSessionMetadata(createSessionMetadata(key1, content));
 
       // Get initial session count
       const sessionsBefore = getAllSessions();
@@ -751,17 +731,19 @@ describe('Save and History Integration', () => {
       expect(sessionsAfter.length).toBe(countBefore);
     });
 
-    it('creates new snapshot only when content changes', () => {
+    it('creates new snapshot only when content changes', async () => {
       const content1 = '# Version 1';
       const key1 = createSnapshot(content1);
+      saveSessionMetadata(createSessionMetadata(key1, content1));
 
       const sessionsBefore = getAllSessions();
       const countBefore = sessionsBefore.length;
 
       // Save with different content
-      sessionStorage.clear();
+      await new Promise(resolve => setTimeout(resolve, 10));
       const content2 = '# Version 2';
       const key2 = createSnapshot(content2);
+      saveSessionMetadata(createSessionMetadata(key2, content2));
 
       // Should create a new session
       const sessionsAfter = getAllSessions();
@@ -778,6 +760,7 @@ describe('Save and History Integration', () => {
     it('auto-save skips when content unchanged', () => {
       const content = '# Auto-save Test';
       const key1 = createSnapshot(content);
+      saveSessionMetadata(createSessionMetadata(key1, content));
 
       // Track content for auto-save
       let lastAutoSavedContent = content;

@@ -1,12 +1,19 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { DEFAULT_MARKDOWN } from '../../utils/constants';
-import { getStorageKey } from '../../utils/compression';
 
 interface MermaidModalState {
   isOpen: boolean;
   svg: string;
   code: string;
+}
+
+export interface SessionMetadata {
+  storageKey: string;
+  title: string;
+  lastModified: number;
+  contentPreview: string;
+  createdAt: number;
 }
 
 interface MarkdownState {
@@ -19,7 +26,8 @@ interface MarkdownState {
   showEditor: boolean;
   showPreview: boolean;
   mermaidModal: MermaidModalState;
-  storageKey: string; // Track which storage key we're using
+  storageKey: string;
+  sessions: SessionMetadata[]; // Session history in memory
 
   updateContent: (content: string) => void;
   setEditorTheme: (theme: string) => void;
@@ -34,23 +42,69 @@ interface MarkdownState {
   closeMermaidModal: () => void;
   togglePanels: (mode: 'editor-only' | 'preview-only' | 'split') => void;
   switchStorageKey: (newKey: string) => void;
+  addSession: (metadata: SessionMetadata) => void;
+  updateSession: (storageKey: string, updates: Partial<Omit<SessionMetadata, 'storageKey'>>) => void;
+  deleteSession: (storageKey: string) => void;
+  deleteAllSessions: () => void;
+  loadSessions: () => void;
 }
 
-// Custom storage that uses dynamic keys
+// Custom storage that uses sessionStorage for current edits (tab-specific)
+// This allows multiple tabs to edit independently
 const dynamicStorage = {
   getItem: (name: string) => {
-    const key = getStorageKey();
-    const str = localStorage.getItem(key);
+    // Use sessionStorage for current editing session (tab-specific)
+    const str = sessionStorage.getItem('markdown-storage-current');
     return str;
   },
   setItem: (name: string, value: string) => {
-    const key = getStorageKey();
-    localStorage.setItem(key, value);
+    // Use sessionStorage for current editing session (tab-specific)
+    sessionStorage.setItem('markdown-storage-current', value);
   },
   removeItem: (name: string) => {
-    const key = getStorageKey();
-    localStorage.removeItem(key);
+    // Use sessionStorage for current editing session (tab-specific)
+    sessionStorage.removeItem('markdown-storage-current');
   },
+};
+
+// Load sessions from localStorage (only on init, client-side only)
+const loadSessionsFromStorage = (): SessionMetadata[] => {
+  // Skip on server-side to avoid hydration mismatch
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const stored = localStorage.getItem('markdown-sessions-metadata');
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) {
+      // Migrate from old object format
+      if (parsed && typeof parsed === 'object') {
+        const sessions = Object.values(parsed) as SessionMetadata[];
+        sessions.sort((a, b) => b.lastModified - a.lastModified);
+        return sessions;
+      }
+      return [];
+    }
+    return parsed;
+  } catch {
+    return [];
+  }
+};
+
+// Persist sessions to localStorage (called after state updates, client-side only)
+const persistSessions = (sessions: SessionMetadata[]) => {
+  // Skip on server-side
+  if (typeof window === 'undefined') return;
+
+  console.log('[persistSessions] Persisting', sessions.length, 'sessions to localStorage');
+  console.log('[persistSessions] Session titles:', sessions.map(s => s.title));
+
+  try {
+    localStorage.setItem('markdown-sessions-metadata', JSON.stringify(sessions));
+    console.log('[persistSessions] Successfully persisted to localStorage');
+  } catch (error) {
+    console.error('Failed to persist sessions:', error);
+  }
 };
 
 export const useMarkdownStore = create<MarkdownState>()(
@@ -69,7 +123,8 @@ export const useMarkdownStore = create<MarkdownState>()(
         svg: '',
         code: '',
       },
-      storageKey: getStorageKey(),
+      storageKey: 'markdown-storage-current', // Fixed key for current editing session in sessionStorage
+      sessions: loadSessionsFromStorage(),
 
       updateContent: (content) => set({ content }),
       setEditorTheme: (theme) => set({ editorTheme: theme }),
@@ -111,6 +166,72 @@ export const useMarkdownStore = create<MarkdownState>()(
 
       switchStorageKey: (newKey: string) => {
         set({ storageKey: newKey });
+      },
+
+      // Session management - state is source of truth
+      addSession: (metadata) => {
+        const sessions = get().sessions;
+        console.log('[addSession] Current sessions count:', sessions.length);
+        console.log('[addSession] Adding/updating session:', metadata.storageKey, metadata.title);
+
+        const existingIndex = sessions.findIndex(s => s.storageKey === metadata.storageKey);
+
+        let newSessions;
+        if (existingIndex >= 0) {
+          console.log('[addSession] Found existing at index:', existingIndex);
+          // Update existing - remove and prepend
+          newSessions = [...sessions];
+          newSessions.splice(existingIndex, 1);
+          newSessions.unshift(metadata);
+        } else {
+          console.log('[addSession] New session, prepending');
+          // New session - prepend to front
+          newSessions = [metadata, ...sessions];
+        }
+
+        // Trim to max 100 sessions
+        if (newSessions.length > 100) {
+          const removed = newSessions.slice(100);
+          removed.forEach(s => localStorage.removeItem(s.storageKey));
+          newSessions = newSessions.slice(0, 100);
+        }
+
+        console.log('[addSession] New sessions count:', newSessions.length);
+        console.log('[addSession] First 3 sessions:', newSessions.slice(0, 3).map((s: SessionMetadata) => s.title));
+
+        set({ sessions: newSessions });
+        persistSessions(newSessions);
+      },
+
+      updateSession: (storageKey, updates) => {
+        const sessions = get().sessions;
+        const sessionIndex = sessions.findIndex(s => s.storageKey === storageKey);
+        if (sessionIndex >= 0) {
+          const newSessions = [...sessions];
+          newSessions[sessionIndex] = { ...sessions[sessionIndex], ...updates };
+          set({ sessions: newSessions });
+          persistSessions(newSessions);
+        }
+      },
+
+      deleteSession: (storageKey) => {
+        const sessions = get().sessions.filter(s => s.storageKey !== storageKey);
+        localStorage.removeItem(storageKey);
+        set({ sessions });
+        persistSessions(sessions);
+      },
+
+      deleteAllSessions: () => {
+        const sessions = get().sessions;
+        sessions.forEach(s => localStorage.removeItem(s.storageKey));
+        set({ sessions: [] });
+        persistSessions([]);
+      },
+
+      loadSessions: () => {
+        // Reload from localStorage (for compatibility during migration)
+        const sessions = loadSessionsFromStorage();
+        set({ sessions });
       },
     }),
     {

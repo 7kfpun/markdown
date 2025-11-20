@@ -12,70 +12,77 @@ const SESSIONS_METADATA_KEY = 'markdown-sessions-metadata';
 const AUTO_SAVE_INTERVAL = 10 * 60 * 1000; // 10 minutes
 const MAX_SESSIONS = 100; // Maximum number of sessions to keep
 
-// Get all session metadata as an object (internal use)
-const getSessionsObject = (): Record<string, SessionMetadata> => {
+// Get all session metadata as array (newest first, no sorting needed)
+const getSessionsArray = (): SessionMetadata[] => {
   try {
     const stored = localStorage.getItem(SESSIONS_METADATA_KEY);
-    if (!stored) return {};
+    if (!stored) return [];
 
     const parsed = JSON.parse(stored);
 
-    // Type validation: must be a plain object, not array or other types
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      // Old/incompatible data format - clear and start fresh
-      console.warn('Incompatible session data format detected, clearing and starting fresh');
-      localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify({}));
-      return {};
+    // Migrate from old object format to array if needed
+    if (!Array.isArray(parsed)) {
+      if (parsed && typeof parsed === 'object') {
+        console.warn('Migrating sessions from object to array format');
+        const sessions = Object.values(parsed) as SessionMetadata[];
+        // Sort once during migration
+        sessions.sort((a, b) => b.lastModified - a.lastModified);
+        localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify(sessions));
+        return sessions;
+      }
+      // Invalid data
+      localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify([]));
+      return [];
     }
 
     return parsed;
   } catch (error) {
     console.error('Failed to get sessions:', error);
-    // Clear corrupted data
-    localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify({}));
-    return {};
+    localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify([]));
+    return [];
   }
 };
 
-// Get all session metadata as sorted array (for display)
+// Get all session metadata (newest first, no sorting needed)
 export const getAllSessions = (): SessionMetadata[] => {
-  try {
-    const sessionsObj = getSessionsObject();
-    const sessions = Object.values(sessionsObj);
-    // Sort by last modified (most recent first) - only when displaying
-    sessions.sort((a, b) => b.lastModified - a.lastModified);
-    return sessions;
-  } catch (error) {
-    console.error('Failed to get sessions:', error);
-    return [];
-  }
+  return getSessionsArray();
 };
 
 // Save session metadata
 export const saveSessionMetadata = (metadata: SessionMetadata): void => {
   try {
-    const sessionsObj = getSessionsObject();
+    const sessions = getSessionsArray();
+    console.log('[saveSessionMetadata] Current sessions count:', sessions.length);
+    console.log('[saveSessionMetadata] Saving metadata:', metadata);
 
-    // Add or update session (no sorting needed)
-    sessionsObj[metadata.storageKey] = metadata;
+    // Check if session already exists (update case)
+    const existingIndex = sessions.findIndex(s => s.storageKey === metadata.storageKey);
 
-    // Check if we exceeded the limit
-    const sessionKeys = Object.keys(sessionsObj);
-    if (sessionKeys.length > MAX_SESSIONS) {
-      // Get all sessions as array to find oldest ones
-      const allSessions = Object.values(sessionsObj);
-      allSessions.sort((a, b) => a.lastModified - b.lastModified); // Sort oldest first
+    if (existingIndex >= 0) {
+      console.log('[saveSessionMetadata] Found existing session at index:', existingIndex);
+      // Update existing session - remove old, prepend updated to front
+      sessions.splice(existingIndex, 1);
+    } else {
+      console.log('[saveSessionMetadata] New session, will prepend to front');
+    }
 
-      // Remove oldest sessions to get back to limit
-      const toRemove = allSessions.slice(0, sessionKeys.length - MAX_SESSIONS);
-      toRemove.forEach((session) => {
-        delete sessionsObj[session.storageKey];
-        // Also remove the content from localStorage
+    // Prepend new/updated session to front (newest first)
+    sessions.unshift(metadata);
+    console.log('[saveSessionMetadata] After prepend, sessions count:', sessions.length);
+    console.log('[saveSessionMetadata] First 3 session titles:', sessions.slice(0, 3).map(s => s.title));
+
+    // Trim to max sessions (remove oldest from end)
+    if (sessions.length > MAX_SESSIONS) {
+      const removed = sessions.splice(MAX_SESSIONS);
+      console.log('[saveSessionMetadata] Trimmed', removed.length, 'old sessions');
+      // Remove content from localStorage for trimmed sessions
+      removed.forEach(session => {
         localStorage.removeItem(session.storageKey);
       });
     }
 
-    localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify(sessionsObj));
+    localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify(sessions));
+    console.log('[saveSessionMetadata] Saved to localStorage');
   } catch (error) {
     console.error('Failed to save session metadata:', error);
   }
@@ -86,8 +93,8 @@ export const updateSessionMetadata = (
   storageKey: string,
   updates: Partial<Omit<SessionMetadata, 'storageKey'>>
 ): void => {
-  const sessionsObj = getSessionsObject();
-  const session = sessionsObj[storageKey];
+  const sessions = getSessionsArray();
+  const session = sessions.find(s => s.storageKey === storageKey);
 
   if (session) {
     Object.assign(session, updates);
@@ -98,11 +105,11 @@ export const updateSessionMetadata = (
 // Delete session (metadata and content)
 export const deleteSession = (storageKey: string): void => {
   try {
-    const sessionsObj = getSessionsObject();
+    const sessions = getSessionsArray();
 
-    // Remove from metadata
-    delete sessionsObj[storageKey];
-    localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify(sessionsObj));
+    // Remove from array
+    const filtered = sessions.filter(s => s.storageKey !== storageKey);
+    localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify(filtered));
 
     // Remove content from localStorage
     localStorage.removeItem(storageKey);
@@ -114,15 +121,15 @@ export const deleteSession = (storageKey: string): void => {
 // Delete all sessions (metadata and content)
 export const deleteAllSessions = (): void => {
   try {
-    const sessionsObj = getSessionsObject();
+    const sessions = getSessionsArray();
 
     // Remove all session content from localStorage
-    Object.keys(sessionsObj).forEach((storageKey) => {
-      localStorage.removeItem(storageKey);
+    sessions.forEach(session => {
+      localStorage.removeItem(session.storageKey);
     });
 
     // Clear metadata
-    localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify({}));
+    localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify([]));
   } catch (error) {
     console.error('Failed to delete all sessions:', error);
   }
@@ -131,13 +138,13 @@ export const deleteAllSessions = (): void => {
 // Rename session
 export const renameSession = (storageKey: string, newTitle: string): void => {
   try {
-    const sessionsObj = getSessionsObject();
-    const session = sessionsObj[storageKey];
+    const sessions = getSessionsArray();
+    const sessionIndex = sessions.findIndex(s => s.storageKey === storageKey);
 
-    if (session) {
-      session.title = newTitle;
-      session.lastModified = Date.now();
-      localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify(sessionsObj));
+    if (sessionIndex >= 0) {
+      sessions[sessionIndex].title = newTitle;
+      sessions[sessionIndex].lastModified = Date.now();
+      localStorage.setItem(SESSIONS_METADATA_KEY, JSON.stringify(sessions));
     }
   } catch (error) {
     console.error('Failed to rename session:', error);
@@ -146,8 +153,8 @@ export const renameSession = (storageKey: string, newTitle: string): void => {
 
 // Get current session metadata
 export const getCurrentSessionMetadata = (storageKey: string): SessionMetadata | null => {
-  const sessionsObj = getSessionsObject();
-  return sessionsObj[storageKey] || null;
+  const sessions = getSessionsArray();
+  return sessions.find(s => s.storageKey === storageKey) || null;
 };
 
 // Create session metadata from content
@@ -183,43 +190,35 @@ export const createSessionMetadata = (
   };
 };
 
-// Create a new snapshot (generates new storage key and saves content)
+// Create a new snapshot (generates new storage key and saves content to localStorage)
+// Note: Does NOT save metadata - caller should use store.addSession()
 export const createSnapshot = (content: string, fullState?: any): string => {
-  // Generate unique storage key for snapshot
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 9);
-  const newKey = `markdown-storage-${timestamp}-${random}`;
+  // Generate unique storage key using timestamp only (milliseconds for uniqueness)
+  const timestamp = Date.now();
+  const newKey = `markdown-storage-${timestamp}`;
 
-  // Create metadata for snapshot
-  const metadata = createSessionMetadata(newKey, content);
-  saveSessionMetadata(metadata);
+  console.log('[createSnapshot] Creating snapshot with key:', newKey);
+  console.log('[createSnapshot] Content preview:', content.substring(0, 100));
+  console.log('[createSnapshot] Has fullState:', !!fullState);
 
   // Save full state to new storage key (or just content if no state provided)
-  let storeData;
-  if (fullState) {
-    // Copy full state but update storageKey
-    storeData = JSON.stringify({
-      ...fullState,
-      state: {
-        ...fullState.state,
-        content,
-        storageKey: newKey,
-      },
-    });
-  } else {
-    // Just content (minimal state)
-    storeData = JSON.stringify({
-      state: {
-        content,
-        storageKey: newKey,
-      },
-      version: 0,
-    });
-  }
-  localStorage.setItem(newKey, storeData);
+  const storeData = fullState ? JSON.stringify({
+    ...fullState,
+    state: {
+      ...fullState.state,
+      content,
+      storageKey: newKey,
+    },
+  }) : JSON.stringify({
+    state: {
+      content,
+      storageKey: newKey,
+    },
+    version: 0,
+  });
 
-  // Update sessionStorage to use new key
-  sessionStorage.setItem('markdown-current-storage-key', newKey);
+  localStorage.setItem(newKey, storeData);
+  console.log('[createSnapshot] Stored data in localStorage');
 
   return newKey;
 };
