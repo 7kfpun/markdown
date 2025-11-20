@@ -39,7 +39,7 @@ export default function LanguageSwitcher({ size = 'small', variant = 'outlined' 
     : 'en';
 
   return (
-    <FormControl size={size} variant={variant} sx={{ minWidth: 140 }}>
+    <FormControl size={size} variant={variant} sx={{ width: '100%' }}>
       <InputLabel id="language-select-label">{t('menu.language')}</InputLabel>
       <Select
         labelId="language-select-label"

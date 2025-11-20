@@ -59,11 +59,12 @@ const HeaderSection = styled.div`
 `;
 
 const HeaderCenter = styled(HeaderSection)`
-  justify-content: center;
-  position: absolute;
+  justify-content: center;\n  position: absolute;
   left: 50%;
   transform: translateX(-50%);
   flex: unset;
+  z-index: 10;
+  pointer-events: auto;
 `;
 
 const HeaderRight = styled(HeaderSection)`
@@ -182,26 +183,12 @@ const SecondaryButtonsContainer = styled.div<{ $dark: boolean }>`
   overflow: hidden;
   opacity: 0;
   transition: all 0.3s ease;
+  pointer-events: none;
 
   ${HeaderRightDesktop}:hover & {
     max-width: 500px;
     opacity: 1;
-    margin-right: 12px;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 24px;
-    background: ${(p) => (p.$dark ? 'rgba(255,255,255,0.15)' : 'rgba(255, 255, 255, 0.3)')};
-  }
-
-  ${HeaderRightDesktop}:hover &::after {
-    opacity: 1;
+    pointer-events: auto;
   }
 `;
 
@@ -526,9 +513,9 @@ export default function EditorPage() {
                 <Upload fontSize="small" />
               </ToolbarIconButton>
             </Tooltip>
-            <Tooltip title={t('tooltips.exportPdf')} arrow>
-              <ToolbarIconButton aria-label={t('aria.exportToPdf')} onClick={handleExportPDF} $dark={darkMode}>
-                <PictureAsPdf fontSize="small" />
+            <Tooltip title={t('tooltips.downloadMd')} arrow>
+              <ToolbarIconButton aria-label={t('aria.downloadAsMarkdown')} onClick={handleExport} $dark={darkMode}>
+                <GetApp fontSize="small" />
               </ToolbarIconButton>
             </Tooltip>
             <Tooltip title={t('tooltips.downloadHtml')} arrow>
@@ -536,20 +523,7 @@ export default function EditorPage() {
                 <Description fontSize="small" />
               </ToolbarIconButton>
             </Tooltip>
-            <Tooltip title={t('tooltips.sessionHistory')} arrow>
-              <ToolbarIconButton
-                aria-label={t('aria.viewSessionHistory')}
-                onClick={() => setHistoryOpen(true)}
-                $dark={darkMode}
-              >
-                <History fontSize="small" />
-              </ToolbarIconButton>
-            </Tooltip>
-            <Tooltip title={t('tooltips.resetContent')} arrow>
-              <ToolbarIconButton aria-label={t('aria.resetToDefault')} onClick={handleReset} $dark={darkMode}>
-                <RestartAlt fontSize="small" />
-              </ToolbarIconButton>
-            </Tooltip>
+
             <Tooltip title={t('tooltips.feedback')} arrow>
               <ToolbarIconButton
                 aria-label={t('aria.reportBugOrFeature')}
@@ -577,9 +551,23 @@ export default function EditorPage() {
                 <Share fontSize="small" />
               </ToolbarIconButton>
             </Tooltip>
-            <Tooltip title={t('tooltips.downloadMd')} arrow>
-              <ToolbarIconButton aria-label={t('aria.downloadAsMarkdown')} onClick={handleExport} $dark={darkMode}>
-                <GetApp fontSize="small" />
+            <Tooltip title={t('tooltips.sessionHistory')} arrow>
+              <ToolbarIconButton
+                aria-label={t('aria.viewSessionHistory')}
+                onClick={() => setHistoryOpen(true)}
+                $dark={darkMode}
+              >
+                <History fontSize="small" />
+              </ToolbarIconButton>
+            </Tooltip>
+            <Tooltip title={t('tooltips.resetContent')} arrow>
+              <ToolbarIconButton aria-label={t('aria.resetToDefault')} onClick={handleReset} $dark={darkMode}>
+                <RestartAlt fontSize="small" />
+              </ToolbarIconButton>
+            </Tooltip>
+            <Tooltip title={t('tooltips.exportPdf')} arrow>
+              <ToolbarIconButton aria-label={t('aria.exportToPdf')} onClick={handleExportPDF} $dark={darkMode}>
+                <PictureAsPdf fontSize="small" />
               </ToolbarIconButton>
             </Tooltip>
             <Tooltip title={darkMode ? t('tooltips.lightMode') : t('tooltips.darkMode')} arrow>
@@ -615,9 +603,19 @@ export default function EditorPage() {
               {t('menu.shareLink')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleImport(); }} title={t('tooltips.importFile')}>
-              <Upload fontSize="small" />
-              {t('menu.importFile')}
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); setHistoryOpen(true); }} title={t('tooltips.sessionHistory')}>
+              <History fontSize="small" />
+              {t('menu.sessionHistory')}
+            </MobileMenuButton>
+
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleReset(); }} title={t('tooltips.resetContent')}>
+              <RestartAlt fontSize="small" />
+              {t('menu.resetContent')}
+            </MobileMenuButton>
+
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExportPDF(); }} title={t('tooltips.exportPdf')}>
+              <PictureAsPdf fontSize="small" />
+              {t('menu.exportPdf')}
             </MobileMenuButton>
 
             <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExport(); }} title={t('tooltips.downloadMd')}>
@@ -630,19 +628,9 @@ export default function EditorPage() {
               {t('menu.downloadHtml')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExportPDF(); }} title={t('tooltips.exportPdf')}>
-              <PictureAsPdf fontSize="small" />
-              {t('menu.exportPdf')}
-            </MobileMenuButton>
-
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); setHistoryOpen(true); }} title={t('tooltips.sessionHistory')}>
-              <History fontSize="small" />
-              {t('menu.sessionHistory')}
-            </MobileMenuButton>
-
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleReset(); }} title={t('tooltips.resetContent')}>
-              <RestartAlt fontSize="small" />
-              {t('menu.resetContent')}
+            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleImport(); }} title={t('tooltips.importFile')}>
+              <Upload fontSize="small" />
+              {t('menu.importFile')}
             </MobileMenuButton>
 
             <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank'); }} title={t('tooltips.feedback')}>

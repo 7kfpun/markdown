@@ -4,7 +4,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 
 // Import all translations
 import en from './locales/en.json';
-import zhTW from './locales/zh-TW.json';
+import zh from './locales/zh.json';
 import es from './locales/es.json';
 import hi from './locales/hi.json';
 import ar from './locales/ar.json';
@@ -30,7 +30,7 @@ export const RTL_LANGUAGES = ['ar', 'ur'];
 // Language metadata for display
 export const LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English' },
-  { code: 'zh-TW', name: 'Chinese', nativeName: '中文' },
+  { code: 'zh', name: 'Chinese', nativeName: '中文' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
   { code: 'ar', name: 'Arabic', nativeName: 'العربية', rtl: true },
@@ -53,7 +53,7 @@ export const LANGUAGES = [
 
 const resources = {
   en: { translation: en },
-  'zh-TW': { translation: zhTW },
+  zh: { translation: zh },
   es: { translation: es },
   hi: { translation: hi },
   ar: { translation: ar },
