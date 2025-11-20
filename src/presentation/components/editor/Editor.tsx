@@ -1,5 +1,6 @@
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
+import { languages } from '@codemirror/language-data';
 import { Extension } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
 import { oneDark } from '@codemirror/theme-one-dark';
@@ -241,6 +242,8 @@ const Editor = forwardRef<EditorHandle, Props>((_, ref) => {
     [updateContent]
   );
 
+  const markdownExtension = useMemo(() => markdown({ codeLanguages: languages }), []);
+
   return (
     <Box
       sx={{
@@ -263,7 +266,7 @@ const Editor = forwardRef<EditorHandle, Props>((_, ref) => {
           value={content}
           height="100%"
           extensions={[
-            markdown(),
+            markdownExtension,
             baseMarkdownStyles,
             keymap.of(markdownKeymap),
             editorWrap ? EditorView.lineWrapping : [],

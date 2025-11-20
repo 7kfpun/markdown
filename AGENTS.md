@@ -94,8 +94,10 @@ src/
 ### Export & Storage
 
 - **Browser Print API**: Native PDF generation via print dialog
-- **localStorage**: All content persisted locally with dynamic storage keys
-- **Session Management**: Automatic session metadata tracking with timestamps
+- **SessionStorage Active Layer**: Current tab’s draft persists via Zustand to `sessionStorage` (`markdown-storage-current`) for instant reloads without cross-tab conflicts
+- **Snapshot Layer**: Manual save + 10-minute auto-save create immutable snapshots in `localStorage` using timestamped keys (`markdown-storage-{timestamp}`)
+- **Metadata Index**: Session metadata stored in `localStorage` as a newest-first array under `markdown-sessions-metadata`, keeping lookups O(1) and enforcing the 100-entry cap
+- **Session Management**: Automatic session metadata tracking with timestamps and cleanup of stale snapshot content
 - **Pako**: DEFLATE compression (level 9) for print page content
 - URL-safe base64 encoding for print page hash
 

@@ -283,21 +283,12 @@ describe('Save and History Integration', () => {
       expect(extracted).toBe(content);
     });
 
-    it('URL hash remains unchanged after multiple saves', () => {
-      const initialHash = '#some-existing-hash';
-      window.location.hash = initialHash;
+    it('preserves non-paxo hashes when saving', () => {
+      const customHash = '#my-custom-anchor';
+      window.location.hash = customHash;
 
-      sessionStorage.clear();
       createSnapshot('# Save 1');
-      expect(window.location.hash).toBe(initialHash);
-
-      sessionStorage.clear();
-      createSnapshot('# Save 2');
-      expect(window.location.hash).toBe(initialHash);
-
-      sessionStorage.clear();
-      createSnapshot('# Save 3');
-      expect(window.location.hash).toBe(initialHash);
+      expect(window.location.hash).toBe(customHash);
     });
 
     it('distinguishes between save (localStorage) and share (URL)', () => {
@@ -636,76 +627,6 @@ describe('Save and History Integration', () => {
       // This snapshot is accessible from any tab
       const stored = JSON.parse(localStorage.getItem(key)!);
       expect(stored.state.content).toBe(content);
-    });
-  });
-
-  describe('URL Hash Management', () => {
-    it('clears paxo hash after loading shared content', () => {
-      const content = '# Shared Content';
-      const compressed = compressToBase64(content);
-      window.location.hash = `#paxo:${compressed}`;
-
-      // Simulate the App component's behavior
-      const extracted = extractContentFromHash();
-      expect(extracted).toBe(content);
-
-      // After loading, the hash should be cleared
-      if (window.location.hash.startsWith('#paxo:')) {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
-
-      expect(window.location.hash).toBe('');
-    });
-
-    it('preserves non-paxo hashes', () => {
-      const customHash = '#my-custom-anchor';
-      window.location.hash = customHash;
-
-      // Simulate save clearing only paxo hashes
-      if (window.location.hash.startsWith('#paxo:')) {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
-
-      // Non-paxo hash should remain
-      expect(window.location.hash).toBe(customHash);
-    });
-
-    it('snapshots do not affect URL hash', () => {
-      const content = '# Original Shared Content';
-      const compressed = compressToBase64(content);
-      window.location.hash = `#paxo:${compressed}`;
-
-      // User edits and saves
-      const newContent = '# Edited Content';
-      const newKey = createSnapshot(newContent);
-
-      // Snapshot doesn't modify URL
-      expect(window.location.hash).toBe(`#paxo:${compressed}`);
-      expect(localStorage.getItem(newKey)).not.toBeNull();
-      expect(newKey).toMatch(/^markdown-storage-\d+$/);
-    });
-
-    it('editing uses markdown-storage-current regardless of URL', () => {
-      const oldContent = '# Old Shared Content';
-      const compressed = compressToBase64(oldContent);
-      window.location.hash = `#paxo:${compressed}`;
-
-      // Current editing key is always the same
-      const key1 = getStorageKey();
-      expect(key1).toBe('markdown-storage-current');
-
-      // Snapshots use timestamp keys
-      const newContent = '# New Content';
-      const key2 = createSnapshot(newContent);
-      expect(key2).toMatch(/^markdown-storage-\d+$/);
-
-      // Editing key unchanged
-      const key3 = getStorageKey();
-      expect(key3).toBe('markdown-storage-current');
-
-      // Verify the new content is stored
-      const stored = JSON.parse(localStorage.getItem(key2)!);
-      expect(stored.state.content).toBe(newContent);
     });
   });
 

@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { Close, Download } from '@mui/icons-material';
 import { copySVGToClipboard, copyMermaidAsPNG } from '../../../utils/mermaidToClipboard';
+import { trackEvent } from '../../../utils/analytics';
 
 interface Props {
   svg: string;
@@ -65,19 +66,26 @@ export default function MermaidModal({ svg, code, onClose }: Props) {
     renderSvg();
   }, [inlineSvg, code, isReady]);
 
+  const handleDialogClose = () => {
+    trackEvent('mermaid_modal_closed');
+    onClose();
+  };
+
   const handleCopyPNG = async () => {
     const content = containerRef.current?.innerHTML || '';
     const success = await copyMermaidAsPNG(content);
     setToast(success ? 'Diagram copied as PNG!' : 'Failed to copy PNG');
+    trackEvent('mermaid_copy_png', { success, hasContent });
   };
 
   const handleCopySVG = async () => {
     const content = containerRef.current?.innerHTML || '';
     const success = await copySVGToClipboard(content);
     setToast(success ? 'Diagram copied as SVG!' : 'Failed to copy SVG');
+    trackEvent('mermaid_copy_svg', { success, hasContent });
   };
 
-  const downloadSVG = () => {
+  const handleDownloadSVG = () => {
     const content = containerRef.current?.innerHTML || '';
     if (!content) return;
     const blob = new Blob([content], { type: 'image/svg+xml' });
@@ -88,19 +96,21 @@ export default function MermaidModal({ svg, code, onClose }: Props) {
     a.click();
     URL.revokeObjectURL(url);
     setToast('SVG downloaded');
+    trackEvent('mermaid_download_svg', { hasContent: true });
   };
 
-  const downloadPNG = async () => {
+  const handleDownloadPNG = async () => {
     const content = containerRef.current?.innerHTML || '';
     const success = await copyMermaidAsPNG(content, { downloadOnly: true });
     setToast(success ? 'PNG downloaded' : 'Failed to download PNG');
+    trackEvent('mermaid_download_png', { success, hasContent });
   };
 
   return (
     <>
       <Dialog
         open
-        onClose={onClose}
+        onClose={handleDialogClose}
         maxWidth={false}
         fullWidth
         disablePortal={false}
@@ -108,7 +118,7 @@ export default function MermaidModal({ svg, code, onClose }: Props) {
         slotProps={{ paper: { sx: { height: '80vh', maxHeight: '100vh' } } }}
       >
         <Box sx={{ position: 'relative' }}>
-          <IconButton onClick={onClose} sx={{ position: 'absolute', right: 8, top: 8, zIndex: 1 }}>
+          <IconButton onClick={handleDialogClose} sx={{ position: 'absolute', right: 8, top: 8, zIndex: 1 }}>
             <Close />
           </IconButton>
         </Box>
@@ -159,13 +169,13 @@ export default function MermaidModal({ svg, code, onClose }: Props) {
               </Button>
             </Stack>
             <Stack direction="row" spacing={1}>
-              <Button onClick={downloadPNG} startIcon={<Download />} disabled={!hasContent}>
+              <Button onClick={handleDownloadPNG} startIcon={<Download />} disabled={!hasContent}>
                 Download PNG
               </Button>
-              <Button onClick={downloadSVG} startIcon={<Download />} disabled={!hasContent}>
+              <Button onClick={handleDownloadSVG} startIcon={<Download />} disabled={!hasContent}>
                 Download SVG
               </Button>
-              <Button onClick={onClose}>Close</Button>
+              <Button onClick={handleDialogClose}>Close</Button>
             </Stack>
           </Stack>
         </DialogActions>

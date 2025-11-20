@@ -21,6 +21,7 @@ import {
   formatLastModified,
 } from '../../../utils/sessionHistory';
 import { useMarkdownStore } from '../../../infrastructure/store/useMarkdownStore';
+import { trackEvent } from '../../../utils/analytics';
 
 interface Props {
   open: boolean;
@@ -39,21 +40,29 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
   const [renameStorageKey, setRenameStorageKey] = useState('');
   const [renameValue, setRenameValue] = useState('');
 
+  const handleCloseButton = () => {
+    trackEvent('session_history_close_button_clicked');
+    onClose();
+  };
+
   const handleDelete = (storageKey: string, event: React.MouseEvent) => {
     event.stopPropagation();
     if (confirm('Delete this session? This cannot be undone.')) {
+      trackEvent('session_history_delete_confirmed', { storageKey });
       deleteSessionFromStore(storageKey);
     }
   };
 
   const handleDeleteAll = () => {
     if (confirm('Delete ALL sessions? This cannot be undone.')) {
+      trackEvent('session_history_delete_all_confirmed', { count: sessions.length });
       deleteAllSessions();
     }
   };
 
   const handleRename = (storageKey: string, currentTitle: string, event: React.MouseEvent) => {
     event.stopPropagation();
+    trackEvent('session_history_rename_opened', { storageKey });
     setRenameStorageKey(storageKey);
     setRenameValue(currentTitle);
     setRenameDialogOpen(true);
@@ -61,11 +70,17 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
 
   const handleRenameSubmit = () => {
     if (renameValue.trim()) {
+      trackEvent('session_history_rename_submitted', { storageKey: renameStorageKey });
       updateSession(renameStorageKey, {
         title: renameValue.trim(),
         lastModified: Date.now(),
       });
     }
+    setRenameDialogOpen(false);
+  };
+
+  const handleRenameCancel = () => {
+    trackEvent('session_history_rename_cancelled', { storageKey: renameStorageKey });
     setRenameDialogOpen(false);
   };
 
@@ -78,6 +93,8 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
       onClose();
       return;
     }
+
+    trackEvent('session_history_restore_clicked', { storageKey });
 
     const sessionData = localStorage.getItem(storageKey);
     if (sessionData) {
@@ -100,7 +117,7 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
             <HistoryIcon />
             <Typography variant="h6">Session History</Typography>
           </Box>
-          <IconButton onClick={onClose} size="small">
+          <IconButton onClick={handleCloseButton} size="small">
             <Close />
           </IconButton>
         </Box>
@@ -219,7 +236,7 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
       </Box>
 
       {/* Rename Dialog */}
-      <Dialog open={renameDialogOpen} onClose={() => setRenameDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={renameDialogOpen} onClose={handleRenameCancel} maxWidth="sm" fullWidth>
         <DialogTitle>Rename Session</DialogTitle>
         <DialogContent>
           <TextField
@@ -238,7 +255,7 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setRenameDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleRenameCancel}>Cancel</Button>
           <Button onClick={handleRenameSubmit} variant="contained">
             Rename
           </Button>

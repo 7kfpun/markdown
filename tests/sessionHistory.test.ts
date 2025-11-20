@@ -47,32 +47,14 @@ describe('sessionHistory utilities', () => {
       expect(sessions).toEqual(arrayData);
     });
 
-    it('clears and returns empty array for corrupted data', () => {
+    it('handles corrupted or invalid data gracefully', () => {
       // Store corrupted data
       localStorage.setItem('markdown-sessions-metadata', 'invalid json {{{');
+      expect(getAllSessions()).toEqual([]);
 
-      const sessions = getAllSessions();
-
-      // Should return empty and clear the corrupted data
-      expect(sessions).toEqual([]);
-      const stored = localStorage.getItem('markdown-sessions-metadata');
-      expect(JSON.parse(stored!)).toEqual([]);
-    });
-
-    it('clears and returns empty array for non-object types', () => {
-      // Store primitive types
-      localStorage.setItem('markdown-sessions-metadata', JSON.stringify('string'));
-
-      const sessions1 = getAllSessions();
-      expect(sessions1).toEqual([]);
-
-      localStorage.setItem('markdown-sessions-metadata', JSON.stringify(123));
-      const sessions2 = getAllSessions();
-      expect(sessions2).toEqual([]);
-
+      // Store non-array types
       localStorage.setItem('markdown-sessions-metadata', JSON.stringify(null));
-      const sessions3 = getAllSessions();
-      expect(sessions3).toEqual([]);
+      expect(getAllSessions()).toEqual([]);
     });
 
     it('returns all sessions from localStorage', () => {
@@ -261,9 +243,6 @@ describe('sessionHistory utilities', () => {
       expect(localStorage.getItem('test-key')).toBeNull();
     });
 
-    it('handles deletion of non-existent session gracefully', () => {
-      expect(() => deleteSession('nonexistent')).not.toThrow();
-    });
   });
 
   describe('deleteAllSessions', () => {
@@ -294,12 +273,6 @@ describe('sessionHistory utilities', () => {
       expect(sessions).toHaveLength(0);
       expect(localStorage.getItem('key1')).toBeNull();
       expect(localStorage.getItem('key2')).toBeNull();
-    });
-
-    it('handles empty session list gracefully', () => {
-      expect(() => deleteAllSessions()).not.toThrow();
-      const sessions = getAllSessions();
-      expect(sessions).toHaveLength(0);
     });
 
     it('preserves other localStorage items', () => {

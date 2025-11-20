@@ -8,11 +8,11 @@ Modern, browser-based markdown editor with live preview, Mermaid diagrams, KaTeX
 - Mermaid diagrams with inline rendering, zoomable modal, and copy/download as PNG or SVG
 - Exports: Markdown, rendered HTML, and PDF via the browser print dialog
 - Session history: Automatic snapshots every 10 minutes with append-only timeline, restore/rename/delete features, 100-item limit with smart cleanup
-- KaTeX inline/block math, drag-and-drop import, auto-save (5s debounce) to localStorage
+- KaTeX inline/block math, drag-and-drop import, and tab-scoped autosave (5s debounce) in sessionStorage
 - Dark/light themes, resizable panels, responsive layout, and offline support indicator
 - Scroll synchronization between editor and preview panels
 - Debounced word/character count updates (1s) for better performance
-- Object-based storage for O(1) lookups and optimal write performance
+- Two-tier storage: sessionStorage for live drafts + localStorage for immutable snapshots
 
 ## Tech Stack
 
@@ -77,7 +77,7 @@ src/
 - Markdown rendering is sanitized with DOMPurify; links open in new tabs.
 - Syntax highlighting uses a shared marked instance to avoid double-highlighting.
 - PDF export relies on the browser print dialog (no html2canvas/jsPDF in use).
-- Content persists to localStorage only (URL hash removed for simplicity).
+- Live content persists to sessionStorage per tab while snapshots/metadata stay in localStorage (URL hash still cleared after saves).
 - Session metadata auto-saves with 5-second debounce after content changes.
 - Word/character count updates with 1-second debounce for performance.
 - Editor/preview scroll positions stay in sync and are restored when switching layout modes.
@@ -85,17 +85,24 @@ src/
 - Dynamic storage keys allow multiple documents to coexist in localStorage.
 - Offline indicator shows connection status with auto-hide when back online.
 
+### Storage Architecture
+
+- **Active Draft Layer**: Zustand persists the current tab’s content/settings into `sessionStorage` (`markdown-storage-current`) so multiple tabs never clobber each other.
+- **Snapshot Layer**: Manual save and 10-minute auto-save create immutable snapshots (`markdown-storage-{timestamp}`) in `localStorage`, including the serialized editor UI state for restoration.
+- **Metadata Index**: Session metadata lives in `localStorage` under `markdown-sessions-metadata` as a sorted array (newest first) for O(1) prepend/update operations and quick migrations from the legacy object map.
+- **Cleanup Rules**: Old snapshots beyond the 100-entry cap are pruned along with their serialized content to keep storage bounded.
+
 ### Session History Architecture
 
 - **Auto-Snapshot System**: Creates new snapshot every 10 minutes with unique storage key
 - **Append-Only Timeline**: All changes preserved in Git-like version history
-- **Object-Based Storage**: Metadata stored as `{[storageKey]: metadata}` for O(1) lookups
+- **Array-Based Metadata**: Metadata stored as a newest-first array for fast prepends and deterministic ordering
 - **100-Item Limit**: Automatically removes oldest sessions when limit exceeded
 - **Performance Optimization**: No sorting on writes, only when displaying history
 - **Data Safety**: Auto-detects and clears incompatible/corrupted data formats
 - **Restore Creates Snapshot**: Restoring any session creates new snapshot at top of timeline
-- **Unique Storage Keys**: Each session gets `markdown-storage-{timestamp}-{random}` key
-- **Session Isolation**: sessionStorage locks key per tab for multi-tab support
+- **Unique Storage Keys**: Each session gets `markdown-storage-{timestamp}` key
+- **Session Isolation**: `sessionStorage` keeps the active draft scoped per tab while history stays in `localStorage`
 
 ## Browser Support
 

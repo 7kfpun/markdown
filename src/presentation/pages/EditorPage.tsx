@@ -16,6 +16,7 @@ import { useOnlineStatus } from '../../utils/useOnlineStatus';
 import { createSessionMetadata, createSnapshot } from '../../utils/sessionHistory';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/language/LanguageSwitcher';
+import { trackEvent } from '../../utils/analytics';
 
 const PageContainer = styled(Box)`
   display: flex;
@@ -293,7 +294,8 @@ export default function EditorPage() {
     }
   }, [isOnline, wasOffline]);
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
+    trackEvent('share_link_clicked');
     try {
       const link = generateShareLink(content);
       await navigator.clipboard.writeText(link);
@@ -304,24 +306,28 @@ export default function EditorPage() {
       setToast(reason);
       setTimeout(() => setToast(''), 2000);
     }
-  };
+  }, [content, t]);
 
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
+    trackEvent('download_markdown_clicked');
     downloadMarkdown(content);
-  };
+  }, [content]);
 
-  const handleExportPDF = () => {
+  const handleExportPDF = useCallback(() => {
+    trackEvent('export_pdf_clicked');
     openPrintPage(content);
-  };
+  }, [content]);
 
-  const handleExportHTML = () => {
+  const handleExportHTML = useCallback(() => {
+    trackEvent('download_rendered_html_clicked');
     const previewEl = document.getElementById('preview-container');
     if (previewEl) {
       downloadRenderedHTML(previewEl);
     }
-  };
+  }, []);
 
-  const handleImport = () => {
+  const handleImport = useCallback(() => {
+    trackEvent('import_file_clicked');
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.md,.txt';
@@ -337,7 +343,7 @@ export default function EditorPage() {
       }
     };
     input.click();
-  };
+  }, []);
 
   const handleStartResize = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!contentRef.current) return;
@@ -383,14 +389,66 @@ export default function EditorPage() {
     return 'preview-only';
   }, [showEditor, showPreview]);
 
+  const handleLayoutToggle = useCallback(
+    (mode: 'editor-only' | 'preview-only' | 'split') => {
+      trackEvent('layout_mode_selected', { mode });
+      togglePanels(mode);
+    },
+    [togglePanels]
+  );
 
-  const handleReset = () => {
+
+  const handleReset = useCallback(() => {
     if (content !== DEFAULT_MARKDOWN) {
       const confirmed = window.confirm(t('messages.resetConfirm'));
       if (!confirmed) return;
     }
+    trackEvent('reset_content_clicked', { changed: content !== DEFAULT_MARKDOWN });
     resetContent();
-  };
+  }, [content, resetContent, t]);
+
+  const handleOpenFeedback = useCallback(() => {
+    trackEvent('feedback_button_clicked');
+    window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank');
+  }, []);
+
+  const handleOpenPrivacy = useCallback(() => {
+    trackEvent('privacy_button_clicked');
+    window.open('/privacy', '_blank');
+  }, []);
+
+  const handleOpenHistoryPanel = useCallback(() => {
+    trackEvent('session_history_button_clicked');
+    setHistoryOpen(true);
+  }, [setHistoryOpen]);
+
+  const handleToggleDarkModeClick = useCallback(() => {
+    trackEvent('toggle_dark_mode_clicked', { enabled: !darkMode });
+    toggleDarkMode();
+  }, [darkMode, toggleDarkMode]);
+
+  const handleOpenMobileMenu = useCallback(() => {
+    trackEvent('mobile_menu_open_clicked');
+    setMobileMenuOpen(true);
+  }, [setMobileMenuOpen]);
+
+  const handleCloseMobileMenu = useCallback(() => {
+    trackEvent('mobile_menu_close_clicked');
+    setMobileMenuOpen(false);
+  }, [setMobileMenuOpen]);
+
+  const createMobileMenuHandler = useCallback(
+    (action: () => void, actionName: string) => () => {
+      trackEvent('mobile_menu_action_clicked', { action: actionName });
+      setMobileMenuOpen(false);
+      action();
+    },
+    [setMobileMenuOpen]
+  );
+
+  const handleHistoryClose = useCallback(() => {
+    setHistoryOpen(false);
+  }, [setHistoryOpen]);
 
   const handleManualSave = useCallback(() => {
     try {
@@ -474,7 +532,7 @@ export default function EditorPage() {
                 aria-label={t('aria.showEditorOnly')}
                 $active={layoutMode === 'editor-only'}
                 $dark={darkMode}
-                onClick={() => togglePanels('editor-only')}
+                onClick={() => handleLayoutToggle('editor-only')}
               >
                 {t('header.editor')}
               </SegmentedButton>
@@ -484,7 +542,7 @@ export default function EditorPage() {
                 aria-label={t('aria.splitView')}
                 $active={layoutMode === 'split'}
                 $dark={darkMode}
-                onClick={() => togglePanels('split')}
+                onClick={() => handleLayoutToggle('split')}
               >
                 {t('header.split')}
               </SegmentedButton>
@@ -494,7 +552,7 @@ export default function EditorPage() {
                 aria-label={t('aria.showPreviewOnly')}
                 $active={layoutMode === 'preview-only'}
                 $dark={darkMode}
-                onClick={() => togglePanels('preview-only')}
+                onClick={() => handleLayoutToggle('preview-only')}
               >
                 {t('header.preview')}
               </SegmentedButton>
@@ -524,7 +582,7 @@ export default function EditorPage() {
             <Tooltip title={t('tooltips.feedback')} arrow>
               <ToolbarIconButton
                 aria-label={t('aria.reportBugOrFeature')}
-                onClick={() => window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank')}
+                onClick={handleOpenFeedback}
                 $dark={darkMode}
               >
                 <BugReport fontSize="small" />
@@ -533,7 +591,7 @@ export default function EditorPage() {
             <Tooltip title={t('tooltips.privacy')} arrow>
               <ToolbarIconButton
                 aria-label={t('aria.privacyPolicy')}
-                onClick={() => window.open('/privacy', '_blank')}
+                onClick={handleOpenPrivacy}
                 $dark={darkMode}
               >
                 <Policy fontSize="small" />
@@ -551,7 +609,7 @@ export default function EditorPage() {
             <Tooltip title={t('tooltips.sessionHistory')} arrow>
               <ToolbarIconButton
                 aria-label={t('aria.viewSessionHistory')}
-                onClick={() => setHistoryOpen(true)}
+                onClick={handleOpenHistoryPanel}
                 $dark={darkMode}
               >
                 <History fontSize="small" />
@@ -570,7 +628,7 @@ export default function EditorPage() {
             <Tooltip title={darkMode ? t('tooltips.lightMode') : t('tooltips.darkMode')} arrow>
               <ToolbarIconButton
                 aria-label={darkMode ? t('aria.switchToLightMode') : t('aria.switchToDarkMode')}
-                onClick={toggleDarkMode}
+                onClick={handleToggleDarkModeClick}
                 $dark={darkMode}
               >
                 {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
@@ -580,67 +638,107 @@ export default function EditorPage() {
           </PrimaryButtons>
         </HeaderRightDesktop>
 
-        <MenuButton $dark={darkMode} onClick={() => setMobileMenuOpen(true)}>
+        <MenuButton $dark={darkMode} onClick={handleOpenMobileMenu}>
           <Menu />
         </MenuButton>
 
-        <Drawer anchor="right" open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)}>
+        <Drawer anchor="right" open={mobileMenuOpen} onClose={handleCloseMobileMenu}>
           <MobileMenuContainer sx={{ width: 280, bgcolor: darkMode ? '#1f2937' : '#f8fbff' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 {t('header.menu')}
               </Typography>
-              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: darkMode ? '#e5e7eb' : '#1f1f1f' }}>
+              <button onClick={handleCloseMobileMenu} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: darkMode ? '#e5e7eb' : '#1f1f1f' }}>
                 <Close />
               </button>
             </Box>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleShare(); }} title={t('tooltips.shareLink')}>
+            <MobileMenuButton
+              $dark={darkMode}
+              onClick={createMobileMenuHandler(handleShare, 'share_link')}
+              title={t('tooltips.shareLink')}
+            >
               <Share fontSize="small" />
               {t('menu.shareLink')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); setHistoryOpen(true); }} title={t('tooltips.sessionHistory')}>
+            <MobileMenuButton
+              $dark={darkMode}
+              onClick={createMobileMenuHandler(handleOpenHistoryPanel, 'session_history')}
+              title={t('tooltips.sessionHistory')}
+            >
               <History fontSize="small" />
               {t('menu.sessionHistory')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleReset(); }} title={t('tooltips.resetContent')}>
+            <MobileMenuButton
+              $dark={darkMode}
+              onClick={createMobileMenuHandler(handleReset, 'reset_content')}
+              title={t('tooltips.resetContent')}
+            >
               <RestartAlt fontSize="small" />
               {t('menu.resetContent')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExportPDF(); }} title={t('tooltips.exportPdf')}>
+            <MobileMenuButton
+              $dark={darkMode}
+              onClick={createMobileMenuHandler(handleExportPDF, 'export_pdf')}
+              title={t('tooltips.exportPdf')}
+            >
               <PictureAsPdf fontSize="small" />
               {t('menu.exportPdf')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExport(); }} title={t('tooltips.downloadMd')}>
+            <MobileMenuButton
+              $dark={darkMode}
+              onClick={createMobileMenuHandler(handleExport, 'download_markdown')}
+              title={t('tooltips.downloadMd')}
+            >
               <GetApp fontSize="small" />
               {t('menu.downloadMd')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleExportHTML(); }} title={t('tooltips.downloadHtml')}>
+            <MobileMenuButton
+              $dark={darkMode}
+              onClick={createMobileMenuHandler(handleExportHTML, 'download_html')}
+              title={t('tooltips.downloadHtml')}
+            >
               <Description fontSize="small" />
               {t('menu.downloadHtml')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); handleImport(); }} title={t('tooltips.importFile')}>
+            <MobileMenuButton
+              $dark={darkMode}
+              onClick={createMobileMenuHandler(handleImport, 'import_file')}
+              title={t('tooltips.importFile')}
+            >
               <Upload fontSize="small" />
               {t('menu.importFile')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank'); }} title={t('tooltips.feedback')}>
+            <MobileMenuButton
+              $dark={darkMode}
+              onClick={createMobileMenuHandler(handleOpenFeedback, 'feedback')}
+              title={t('tooltips.feedback')}
+            >
               <BugReport fontSize="small" />
               {t('menu.reportBug')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); window.open('/privacy', '_blank'); }} title={t('tooltips.privacy')}>
+            <MobileMenuButton
+              $dark={darkMode}
+              onClick={createMobileMenuHandler(handleOpenPrivacy, 'privacy')}
+              title={t('tooltips.privacy')}
+            >
               <Policy fontSize="small" />
               {t('menu.privacyPolicy')}
             </MobileMenuButton>
 
-            <MobileMenuButton $dark={darkMode} onClick={() => { setMobileMenuOpen(false); toggleDarkMode(); }} title={darkMode ? t('tooltips.lightMode') : t('tooltips.darkMode')}>
+            <MobileMenuButton
+              $dark={darkMode}
+              onClick={createMobileMenuHandler(handleToggleDarkModeClick, 'toggle_theme')}
+              title={darkMode ? t('tooltips.lightMode') : t('tooltips.darkMode')}
+            >
               {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
               {darkMode ? t('menu.lightMode') : t('menu.darkMode')}
             </MobileMenuButton>
@@ -684,12 +782,9 @@ export default function EditorPage() {
 
       <SessionHistory
         open={historyOpen}
-        onClose={() => setHistoryOpen(false)}
+        onClose={handleHistoryClose}
         currentStorageKey={storageKey}
-        onLoadSession={() => {
-          // Session loading is handled within SessionHistory component
-          setHistoryOpen(false);
-        }}
+        onLoadSession={handleHistoryClose}
       />
 
       {toast && (
