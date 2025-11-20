@@ -59,17 +59,6 @@ jobs:
           </html>
           EOF
 
-      - name: Upload screenshots
-        id: upload-screenshots
-        run: |
-          # Upload main screenshot
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: image/png" \
-            --data-binary @screenshot-main.png \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/assets" \
-            -o upload-response.json || echo "Upload via API failed, will use artifacts"
-
       - name: Upload screenshot artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -77,34 +66,67 @@ jobs:
           path: screenshot-*.png
           retention-days: 7
 
-      - name: Comment on PR
+      - name: Upload screenshot and comment on PR
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
 
-            // Read screenshot and convert to base64
+            // Upload screenshot to GitHub's user content CDN
             const screenshot = fs.readFileSync('screenshot-main.png');
-            const base64 = screenshot.toString('base64');
 
-            // Create comment with embedded image
+            // Create a temporary comment to upload the image
+            const uploadComment = await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: 'Uploading screenshot...'
+            });
+
+            // Upload image via GitHub's API
+            const uploadResponse = await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/assets', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              headers: {
+                'content-type': 'image/png'
+              },
+              data: screenshot,
+              name: 'screenshot.png'
+            }).catch(async (error) => {
+              console.log('Upload failed, will link to artifacts instead');
+              return null;
+            });
+
+            // Delete temporary comment
+            await github.rest.issues.deleteComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: uploadComment.data.id
+            });
+
+            // Create comment with image or artifact link
+            const artifactUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+            const imageMarkdown = uploadResponse
+              ? `![Markdown Editor Preview](${uploadResponse.data.browser_download_url})`
+              : `[📥 View Screenshots in Artifacts](${artifactUrl})`;
+
             const body = `## 📸 Visual Preview
 
-            Here's how the app looks with this PR:
+${imageMarkdown}
 
-            ![Markdown Editor Preview](data:image/png;base64,${base64})
+<details>
+<summary>Screenshot Details</summary>
 
-            <details>
-            <summary>Screenshot Details</summary>
+- **Viewport**: 1280x800
+- **Browser**: Chromium (Playwright)
+- **Build**: Production mode
+- **Commit**: ${{ github.event.pull_request.head.sha }}
 
-            - **Viewport**: 1280x800
-            - **Browser**: Chromium (Playwright)
-            - **Build**: Production mode
+Download full screenshots from the [workflow artifacts](${artifactUrl}).
+</details>`;
 
-            You can also download the full screenshots from the [workflow artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
-            </details>`;
-
-            // Find existing comment
+            // Find existing bot comment
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
