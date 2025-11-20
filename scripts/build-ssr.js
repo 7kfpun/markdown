@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { copyFileSync, mkdirSync, existsSync } from 'fs';
+import { copyFileSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -12,7 +12,7 @@ console.log('[Build] Starting SSR build...');
 console.log('[Build] Cleaning previous builds...');
 try {
   execSync('rm -rf dist', { cwd: rootDir, stdio: 'inherit' });
-} catch (error) {
+} catch {
   console.warn('[Build] No previous build to clean');
 }
 
