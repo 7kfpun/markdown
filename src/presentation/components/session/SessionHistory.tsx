@@ -99,7 +99,7 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
         const parsed = JSON.parse(sessionData);
         const restoredContent = parsed.state?.content || parsed.content || '';
 
-        // Create a NEW snapshot with restored content (adds to top of history)
+        // Create a NEW snapshot with restored content only (adds to top of history)
         const newKey = createSnapshot(restoredContent);
 
         // Update current content and switch to new key
@@ -167,7 +167,7 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
                     },
                   }}
                   secondaryAction={
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                       {!isCurrent && (
                         <IconButton
                           aria-label="restore"
@@ -199,9 +199,10 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
                   }
                 >
                   <ListItemText
+                    sx={{ pr: isCurrent ? 6 : 15 }}
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle2" noWrap>
+                        <Typography variant="subtitle2" noWrap sx={{ flex: 1, minWidth: 0 }}>
                           {session.title}
                         </Typography>
                         {isCurrent && (
@@ -213,6 +214,7 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
                               px: 0.75,
                               py: 0.25,
                               borderRadius: 0.5,
+                              flexShrink: 0,
                             }}
                           >
                             Current

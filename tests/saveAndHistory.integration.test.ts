@@ -173,6 +173,77 @@ describe('Save and History Integration', () => {
       const sessions = getAllSessions();
       expect(sessions).toHaveLength(2);
     });
+
+    it('restore creates new snapshot with content only, not full state', () => {
+      // Create original session with full state
+      sessionStorage.clear();
+      const originalContent = '# Original Document';
+      const fullState = {
+        state: {
+          content: originalContent,
+          storageKey: 'old-key',
+          darkMode: true,
+          editorTheme: 'one-dark',
+          editorFontSize: 16,
+          editorWrap: false,
+          previewTheme: 'dark',
+        },
+        version: 3,
+      };
+      const originalKey = createSnapshot(originalContent, fullState);
+
+      // Create a newer session with different content and state
+      sessionStorage.clear();
+      const newerContent = '# Newer Document';
+      const newerState = {
+        state: {
+          content: newerContent,
+          storageKey: 'newer-key',
+          darkMode: false,
+          editorTheme: 'github-light',
+          editorFontSize: 14,
+          editorWrap: true,
+          previewTheme: 'github',
+        },
+        version: 4,
+      };
+      const newerKey = createSnapshot(newerContent, newerState);
+
+      // Now simulate restore: get content from original session
+      const originalSnapshot = JSON.parse(localStorage.getItem(originalKey)!);
+      const restoredContent = originalSnapshot.state.content;
+
+      // Create a NEW snapshot with only the content (not full state)
+      sessionStorage.clear();
+      const restoredKey = createSnapshot(restoredContent);
+
+      // Verify new snapshot was created
+      expect(restoredKey).not.toBe(originalKey);
+      expect(restoredKey).not.toBe(newerKey);
+
+      // Verify content is correct
+      const restoredSnapshot = JSON.parse(localStorage.getItem(restoredKey)!);
+      expect(restoredSnapshot.state.content).toBe(originalContent);
+
+      // Verify it has minimal state (only content and storageKey)
+      expect(restoredSnapshot.state.storageKey).toBe(restoredKey);
+      expect(Object.keys(restoredSnapshot.state)).toHaveLength(2); // only content and storageKey
+
+      // Original state properties should NOT be copied
+      expect(restoredSnapshot.state.darkMode).toBeUndefined();
+      expect(restoredSnapshot.state.editorTheme).toBeUndefined();
+      expect(restoredSnapshot.state.editorFontSize).toBeUndefined();
+      expect(restoredSnapshot.state.editorWrap).toBeUndefined();
+      expect(restoredSnapshot.state.previewTheme).toBeUndefined();
+      expect(restoredSnapshot.version).toBe(0); // minimal version
+
+      // All three versions should exist in history
+      const sessions = getAllSessions();
+      expect(sessions).toHaveLength(3);
+      expect(sessions.some(s => s.storageKey === originalKey)).toBe(true);
+      expect(sessions.some(s => s.storageKey === newerKey)).toBe(true);
+      expect(sessions.some(s => s.storageKey === restoredKey)).toBe(true);
+    });
   });
 
   describe('URL Hash Management', () => {
