@@ -3,7 +3,9 @@ import { compressToBase64 } from './compression';
 export const openPrintPage = (content) => {
   try {
     const compressed = compressToBase64(content);
-    const printUrl = `${window.location.origin}/print#paxo:${compressed}`;
+    // Create clean print URL with proper path and hash
+    const baseUrl = `${window.location.protocol}//${window.location.host}`;
+    const printUrl = `${baseUrl}/print#paxo:${compressed}`;
     window.open(printUrl, '_blank');
   } catch (error) {
     console.error('Failed to open print page:', error);

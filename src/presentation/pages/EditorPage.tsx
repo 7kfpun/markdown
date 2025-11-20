@@ -161,7 +161,7 @@ const Resizer = styled.div`
 
 const HeaderRightDesktop = styled(HeaderRight)`
   position: relative;
-  gap: 12px;
+  gap: 8px;
 
   @media (max-width: 1400px) {
     display: none;
@@ -171,13 +171,13 @@ const HeaderRightDesktop = styled(HeaderRight)`
 const PrimaryButtons = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 `;
 
 const SecondaryButtonsContainer = styled.div<{ $dark: boolean }>`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   max-width: 0;
   overflow: hidden;
   opacity: 0;
