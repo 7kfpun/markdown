@@ -1,5 +1,6 @@
 import { renderToString } from 'react-dom/server';
 import App from './App';
+import { DEFAULT_MARKDOWN } from './utils/constants';
 
 export interface RenderResult {
   html: string;
@@ -12,6 +13,7 @@ export interface RenderResult {
     ogImage: string;
     twitterImage: string;
   };
+  defaultContent: string;
 }
 
 export function render(url: string): RenderResult {
@@ -53,5 +55,6 @@ export function render(url: string): RenderResult {
       ogImage,
       twitterImage,
     },
+    defaultContent: DEFAULT_MARKDOWN,
   };
 }

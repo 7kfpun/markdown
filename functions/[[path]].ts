@@ -25,10 +25,29 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // @ts-ignore - This will be bundled by Vite
     const { render } = await import('../dist/server/entry-server.js');
 
-    const { html, head } = render(pathname);
+    const { html, head, defaultContent } = render(pathname);
 
     // Load the template HTML
     const template = await getTemplate(context.env.ASSETS);
+
+    // Escape HTML for safe injection
+    const escapeHtml = (str: string) =>
+      str.replace(/&/g, '&amp;')
+         .replace(/</g, '&lt;')
+         .replace(/>/g, '&gt;')
+         .replace(/"/g, '&quot;')
+         .replace(/'/g, '&#039;');
+
+    // Add SEO-friendly default content for homepage
+    const seoContent = pathname === '/' ? `
+      <!-- SEO: Default markdown content for search engines -->
+      <noscript>
+        <div style="max-width: 800px; margin: 40px auto; padding: 20px; font-family: system-ui, -apple-system, sans-serif;">
+          <pre style="white-space: pre-wrap; word-wrap: break-word; font-size: 14px; line-height: 1.6;">${escapeHtml(defaultContent)}</pre>
+        </div>
+      </noscript>
+      <!-- End SEO content -->
+    ` : '';
 
     // Replace placeholders with SSR content
     const finalHtml = template
@@ -81,7 +100,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       .replace(
         /<meta name="twitter:image"[^>]*>/,
         `<meta name="twitter:image" content="${head.twitterImage}" />`
-      );
+      )
+      .replace('</body>', `${seoContent}</body>`);
 
     return new Response(finalHtml, {
       headers: {
