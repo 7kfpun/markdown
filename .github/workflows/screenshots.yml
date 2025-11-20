@@ -106,7 +106,12 @@ jobs:
             });
 
             // Create comment with image or artifact link
-            const artifactUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+            const serverUrl = '${{ github.server_url }}';
+            const repository = '${{ github.repository }}';
+            const runId = '${{ github.run_id }}';
+            const commitSha = '${{ github.event.pull_request.head.sha }}';
+            const artifactUrl = `${serverUrl}/${repository}/actions/runs/${runId}`;
+
             const imageMarkdown = uploadResponse
               ? `![Markdown Editor Preview](${uploadResponse.data.browser_download_url})`
               : `[📥 View Screenshots in Artifacts](${artifactUrl})`;
@@ -121,7 +126,7 @@ ${imageMarkdown}
 - **Viewport**: 1280x800
 - **Browser**: Chromium (Playwright)
 - **Build**: Production mode
-- **Commit**: ${{ github.event.pull_request.head.sha }}
+- **Commit**: ${commitSha}
 
 Download full screenshots from the [workflow artifacts](${artifactUrl}).
 </details>`;
