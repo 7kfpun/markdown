@@ -99,8 +99,8 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
         const parsed = JSON.parse(sessionData);
         const restoredContent = parsed.state?.content || parsed.content || '';
 
-        // Create a NEW snapshot with restored content AND full state (adds to top of history)
-        const newKey = createSnapshot(restoredContent, parsed);
+        // Create a NEW snapshot with restored content only (adds to top of history)
+        const newKey = createSnapshot(restoredContent);
 
         // Update current content and switch to new key
         useMarkdownStore.getState().updateContent(restoredContent);
