@@ -199,8 +199,9 @@ export default function SessionHistory({ open, onClose, currentStorageKey, onLoa
                   }
                 >
                   <ListItemText
+                    sx={{ pr: isCurrent ? 6 : 15 }}
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between', pr: isCurrent ? 0 : 12 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography variant="subtitle2" noWrap sx={{ flex: 1, minWidth: 0 }}>
                           {session.title}
                         </Typography>
