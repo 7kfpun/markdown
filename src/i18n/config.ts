@@ -80,6 +80,7 @@ i18n
   .init({
     resources,
     fallbackLng: 'en',
+    load: 'languageOnly', // Strip region code (e.g., en-US -> en)
     interpolation: {
       escapeValue: false, // React already escapes values
     },
