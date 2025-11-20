@@ -160,8 +160,48 @@ const Resizer = styled.div`
 `;
 
 const HeaderRightDesktop = styled(HeaderRight)`
+  position: relative;
+  gap: 12px;
+
   @media (max-width: 1400px) {
     display: none;
+  }
+`;
+
+const PrimaryButtons = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const SecondaryButtonsContainer = styled.div<{ $dark: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+
+  ${HeaderRightDesktop}:hover & {
+    max-width: 500px;
+    opacity: 1;
+    margin-right: 12px;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 24px;
+    background: ${(p) => (p.$dark ? 'rgba(255,255,255,0.15)' : 'rgba(255, 255, 255, 0.3)')};
+  }
+
+  ${HeaderRightDesktop}:hover &::after {
+    opacity: 1;
   }
 `;
 
@@ -479,73 +519,80 @@ export default function EditorPage() {
         </HeaderCenter>
 
         <HeaderRightDesktop>
-          <Tooltip title={t('tooltips.feedback')} arrow>
-            <ToolbarIconButton
-              aria-label={t('aria.reportBugOrFeature')}
-              onClick={() => window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank')}
-              $dark={darkMode}
-            >
-              <BugReport fontSize="small" />
-            </ToolbarIconButton>
-          </Tooltip>
-          <Tooltip title={t('tooltips.privacy')} arrow>
-            <ToolbarIconButton
-              aria-label={t('aria.privacyPolicy')}
-              onClick={() => window.open('/privacy', '_blank')}
-              $dark={darkMode}
-            >
-              <Policy fontSize="small" />
-            </ToolbarIconButton>
-          </Tooltip>
-          <Tooltip title={t('tooltips.sessionHistory')} arrow>
-            <ToolbarIconButton
-              aria-label={t('aria.viewSessionHistory')}
-              onClick={() => setHistoryOpen(true)}
-              $dark={darkMode}
-            >
-              <History fontSize="small" />
-            </ToolbarIconButton>
-          </Tooltip>
-          <Tooltip title={t('tooltips.resetContent')} arrow>
-            <ToolbarIconButton aria-label={t('aria.resetToDefault')} onClick={handleReset} $dark={darkMode}>
-              <RestartAlt fontSize="small" />
-            </ToolbarIconButton>
-          </Tooltip>
-          <Tooltip title={t('tooltips.importFile')} arrow>
-            <ToolbarIconButton aria-label={t('aria.importMarkdown')} onClick={handleImport} $dark={darkMode}>
-              <Upload fontSize="small" />
-            </ToolbarIconButton>
-          </Tooltip>
-          <Tooltip title={t('tooltips.shareLink')} arrow>
-            <ToolbarIconButton aria-label={t('aria.shareViaLink')} onClick={handleShare} $dark={darkMode}>
-              <Share fontSize="small" />
-            </ToolbarIconButton>
-          </Tooltip>
-          <Tooltip title={t('tooltips.downloadMd')} arrow>
-            <ToolbarIconButton aria-label={t('aria.downloadAsMarkdown')} onClick={handleExport} $dark={darkMode}>
-              <GetApp fontSize="small" />
-            </ToolbarIconButton>
-          </Tooltip>
-          <Tooltip title={t('tooltips.downloadHtml')} arrow>
-            <ToolbarIconButton aria-label={t('aria.downloadRenderedHtml')} onClick={handleExportHTML} $dark={darkMode}>
-              <Description fontSize="small" />
-            </ToolbarIconButton>
-          </Tooltip>
-          <Tooltip title={t('tooltips.exportPdf')} arrow>
-            <ToolbarIconButton aria-label={t('aria.exportToPdf')} onClick={handleExportPDF} $dark={darkMode}>
-              <PictureAsPdf fontSize="small" />
-            </ToolbarIconButton>
-          </Tooltip>
-          <Tooltip title={darkMode ? t('tooltips.lightMode') : t('tooltips.darkMode')} arrow>
-            <ToolbarIconButton
-              aria-label={darkMode ? t('aria.switchToLightMode') : t('aria.switchToDarkMode')}
-              onClick={toggleDarkMode}
-              $dark={darkMode}
-            >
-              {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
-            </ToolbarIconButton>
-          </Tooltip>
-          <LanguageSwitcher size="small" variant="standard" />
+          {/* Secondary buttons - show on hover */}
+          <SecondaryButtonsContainer $dark={darkMode}>
+            <Tooltip title={t('tooltips.importFile')} arrow>
+              <ToolbarIconButton aria-label={t('aria.importMarkdown')} onClick={handleImport} $dark={darkMode}>
+                <Upload fontSize="small" />
+              </ToolbarIconButton>
+            </Tooltip>
+            <Tooltip title={t('tooltips.exportPdf')} arrow>
+              <ToolbarIconButton aria-label={t('aria.exportToPdf')} onClick={handleExportPDF} $dark={darkMode}>
+                <PictureAsPdf fontSize="small" />
+              </ToolbarIconButton>
+            </Tooltip>
+            <Tooltip title={t('tooltips.downloadHtml')} arrow>
+              <ToolbarIconButton aria-label={t('aria.downloadRenderedHtml')} onClick={handleExportHTML} $dark={darkMode}>
+                <Description fontSize="small" />
+              </ToolbarIconButton>
+            </Tooltip>
+            <Tooltip title={t('tooltips.sessionHistory')} arrow>
+              <ToolbarIconButton
+                aria-label={t('aria.viewSessionHistory')}
+                onClick={() => setHistoryOpen(true)}
+                $dark={darkMode}
+              >
+                <History fontSize="small" />
+              </ToolbarIconButton>
+            </Tooltip>
+            <Tooltip title={t('tooltips.resetContent')} arrow>
+              <ToolbarIconButton aria-label={t('aria.resetToDefault')} onClick={handleReset} $dark={darkMode}>
+                <RestartAlt fontSize="small" />
+              </ToolbarIconButton>
+            </Tooltip>
+            <Tooltip title={t('tooltips.feedback')} arrow>
+              <ToolbarIconButton
+                aria-label={t('aria.reportBugOrFeature')}
+                onClick={() => window.open('https://docs.google.com/forms/d/1PJbMNF_yUiiC_frG4EvASSpGV-bYSsHIA_mcEClzDj8', '_blank')}
+                $dark={darkMode}
+              >
+                <BugReport fontSize="small" />
+              </ToolbarIconButton>
+            </Tooltip>
+            <Tooltip title={t('tooltips.privacy')} arrow>
+              <ToolbarIconButton
+                aria-label={t('aria.privacyPolicy')}
+                onClick={() => window.open('/privacy', '_blank')}
+                $dark={darkMode}
+              >
+                <Policy fontSize="small" />
+              </ToolbarIconButton>
+            </Tooltip>
+          </SecondaryButtonsContainer>
+
+          {/* Primary buttons - always visible */}
+          <PrimaryButtons>
+            <Tooltip title={t('tooltips.shareLink')} arrow>
+              <ToolbarIconButton aria-label={t('aria.shareViaLink')} onClick={handleShare} $dark={darkMode}>
+                <Share fontSize="small" />
+              </ToolbarIconButton>
+            </Tooltip>
+            <Tooltip title={t('tooltips.downloadMd')} arrow>
+              <ToolbarIconButton aria-label={t('aria.downloadAsMarkdown')} onClick={handleExport} $dark={darkMode}>
+                <GetApp fontSize="small" />
+              </ToolbarIconButton>
+            </Tooltip>
+            <Tooltip title={darkMode ? t('tooltips.lightMode') : t('tooltips.darkMode')} arrow>
+              <ToolbarIconButton
+                aria-label={darkMode ? t('aria.switchToLightMode') : t('aria.switchToDarkMode')}
+                onClick={toggleDarkMode}
+                $dark={darkMode}
+              >
+                {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
+              </ToolbarIconButton>
+            </Tooltip>
+            <LanguageSwitcher size="small" variant="standard" />
+          </PrimaryButtons>
         </HeaderRightDesktop>
 
         <MenuButton $dark={darkMode} onClick={() => setMobileMenuOpen(true)}>
