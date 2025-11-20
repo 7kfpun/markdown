@@ -74,8 +74,11 @@ This document outlines the migration from GitHub Pages (static site) to Cloudfla
 #### GitHub Actions
 
 - New workflow: `.github/workflows/deploy-cloudflare.yml`
-- Runs on push to main branch
+- Runs on push to main branch AND pull requests
 - Steps: Install → Lint → Test → Build → Deploy to Cloudflare Pages
+- **PR Preview Deployments**: Automatically creates preview URLs for each PR
+- Posts preview URL as a comment on the PR
+- Preview deployments are automatically cleaned up when PR is closed
 
 #### Required Secrets
 
@@ -143,6 +146,40 @@ Add these to your GitHub repository secrets:
    ```bash
    yarn deploy
    ```
+
+#### Option 3: PR Preview Deployments (Automatic)
+
+Every pull request automatically gets a preview deployment!
+
+1. **Create a PR**: Push your branch and create a pull request
+
+   ```bash
+   git push -u origin feature-branch
+   ```
+
+2. **Automatic Preview**: GitHub Actions will automatically:
+   - Run linting and tests
+   - Build the SSR application
+   - Deploy to Cloudflare Pages preview environment
+   - Comment on the PR with the preview URL
+
+3. **Test Your Changes**: Use the preview URL to verify:
+   - Visual changes
+   - SEO meta tags (View Page Source)
+   - Server-side rendering
+   - All functionality
+
+4. **Share with Team**: The preview URL can be shared with reviewers
+
+5. **Automatic Cleanup**: Preview deployment is removed when PR is closed/merged
+
+**Example Preview URL Format:**
+
+```
+https://abc123def.1markdown.pages.dev
+```
+
+Each PR gets a unique preview URL that stays live until the PR is closed.
 
 ### Cloudflare Pages Setup
 
