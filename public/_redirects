@@ -1,0 +1,5 @@
+# SPA fallback - this ensures all routes are handled by React Router
+# Cloudflare Pages will serve these routes through the Functions first
+# If Functions fail, this will fallback to index.html for client-side routing
+
+/*    /index.html   200
