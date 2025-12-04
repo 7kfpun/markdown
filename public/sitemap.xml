@@ -8,32 +8,16 @@
 
   <!-- Homepage / Editor -->
   <url>
-    <loc>https://1markdown.wahthefox.com/</loc>
-    <lastmod>2024-11-19</lastmod>
+    <loc>https://onemarkdown.com/</loc>
+    <lastmod>2025-12-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- View Page -->
-  <url>
-    <loc>https://1markdown.wahthefox.com/view</loc>
-    <lastmod>2024-11-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Print Page -->
-  <url>
-    <loc>https://1markdown.wahthefox.com/print</loc>
-    <lastmod>2024-11-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-
   <!-- Privacy Policy -->
   <url>
-    <loc>https://1markdown.wahthefox.com/privacy</loc>
-    <lastmod>2024-11-19</lastmod>
+    <loc>https://onemarkdown.com/privacy</loc>
+    <lastmod>2025-12-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
