@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
-import { createSnapshot, getAllSessions } from '../src/utils/sessionHistory';
-import { useMarkdownStore } from '../src/infrastructure/store/useMarkdownStore';
+import { createSnapshot, getAllSessions } from '../../src/utils/sessionHistory';
+import { useMarkdownStore } from '../../src/infrastructure/store/useMarkdownStore';
 
 /**
  * Integration tests for Session Restore functionality

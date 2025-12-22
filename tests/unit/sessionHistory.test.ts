@@ -13,7 +13,7 @@ import {
   startAutoSave,
   stopAutoSave,
   type SessionMetadata,
-} from '../src/utils/sessionHistory';
+} from '../../src/utils/sessionHistory';
 
 describe('sessionHistory utilities', () => {
   beforeEach(() => {

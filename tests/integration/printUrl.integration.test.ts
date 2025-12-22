@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { openPrintPage } from '../src/utils/export.js';
+import { openPrintPage } from '../../src/utils/export.js';
 
 describe('Print URL Integration', () => {
     let mockWindowOpen: ReturnType<typeof vi.fn>;
