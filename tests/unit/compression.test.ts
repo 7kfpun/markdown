@@ -6,7 +6,7 @@ import {
   getStorageKey,
   extractContentFromHash,
   extractContentFromUrl,
-} from '../src/utils/compression.js';
+} from '../../src/utils/compression.js';
 
 // Vitest jsdom environment provides window/btoa/atob.
 

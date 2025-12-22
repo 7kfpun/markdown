@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { getMarkedInstance } from '../src/utils/markedInstance';
+import { getMarkedInstance } from '../../src/utils/markedInstance';
 
 describe('markedInstance utilities', () => {
   beforeEach(() => {

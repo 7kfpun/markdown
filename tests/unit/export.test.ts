@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { openPrintPage, downloadMarkdown, downloadHTML, downloadRenderedHTML, copyHTMLToClipboard } from '../src/utils/export.js';
+import { openPrintPage, downloadMarkdown, downloadHTML, downloadRenderedHTML, copyHTMLToClipboard } from '../../src/utils/export.js';
 
 describe('export utilities', () => {
   let mockCreateElement: HTMLAnchorElement;

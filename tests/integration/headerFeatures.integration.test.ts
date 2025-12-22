@@ -4,20 +4,20 @@ import {
   compressToBase64,
   decompressFromBase64,
   extractContentFromHash,
-} from '../src/utils/compression';
+} from '../../src/utils/compression';
 import {
   openPrintPage,
   downloadMarkdown,
   downloadRenderedHTML,
-} from '../src/utils/export';
-import { DEFAULT_MARKDOWN } from '../src/utils/constants';
+} from '../../src/utils/export';
+import { DEFAULT_MARKDOWN } from '../../src/utils/constants';
 import {
   createSnapshot,
   getAllSessions,
   deleteAllSessions,
   saveSessionMetadata,
   createSessionMetadata,
-} from '../src/utils/sessionHistory';
+} from '../../src/utils/sessionHistory';
 
 /**
  * Integration tests for Header Features (Top Right Corner)

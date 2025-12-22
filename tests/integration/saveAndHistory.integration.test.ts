@@ -8,14 +8,14 @@ import {
   deleteAllSessions,
   deleteSession,
   type SessionMetadata,
-} from '../src/utils/sessionHistory';
+} from '../../src/utils/sessionHistory';
 import {
   compressToBase64,
   decompressFromBase64,
   generateShareLink,
   getStorageKey,
   extractContentFromHash,
-} from '../src/utils/compression';
+} from '../../src/utils/compression';
 
 /**
  * Integration tests for Save & Session History features

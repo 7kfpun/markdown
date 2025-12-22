@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { copySVGToClipboard, copyMermaidAsPNG } from '../src/utils/mermaidToClipboard.js';
+import { copySVGToClipboard, copyMermaidAsPNG } from '../../src/utils/mermaidToClipboard.js';
 
 describe('Mermaid Copy/Download', () => {
     let mockClipboard: any;
