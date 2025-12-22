@@ -10,6 +10,7 @@ import {
   stopAutoSave,
   createSnapshot,
 } from './utils/sessionHistory';
+import FeedbackPopup from './presentation/components/feedback/FeedbackPopup';
 
 interface AppProps {
   isServer?: boolean;
@@ -91,6 +92,7 @@ export default function App({ isServer = false, location = '/' }: AppProps = {})
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AppRouter isServer={isServer} location={location} />
+      {!isServer && <FeedbackPopup />}
     </ThemeProvider>
   );
 }
