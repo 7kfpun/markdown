@@ -111,8 +111,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     });
   } catch (error) {
     console.error('SSR Error:', error);
-    // Fallback to serving the static HTML if SSR fails
-    return context.env.ASSETS.fetch(context.request);
+    // Serve index.html content directly (200, no redirect).
+    // Using the placeholder pattern avoids Cloudflare's automatic
+    // /index.html → / redirect which would strip the URL fragment
+    // (e.g. #paxo:... share links) before the client JS can read it.
+    const template = await getTemplate(context.env.ASSETS);
+    return new Response(template, {
+      status: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    });
   }
 };
 

@@ -24,26 +24,30 @@ export default function App({ isServer = false, location = '/' }: AppProps = {})
   const addSession = useMarkdownStore(state => state.addSession);
   const lastAutoSavedContentRef = useRef<string>('');
 
-  // Load URL content on mount and clear hash after loading (client-side only)
+  // Load URL content on mount and on same-tab hash navigation (client-side only)
   useEffect(() => {
     // Skip on server-side
     if (isServer) return;
 
-    const sharedContent = extractContentFromUrl();
-    if (sharedContent) {
-      // Only update if localStorage doesn't have content for this key already
-      // (localStorage might have edits from a previous session with this URL)
-      if (!content || content === '') {
+    const loadFromHash = () => {
+      const sharedContent = extractContentFromUrl();
+      if (sharedContent) {
         updateContent(sharedContent);
+        if (window.location.hash.startsWith('#paxo:')) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
       }
-      // Clear paxo URL hash after loading shared content
-      // This transitions from shared URL to local storage
-      if (window.location.hash.startsWith('#paxo:')) {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
-    }
+    };
+
+    // Load on initial mount
+    loadFromHash();
     // Initialize auto-save tracker with current content
     lastAutoSavedContentRef.current = content;
+
+    // Also handle the case where the user pastes a share link into the address
+    // bar while already on the page — that triggers a hashchange, not a reload.
+    window.addEventListener('hashchange', loadFromHash);
+    return () => window.removeEventListener('hashchange', loadFromHash);
   }, [updateContent, isServer]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
