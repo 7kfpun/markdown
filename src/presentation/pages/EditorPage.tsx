@@ -10,6 +10,7 @@ import MermaidModal from '../components/mermaid/MermaidModal';
 import SessionHistory from '../components/session/SessionHistory';
 import { OfflineIndicator } from '../components/offline/OfflineIndicator';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { generateShareLink } from '../../utils/compression';
 import { downloadMarkdown } from '../../utils/export';
 import { useOnlineStatus } from '../../utils/useOnlineStatus';
@@ -262,6 +263,7 @@ export default function EditorPage() {
     previewTheme,
   } = useMarkdownStore();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [toast, setToast] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -414,8 +416,8 @@ export default function EditorPage() {
 
   const handleOpenPrivacy = useCallback(() => {
     trackEvent('privacy_button_clicked');
-    window.open('/privacy', '_blank');
-  }, []);
+    navigate('/privacy');
+  }, [navigate]);
 
   const handleOpenHistoryPanel = useCallback(() => {
     trackEvent('session_history_button_clicked');
