@@ -12,7 +12,7 @@ function injectServiceWorkerVersion() {
     name: 'inject-sw-version',
     closeBundle() {
       try {
-        const swPath = resolve(__dirname, 'dist/sw.js');
+        const swPath = resolve(__dirname, 'dist/client/sw.js');
         const swContent = readFileSync(swPath, 'utf-8');
 
         // Generate version from timestamp
