@@ -31,11 +31,10 @@ export default function App({ isServer = false, location = '/' }: AppProps = {})
 
     const sharedContent = extractContentFromUrl();
     if (sharedContent) {
-      // Only update if localStorage doesn't have content for this key already
-      // (localStorage might have edits from a previous session with this URL)
-      if (!content || content === '') {
-        updateContent(sharedContent);
-      }
+      // Always load shared content when a #paxo: share link is opened.
+      // The previous check `if (!content || content === '')` caused share links
+      // to silently fail for users who already had content in localStorage.
+      updateContent(sharedContent);
       // Clear paxo URL hash after loading shared content
       // This transitions from shared URL to local storage
       if (window.location.hash.startsWith('#paxo:')) {
