@@ -111,11 +111,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     });
   } catch (error) {
     console.error('SSR Error:', error);
-    // Fallback to serving index.html for SPA client-side routing.
-    // Do NOT fall back to context.request — paths like /privacy and /print
-    // have no static files, so that would return 404.
-    const indexUrl = new URL('/index.html', context.request.url).toString();
-    return context.env.ASSETS.fetch(new Request(indexUrl));
+    // Serve index.html content directly (200, no redirect).
+    // Using the placeholder pattern avoids Cloudflare's automatic
+    // /index.html → / redirect which would strip the URL fragment
+    // (e.g. #paxo:... share links) before the client JS can read it.
+    const template = await getTemplate(context.env.ASSETS);
+    return new Response(template, {
+      status: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    });
   }
 };
 
