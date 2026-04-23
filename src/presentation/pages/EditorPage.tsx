@@ -1,5 +1,5 @@
 import { Box, Tooltip, Drawer, Typography } from '@mui/material';
-import { Brightness4, Brightness7, GetApp, PictureAsPdf, Share, Upload, RestartAlt, Description, BugReport, Policy, Menu, Close, History } from '@mui/icons-material';
+import { Brightness4, Brightness7, GetApp, PictureAsPdf, Share, Upload, RestartAlt, Description, BugReport, Policy, Menu, Close, History, ContentCopy } from '@mui/icons-material';
 import styled from 'styled-components';
 import { useMarkdownStore } from '../../infrastructure/store/useMarkdownStore';
 import { DEFAULT_MARKDOWN } from '../../utils/constants';
@@ -266,6 +266,7 @@ export default function EditorPage() {
   const navigate = useNavigate();
 
   const [toast, setToast] = useState('');
+  const [shareUrl, setShareUrl] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [splitSizes, setSplitSizes] = useState({ editor: 50, preview: 50 });
@@ -300,15 +301,30 @@ export default function EditorPage() {
     trackEvent('share_link_clicked');
     try {
       const link = generateShareLink(content);
-      await navigator.clipboard.writeText(link);
-      setToast(t('messages.linkCopied'));
-      setTimeout(() => setToast(''), 2000);
+      setShareUrl(link);
+      try {
+        await navigator.clipboard.writeText(link);
+        setToast(t('messages.linkCopied'));
+        setTimeout(() => setToast(''), 2000);
+      } catch {
+        // Clipboard failed — share panel is visible so user can copy manually
+      }
     } catch (error) {
       const reason = error instanceof Error ? error.message : t('messages.failedToShare');
       setToast(reason);
       setTimeout(() => setToast(''), 2000);
     }
   }, [content, t]);
+
+  const handleCopyShareUrl = useCallback(async () => {
+    if (!shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+    } catch { /* ignore — user can select the URL manually */ }
+    setShareUrl('');
+    setToast(t('messages.linkCopied'));
+    setTimeout(() => setToast(''), 2000);
+  }, [shareUrl, t]);
 
   const handleExport = useCallback(() => {
     trackEvent('download_markdown_clicked');
@@ -788,6 +804,53 @@ export default function EditorPage() {
         currentStorageKey={storageKey}
         onLoadSession={handleHistoryClose}
       />
+
+      {shareUrl && (
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            bgcolor: 'background.paper',
+            boxShadow: 4,
+            px: 2,
+            py: 1.5,
+            borderRadius: 2,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            zIndex: 9999,
+            maxWidth: '90vw',
+            minWidth: 300,
+          }}
+        >
+          <input
+            readOnly
+            value={shareUrl}
+            onClick={(e) => e.currentTarget.select()}
+            style={{
+              flex: 1,
+              border: '1px solid rgba(0,0,0,0.23)',
+              borderRadius: 4,
+              padding: '4px 8px',
+              fontSize: '0.72rem',
+              fontFamily: 'monospace',
+              background: darkMode ? 'rgba(255,255,255,0.05)' : '#f5f5f5',
+              color: darkMode ? '#e5e7eb' : '#1f1f1f',
+              minWidth: 0,
+              outline: 'none',
+              width: '100%',
+            }}
+          />
+          <ToolbarIconButton $dark={darkMode} onClick={handleCopyShareUrl} aria-label="Copy link">
+            <ContentCopy fontSize="small" />
+          </ToolbarIconButton>
+          <ToolbarIconButton $dark={darkMode} onClick={() => setShareUrl('')} aria-label="Close">
+            <Close fontSize="small" />
+          </ToolbarIconButton>
+        </Box>
+      )}
 
       {toast && (
         <Box
